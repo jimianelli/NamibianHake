@@ -78,3 +78,7 @@ sims
 /.luarc.json
 inst/doc
 docs
+.Rdata
+.httr-oauth
+.DS_Store
+.quarto

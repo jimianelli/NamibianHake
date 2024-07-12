@@ -8,11 +8,55 @@ source("R/read-admb2.R")
 ctl_dat <- read_dat(here("mods", "test", "log_input.rep"))
 View(ctl_dat)
 
+# Create a new package -------------------------------------------------
+library(usethis)
+path <- file.path(here())
+create_package(path)
+proj_activate(path)
+use_description()
+use_mit_license("Jim Ianelli")
+
+use_package("ggplot2", "Suggests")
+#> ✔ Adding 'ggplot2' to Suggests field in DESCRIPTION
+#> • Use `requireNamespace("ggplot2", quietly = TRUE)` to test if package is installed
+#> • Then directly refer to functions with `ggplot2::fun()`
+
+# Set up other files -------------------------------------------------
+use_readme_md()
+#> ✔ Writing 'README.md'
+#> • Update 'README.md' to include installation instructions.
+
+use_news_md()
+#> ✔ Writing 'NEWS.md'
+
+use_test("my-test")
+#> ✔ Adding 'testthat' to Suggests field in DESCRIPTION
+#> ✔ Adding '3' to Config/testthat/edition
+#> ✔ Creating 'tests/testthat/'
+#> ✔ Writing 'tests/testthat.R'
+#> ✔ Writing 'tests/testthat/test-my-test.R'
+#> • Edit 'tests/testthat/test-my-test.R'
+
+x <- 1
+y <- 2
+use_data(x, y)
+#> ✔ Adding 'R' to Depends field in DESCRIPTION
+#> ✔ Creating 'data/'
+#> ✔ Setting LazyData to 'true' in 'DESCRIPTION'
+#> ✔ Saving 'x', 'y' to 'data/x.rda', 'data/y.rda'
+#> • Document your data (see 'https://r-pkgs.org/data.html')
+
+# Use git ------------------------------------------------------------
+use_git()
+#> ✔ Initialising Git repo
+#> ✔ Adding '.Rproj.user', '.Rhis
+
 #--Read in model output files-----
 
   obc <- read_rep(here("mods", "Mod1", "nh_R.rep"))
   bc <- read_rep(here("mods", "bc", "nh_R.rep"))
   m1 <- read_rep(here("mods", "m1", "nh_R.rep"))
+
   m2 <- read_rep(here("mods", "m2", "nh_R.rep"))
   m3 <- read_rep(here("mods", "m3", "nh_R.rep"))
   m4 <- read_rep(here("mods", "m4", "nh_R.rep"))
@@ -27,7 +71,7 @@ View(ctl_dat)
   minus1 <- read_rep(here("mods", "minus1", "nh_R.rep"))
   minus0 <- read_rep(here("mods", "minus0", "nh_R.rep"))
   h9 <- read_rep(here("mods", "h9", "nh_R.rep"))
-  
+
   df <- rbind(
     data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
     data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
@@ -37,7 +81,7 @@ View(ctl_dat)
     data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5"),
     data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6")
   )
-  
+
   df <- rbind(
     #data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
     #data.frame(SSB = h4$SSB, R = h4$Pred_Rec, Model = "Steepness=0.4 "),
@@ -47,7 +91,7 @@ View(ctl_dat)
     data.frame(SSB = minus1$SSB, R = minus1$Pred_Rec, Model = "Steepness=0.7, minus1"),
     data.frame(SSB = h9$SSB, R = h9$Pred_Rec, Model = "Steepness=0.9 ")
   )
-  
+
   #-- Read in the output files for diagnostics and error bars---
 {
   mods <-  rbind(
@@ -55,8 +99,8 @@ View(ctl_dat)
     read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
     read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
     read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3"),
-    read_csv(here("mods", "m4", "nh_out.csv")) |> mutate(Model = "Model 4"),
-    read_csv(here("mods", "m5", "nh_out.csv")) |> mutate(Model = "Model 5"),
+    #read_csv(here("mods", "m4", "nh_out.csv")) |> mutate(Model = "Model 4"),
+    #read_csv(here("mods", "m5", "nh_out.csv")) |> mutate(Model = "Model 5"),
     read_csv(here("mods", "m6", "nh_out.csv")) |> mutate(Model = "Model 6")
     #read_csv(here("mods", "Mod1", "nh_out.csv")) |> mutate(Model = "Base Case"),
     #read_csv(here("mods", "h4", "nh_out.csv")) |> mutate(Model = "Steepness=0.4 "),
@@ -86,8 +130,8 @@ mods %>%
   geom_ribbon(alpha = .24) +
   ggthemes::theme_few() +
   coord_cartesian(ylim=c(0, 3e3)) +
-  geom_line(aes(color=Model, width=2)) + ylim(0,NA) +
-  geom_point(aes(color=Model, shape=Model, size=2)) + 
+  geom_line(aes(color=Model )) + ylim(0,NA) +
+  geom_point(aes(color=Model, shape=Model),size=1.) +
   ylab("SSB") +
   xlab("Year")
 
@@ -130,26 +174,7 @@ mods |>
 # a: theme(legend.position="none")
 
 #--Age fits using tidyverse----
-PlotAgeFit <- function(x=bc,title=NULL,type="fishery",fage=2,lage=7) {
-  obs <- x[[paste0(type,"_Pobs")]]
-  pred <- x[[paste0(type,"_Phat")]]
-  incl <- rowSums(data.frame(obs, src = "Obs")[, 2:7]) > 0
-  dftmp <- rbind(
-    data.frame(obs, src = "Obs")[incl, ],
-    data.frame(pred, src = "Pred")[incl, ]
-  )
-  names(dftmp) <- c("Year", fage:lage, "type")
-  x <- pivot_longer(dftmp,
-    cols = 2:(lage+2-fage),
-    names_to = "Age", values_to = "proportion"
-  )
-  ggplot(x |> filter(type == "Obs"), aes(x = Age, y = proportion)) +
-    geom_bar(stat = "Identity", fill = "salmon") +
-    geom_point(
-      data = x |> filter(type == "Pred"),
-      aes(x = Age, y = proportion), size=2, shape=3
-    ) + facet_wrap(Year ~ .) + ggtitle(paste0(title,", ",type))
-}
+
 PlotAgeFit(x=minus0, title="Minus age group=0",type="survey1",fage=0)
 PlotAgeFit(x=minus1, title="Minus age group=1",type="survey1",fage=1,lage=7)
 PlotAgeFit(x=minus1, title="Minus age group=1",type="fishery",fage=2,lage=7)
@@ -182,7 +207,7 @@ PlotAgeFit(x=h9,title="Steepness=0.9",type="survey1")
   dfidx |> filter(Obs>-0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
     geom_point(color="black") + ylim(0,NA)+
     geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))
-    
+
   dfcpue <- rbind(
     data.frame(Year = 1964:2023,Obs = bc$Obs_CPUE_3, predicted = bc$e_CPUE_3, Model = "Base Case"),
     data.frame(Year = 1964:2023,Obs = m1$Obs_CPUE_3, predicted = m1$e_CPUE_3, Model = "Model 1"),
@@ -202,8 +227,8 @@ PlotAgeFit(x=h9,title="Steepness=0.9",type="survey1")
   dfcpue |> filter(Obs>0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
     geom_point(color="black") +
     geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))+
-    ggtitle("CPUE 3") + ylim(0,NA)   
-  
+    ggtitle("CPUE 3") + ylim(0,NA)
+
   dfcpue <- rbind(
     data.frame(Year = 1964:2023,Obs = bc$Obs_CPUE_6, predicted = bc$e_CPUE_6, Model = "Basecase     "),
     data.frame(Year = 1964:2023,Obs = h7tvs$Obs_CPUE_6, predicted = h7tvs$e_CPUE_6, Model = "h=0.7, minus2"),
@@ -213,8 +238,8 @@ PlotAgeFit(x=h9,title="Steepness=0.9",type="survey1")
   dfcpue |> filter(Obs>0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
     geom_point(color="black") +
     geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))+
-    ggtitle("CPUE 6") + ylim(0,NA)   
-  
+    ggtitle("CPUE 6") + ylim(0,NA)
+
   dfcpue <- rbind(
     data.frame(Year = 1964:2023,Obs = bc$Obs_CPUE_1, predicted = bc$e_CPUE_1, Model = "Basecase     "),
     data.frame(Year = 1964:2023,Obs = h7tvs$Obs_CPUE_1, predicted = h7tvs$e_CPUE_1, Model = "h=0.7, minus2"),
@@ -224,9 +249,9 @@ PlotAgeFit(x=h9,title="Steepness=0.9",type="survey1")
   dfcpue |> filter(Obs>0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
     geom_point(color="black") +
     geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))+
-    ggtitle("CPUE 1") + ylim(0,NA)   
-  
-#---Selectivities----------------  
+    ggtitle("CPUE 1") + ylim(0,NA)
+
+#---Selectivities----------------
 dfsel <- rbind(
     data.frame(Year = 1964:2023,Sel = bc$S[1:60,],  Model = "Base Case"),
     #data.frame(Year = 1964:2023,Sel = h4$S[1:60,],  Model = "h=0.4"),
@@ -262,7 +287,7 @@ M[,2:10]
   }
   p1
   plot_sel()
-  
+
 #--Read in model output files parallel-----
 dir_list  <- c("Mod1", "h4", "h4asymp", "h5", "h7", "h9")
 fn <- paste0("mods/", dir_list, "/nh_R.rep")

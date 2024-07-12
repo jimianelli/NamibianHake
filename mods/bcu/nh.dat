@@ -1,5 +1,5 @@
 1
-#M4
+#Mod1
 minus1,h7,asymp,sigmafixed,tvs
 ../data/namhakdata24.dat 
 20
@@ -38,10 +38,10 @@ minus1,h7,asymp,sigmafixed,tvs
 #
 3
 3
-4
+-4
 -4
 4
-4
+66
 2
 0.5
 1965
