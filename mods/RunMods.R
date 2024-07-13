@@ -123,6 +123,7 @@ plotly::ggplotly(p1)
 #--Plot the SSB and R curves------------------------
 
 #--SSB---
+tail(mods)
 mods %>%
   filter(Year > 1960, Variable == "SSB") |>
   ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
