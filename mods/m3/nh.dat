@@ -1,6 +1,6 @@
 1
-#M3
-minus1,h7,asymp,sigmafixed,tvs
+#Model_3
+minus1,h7,asymp,sigmafixed,tvs,Mestimated
 ../data/namhakdata24.dat 
 20
 1964
@@ -8,7 +8,7 @@ minus1,h7,asymp,sigmafixed,tvs
 8
 2
 -1
-2
+6
 -1
 -5
 -1
