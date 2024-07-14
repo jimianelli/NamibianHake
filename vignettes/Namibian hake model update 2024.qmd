@@ -1,25 +1,19 @@
+---
+title: "Namibian hake model update, 2024"
+author: "John Kathena, Jim Ianelli"
+vignette: >
+  %\VignetteIndexEntry{Model update}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
 
-# NamibianHake
-
-<!-- badges: start -->
-<!-- badges: end -->
-
-The goal of NamibianHake is to setup a package for the Namibian hake assessment.
-
-## Installation
-
-You can install the development version of NamibianHake from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("jimianelli/NamibianHake")
-```
 
 ## Example model runs
 
 Below are examples which show how models can be run based on the directory location.
+j
+```{r startup}
 
-``` r
 library(NamibianHake)
 ## basic example code
 library(here)
@@ -27,6 +21,9 @@ library(tidyverse)
 library(ggridges)
 theme_set(ggthemes::theme_few())
 
+```
+
+```{r getmods}
 bc <- run_nh("bc")
 m1 <- run_nh("m1",runit=FALSE)
 m2 <- run_nh("m2",runit=FALSE)
@@ -45,6 +42,9 @@ df <- rbind(
     data.frame(SSB = m2$SSB, R = m2$Pred_Rec, Model = "Model 2"),
     data.frame(SSB = m3$SSB, R = m3$Pred_Rec, Model = "Model 3") 
   ) 
+```
+
+```{r plots}
 
 p1 <- df %>% ggplot(aes(x = SSB, y = R, color = Model, shape=Model)) +
   geom_point() +
@@ -55,4 +55,3 @@ M<- data.frame(Year = 1964:2023,Sel = bc$S[1:60,], Model = "h=0.7, base case")
 plot_sel()
 
 ```
-
