@@ -71,6 +71,31 @@ df <- rbind(
   data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5"),
   data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6")
 )
+bc <- run_nh("bc",runit=FALSE)
+m1 <- run_nh("m1",runit=FALSE)
+m2 <- run_nh("m2",runit=FALSE)
+m3 <- run_nh("m3",runit=FALSE)
+m5 <- run_nh("m5",runit=FALSE)
+m6 <- run_nh("m6",runit=FALSE)
+mods <-  rbind(
+    read_csv(here("mods", "bc", "nh_out.csv")) |> mutate(Model = "Base Case"),
+    read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
+    read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
+    read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3")
+    )
+  
+df <- rbind(
+    data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
+    data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
+    data.frame(SSB = m2$SSB, R = m2$Pred_Rec, Model = "Model 2"),
+    data.frame(SSB = m3$SSB, R = m3$Pred_Rec, Model = "Model 3") ,
+    data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5") ,
+    data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6") 
+  ) 
+>>>>>>> d3b4ea8 (vign)
+>>>>>>> bca1eb7 (Style code (GHA))
+>>>>>>> 8b96b42 (Style code (GHA))
+>>>>>>> 4a59f50 (Style code (GHA))
 ```
 
 
@@ -93,9 +118,11 @@ p1
 
 ```{r agecomps}
 #| echo: false
-#| fig.cap: "Model runs"
-PlotAgeFit(x = bc, title = "Base case", type = "fishery", fage = 2, lage = 7)
-PlotAgeFit(x = bc, title = "Base case", type = "survey1", fage = 1, lage = 7)
+#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the 
+#| base case model uses a 'minus group' equal to '1' for the survey data."
+PlotAgeFit(x=bc, title="Base case",type="fishery",fage=2,lage=7)
+PlotAgeFit(x=bc, title="Base case",type="survey1",fage=1,lage=7)
+
 ```
 
 ### Selectivity
