@@ -289,6 +289,106 @@ M[,2:10]
   p1
   plot_sel()
 
+#--Try Bayesian posterior integration using adnuts--------
+  library(adnuts)                         # needs to be 1.0.9000
+  library(snowfall)
+  library(rstan)
+  library(shinystan)
+  reps <- parallel::detectCores()-2 # chains to run in parallel
+  reps
+  ## Reproducible seeds are passed to ADMB
+  set.seed(352)
+  seeds <- sample(1:1e4, size=reps)
+  seeds
+
+  m <- 'nh -steepness 0.7'
+  d <- 'mcmc'
+  setwd(d)
+  system(paste(m, '-nox -binp nh.bar -hbf 1 -iprint 200 -mcmc 10'))
+  setwd('../..')
+  setwd('..')
+  getwd()
+
+  get.inits <- function(fit, chains){
+    post <- extract_samples(fit)
+    ind <- sample(1:nrow(post), size=chains)
+    lapply(ind, function(i) as.numeric(post[i,]))
+  }
+
+  ## Here we assume the pm.exe model is in a folder called 'pm'
+  ## as well. This folder gets copied during parallel runs.
+  d<- 'mods/mcmc'
+  m <- 'nh' # the model name, folder is also assumed to be called this runs/base/mcmc
+  ## First optimize the model to make sure the Hessian is good.
+  setwd(d);
+  system('nh -nox -mcmc 15 -hbf 1 -binp nh.bar -phase 50');
+  setwd('../..')
+
+
+  ## Run--
+  iter <- 500 # maybe too many...depends are number cores...I used 8...
+  chains=8
+  #iter <- 4000*thin; warmup <- iter/#8
+
+  inits <- NULL ## start chains from MLE
+  fit.mle <- sample_nuts(model=m, path=d, iter=iter, warmup=iter/4,
+                         chains=chains, cores=chains, control=list(control=list(max_treedepth=14,
+                                                                                metric='mle')))
+
+  summary(fit.mle)
+  plot_uncertainties(fit.mle)
+  pairs_admb(fit.mle, pars=1:6, order='slow')
+  pairs_admb(fit.mle, pars=1:6, order='fast')
+
+  pdf("pairs_rdev.pdf")
+  pairs_admb(fit.mle, pars=68:78)
+  pairs_admb(fit.mle2, pars=68:78)
+  dev.off()
+  pdf("marginals.pdf")
+  plot_marginals(fit.mle)
+  dev.off()
+  print(fit.mle)
+  plot_sampler_params(fit.mle)
+  launch_shinyadmb(fit.mle)
+
+  ## It doesn't really need any fixes so rerun with NUTS. Reoptimize to get
+  ## the correct mass matrix for NUTS. Note the -hbf 1 argument. This is a
+  ## technical requirement b/c NUTS uses a different set of bounding
+  ## functions and thus the mass matrix will be different.
+  ## Use default MLE covariance (mass matrix) and short parallel NUTS chains
+  ## started from the MLE.
+
+  ## If good, run again for inference using updated mass matrix. Increase
+  ## adapt_delta toward 1 if you have divergences (runs will take longer).
+  mass <- fit.mle$covar.est # note this is in unbounded parameter space
+  inits <- get.inits(fit.mle, reps) ## use inits from pilot run
+  reps
+  fit.mle2 <- sample_nuts(model=m, path=d, iter=2000, warmup=iter/4,
+                          chains=chains, cores=chains, control=list(control=list(max_treedepth=14,
+                                                                                 metric=mass,adapt_delta=0.95)))
+  plot_sampler_params(fit.mle2)
+  launch_shinyadmb(fit.mle)
+  launch_shinyadmb(fit.mle2)
+  pairs_admb(fit.mle2, pars=1:6, order='slow')
+  summary(fit.mle)
+  summary(fit.mle2)
+  saveRDS(fit.mle, file='fit.mle.RDS')
+  saveRDS(fit.mle2, file='fit.mle2.RDS')
+
+  ## Again check for issues of nonconvergence and other standard checks. Then
+  ## use for inference.
+  ess <- monitor(fit.mle2$samples, warmup=nuts.updated$warmup, print=FALSE)[,'n_eff']
+  nuts.updated$ess <- ess
+  saveRDS(nuts.updated, file='nuts.updated.RDS')
+  launch_shinyadmb(nuts.updated)
+  slow <- names(sort(ess))[1:8]
+  png('pairs_slow_nuts2.png', width=7, height=5, units='in', res=500)
+  pairs_admb(fit=nuts.updated, pars=slow)
+  dev.off()
+
+  save.image() # save to file for later
+
+
 #--Read in model output files parallel-----
 dir_list  <- c("Mod1", "h4", "h4asymp", "h5", "h7", "h9")
 fn <- paste0("mods/", dir_list, "/nh_R.rep")
