@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="John Kathena, Jim Ianelli">
-<meta name="dcterms.date" content="2024-07-14">
+<meta name="dcterms.date" content="2024-07-15">
 
 <title>Namibian hake model update, 2024</title>
 <style>
@@ -64,7 +64,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 14, 2024</p>
+      <p class="date">July 15, 2024</p>
     </div>
   </div>
   
@@ -96,7 +96,7 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td>Basecase (bc)</td>
-<td>Model with survey “minus group” to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated,</td>
+<td>Model with survey “minus group” to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified.</td>
 </tr>
 <tr class="even">
 <td>m1</td>
@@ -112,27 +112,47 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td>m4</td>
-<td>As 1.03 but with more ages in the SRR and steepness estimated with prior, sigmaR=0.6</td>
+<td>As base case but with fishery selectivity allowed to be dome-shaped</td>
 </tr>
 <tr class="even">
-<td>m4</td>
-<td>As 1.03 but with more ages in the SRR and steepness estimated with prior, sigmaR=0.6</td>
+<td>m5</td>
+<td>As base case but with stock-recruit steepness fixed at 0.43</td>
 </tr>
 <tr class="odd">
-<td>m5</td>
-<td>As 1.03 but with more ages in the SRR and steepness estimated with prior, sigmaR=0.6</td>
+<td>m6</td>
+<td>As base case but with stock-recruit steepness fixed at 0.9</td>
 </tr>
 <tr class="even">
-<td>m6</td>
-<td>As 1.03 but with more ages in the SRR and steepness estimated with prior, sigmaR=0.6</td>
+<td>m7</td>
+<td>As base case but with early indices dropped (pre 1990)</td>
 </tr>
 </tbody>
 </table>
+</section>
+</section>
+<section id="model-runs" class="level2">
+<h2 class="anchored" data-anchor-id="model-runs">Model runs</h2>
+<section id="stock-recruitment-curves" class="level3">
+<h3 class="anchored" data-anchor-id="stock-recruitment-curves">Stock-recruitment curves</h3>
+<p>The following plot shows the stock-recruitment curves for the base case and models 1, 2, 3, and 5 and 6.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="00-Namibian_hake_model_2024_files/figure-html/plots-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="00-Namibian_hake_model_2024_files/figure-html/srrplots-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Model runs</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="age-composition-fits" class="level3">
+<h3 class="anchored" data-anchor-id="age-composition-fits">Age composition fits</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="00-Namibian_hake_model_2024_files/figure-html/agecomps-1.png" class="img-fluid figure-img" width="672"></p>
 <figcaption>Model runs</figcaption>
 </figure>
 </div>
@@ -140,24 +160,21 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="00-Namibian_hake_model_2024_files/figure-html/plots-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="00-Namibian_hake_model_2024_files/figure-html/agecomps-2.png" class="img-fluid figure-img" width="672"></p>
 <figcaption>Model runs</figcaption>
 </figure>
 </div>
 </div>
+</div>
+</section>
+<section id="selectivity" class="level3">
+<h3 class="anchored" data-anchor-id="selectivity">Selectivity</h3>
+<div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="00-Namibian_hake_model_2024_files/figure-html/plots-3.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Model runs</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="00-Namibian_hake_model_2024_files/figure-html/plots-4.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Model runs</figcaption>
+<p><img src="00-Namibian_hake_model_2024_files/figure-html/selex-1.png" class="img-fluid figure-img" width="384"></p>
+<figcaption>Selectivity estimates for the base-case model run.</figcaption>
 </figure>
 </div>
 </div>
