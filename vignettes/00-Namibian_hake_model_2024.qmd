@@ -4,36 +4,88 @@ author: "John Kathena, Jim Ianelli"
 date: today
 prefer-html: true
 vignette: >
-
   %\VignetteIndexEntry{Model update}
-  %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{quarto::html}
+format:
+    html:
+        embed-resources: true
+        toc: true
+        toc-title: 'Contents'
+        number-sections: false
+editor: 
+  markdown: 
+    wrap: sentence
 ---
 
+# Project overview
 
-## Example model runs
+The following reflects my interpretation of the Marine Stewardship Council's certification request.
+There is a need to catch up on missed milestones and outlines the necessary steps for the upcoming Year 4 milestone.
+## Key Points: 1.
+Year 3 Milestone Missed: The milestone required revised stock assessments for M.
+paradoxus, which was not met.
+2.
+Year 4 Milestone: By February 2025, the MFMR must use the Harvest Control Rule (HCR) systematically to verify the TAC for paradoxus.
+This needs to be applied in the August/September 2024 management meetings.
+3.
+Namibian Stock Assessment: There's a recommendation to review and re-evaluate the assumptions and parameter values of assessment models, particularly the pessimistic base case model.
+4.
+Implementation Issues: MFMR has Dr. Ianelli’s report but not the code to run the model, and training is required for the Namibian team.
+
+## Draft agenda
+
+The following draft agenda outlines the steps to address the missed milestones and prepare for the upcoming Year 4 milestone.
+
+### Week 1:
+
+1.  Day 1-2: Review and Planning
+    -   Review the Year 3 milestone requirements and current progress.
+    -   Plan steps to implement the HCR for M. paradoxus.
+2.  Day 3-4: Data Preparation
+    -   Gather and prepare Namibia stock assessment data.
+    -   Coordinate with MFMR to understand current data handling and management practices.
+3.  Day 5: Meeting Preparation
+    -   Prepare documentation and a presentation for the MFMR management meeting.
+    -   Outline the steps needed for the August/September 2024 meeting to include HCR in TAC setting.
+
+### Week 2:
+
+4.  Day 1-2: Model Review
+    -   Review Dr. Ianelli's report and identify key elements for implementation.
+    -   Develop a preliminary implementation plan for the HCR model.
+5.  Day 3-4: Training Coordination
+    -   Arrange a training session with Dr. Ianelli or another suitable individual for MFMR.
+    -   Coordinate with the training provider and MFMR to schedule the session.
+6.  Day 5: Reporting
+    -   Compile a progress report summarizing activities, challenges, and next steps.
+    -   Send the report to Hugh and relevant stakeholders for feedback.
+
+This agenda ensures a systematic approach to address the milestones and prepare for the upcoming management meeting, focusing on implementing the HCR and providing necessary training to MFMR.
+
+Below are two main sections, first on model developments and second on application of a control rule that accounts for the signals in the data on the different species.
+
+# Assessment model runs
 
 Below are examples which show how models can be run based on the directory location.
 
 ### Model descriptions
 
 The following table was developed based on testing the model with different assumptions and data sources.
-Key differences from the 2023 assessment configuration was the assumption that 
-model estimation of variance terms was appropriate. This feature resulted in unacceptable 
-residual patterns and essentially a complete down weighting of the index data.
-We used the assumed variance terms (CVs) for the indices in all of the following 
-model configurations:
+Key differences from the 2023 assessment configuration was the assumption that model estimation of variance terms was appropriate.
+This feature resulted in unacceptable residual patterns and essentially a complete down weighting of the index data.
+We used the assumed variance terms (CVs) for the indices in all of the following model configurations:
 
-| Model | Description    |
-|----------------------|--------------------------------------------------|
-| Basecase (bc)  | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified.|
-| m1  | As base case but with survey catchability fixed at 1.0 |
-| m2  | As base case but with survey catchability fixed at 0.5 |
-| m3  | As base case but with natural mortality estimated   |
-| m4  | As base case but with fishery selectivity allowed to be dome-shaped |
-| m5  | As base case but with stock-recruit steepness fixed at 0.43 |
-| m6  | As base case but with stock-recruit steepness fixed at 0.9  |
-| m7  | As base case but with early indices dropped (pre 1990)      |
+| Model         | Description                                                                                                                                                                                     |
+|-----------------------|-------------------------------------------------|
+| Basecase (bc) | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified. |
+| m1            | As base case but with survey catchability fixed at 1.0                                                                                                                                          |
+| m2            | As base case but with survey catchability fixed at 0.5                                                                                                                                          |
+| m3            | As base case but with natural mortality estimated                                                                                                                                               |
+| m4            | As base case but with fishery selectivity allowed to be dome-shaped                                                                                                                             |
+| m5            | As base case but with stock-recruit steepness fixed at 0.43                                                                                                                                     |
+| m6            | As base case but with stock-recruit steepness fixed at 0.9                                                                                                                                      |
+| m7            | As base case but with early indices dropped (pre 1990)                                                                                                                                          |
 
 ```{r startup}
 #| echo: false
@@ -81,7 +133,10 @@ mods <-  rbind(
     read_csv(here("mods", "bc", "nh_out.csv")) |> mutate(Model = "Base Case"),
     read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
     read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
-    read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3")
+    read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3"),
+    read_csv(here("mods", "m4", "nh_out.csv")) |> mutate(Model = "Model 4"),
+    read_csv(here("mods", "m5", "nh_out.csv")) |> mutate(Model = "Model 5"),
+    read_csv(here("mods", "m6", "nh_out.csv")) |> mutate(Model = "Model 6")
     )
   
 df <- rbind(
@@ -92,12 +147,7 @@ df <- rbind(
     data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5") ,
     data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6") 
   ) 
->>>>>>> d3b4ea8 (vign)
->>>>>>> bca1eb7 (Style code (GHA))
->>>>>>> 8b96b42 (Style code (GHA))
->>>>>>> 4a59f50 (Style code (GHA))
 ```
-
 
 ## Model runs
 
@@ -126,6 +176,7 @@ PlotAgeFit(x=bc, title="Base case",type="survey1",fage=1,lage=7)
 ```
 
 ### Selectivity
+
 ```{r selex}
 #| echo: false
 #| fig.cap: "Selectivity estimates for the base-case model run."
@@ -136,3 +187,59 @@ M <- data.frame(Year = 1964:2023, Sel = bc$S[1:60, ], Model = "h=0.7, base case"
 p1 <- plot_sel()
 p1
 ```
+
+### Stock status comparisons
+
+```{r stockstatus}
+#| echo: false
+#| fig.cap: "Some reference point comparisons  among model runs. 
+#| aveRY_90 is the average replacement yeild since 1990, aveRY is the average replacement yield over the most recent 5 years before the current year, Cur_90 is 
+#| the current (terminal year) SSB over the estimate from 1990, Cur_B0 is over the unfished estimate, and Cur_Bmsy is the ratio of current SSB over the Bmsy estimate. "
+#| fig.width: 8
+#| fig.height: 5
+
+#--Plot the reference points-------------------
+mods |>
+  filter(Variable != "R" & Variable != "SSB") |>
+  ggplot(aes(x = Model, y = value, ymin = ymin, ymax = ymax, color = Model, fill = Model)) +
+  geom_point(size = 3) +
+  ggthemes::theme_few() +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_errorbar() +
+  ylab("Value") +
+  xlab("") +
+  facet_wrap(. ~ Variable, scales = "free")
+
+```
+
+# Control rule application
+
+## Design of triggered control rule
+
+The situation for developing a two-species control rule where catches between species and the trend in overall biomass for both species is combined is challenging.
+For management purposes, the goal is to avoid incidental takes in the proportion of one species that exceeds the historical levels of depletion for either stock.
+Fortunately, survey data are available that can be used to distinguish trends in the relative biomass for both stocks.
+The design of the triggered control rule therefore must consider patterns in the relative biomass from the survey data, the absolute biomass of the combined catch and biomass as modeled from the combined-stocks assessment.
+This provides a pragmatic approach using available data.
+
+The steps in the control rule would be first to run a simple model that projected the survey biomass and relative proportion of M.
+paradoxus.
+Then, given the mean proportion over the period, compute the adjustment needed to the overarching control rule for the management procedure.
+For example, the historical range based on the survey has been between about one third of the mean value (in the earliest part of the period) to about 70% above the mean proportion.
+This range (especially the lower value) was used as a semi-empirical way to develop a minimum stock size threshold as part of the control rule.
+That is, when the stock of M.
+paradoxus drops below 30% of the mean proportion of the combined stocks estimate, the TAC recommendation for the combined stock would be zero.
+So if proportion of M.
+paradoxus (p_y) is greater than 30% of the long-term mean proportion, then
+
+$TAC_y=(0.8 \sum_{y}^{y-4}\frac{RY_y} 5) \min(1,B_y/B_{MSY})  \min(1,p_y/\bar{p})$
+
+In words, the TAC in year y is equal to the catch under the current control rule times the ratio of the spawning biomass relative to BMSY (or proxy) and the externally estimated proportion of M.
+paradoxus from survey data.
+The second and third terms on the right hands side are depicted in Table 1 (and include the zero catch recommended if the M. paradoxus proportion dropped below the lowest value historically observed).
+The values of γ,λ were both set to 1.0 but could be adjusted (say to 0.5) to have a more gradual transition as the proportion or aggregate stock conditions drop below mean levels.
+We note that the specification of a survey linkage by the individual species provides a trigger (30% of long-term mean) that reduces the exploitation rate as the point of recruitment impairment (PRI) is approached.
+
+Improvements to this approach could benefit from management that accounts for the depth of fishing Johnsen and Kathena (2012).
+These data were unavailable for inclusion in this study since they rely on predictions of the species mix based on the depth of fishing.
+Also, it is unclear that depth of fishing could be forecasted in a manner that could be built into a management measure.
