@@ -10,21 +10,20 @@ compile('src/re_tmb.cpp')
 dyn.load(dynlib('src/re_tmb'))
 source('R/utils.R')
 
-out <- read_re_output('tests/re_runs/rwout.rep')
-c1df <- read_re_output('runs/hcr1/cap1out.rep')
-c2df <- read_re_output('runs/hcr1/cap2out.rep')
-p1df <- read_re_output('runs/hcr1/par1out.rep')
-p2df <- read_re_output('runs/hcr1/par2out.rep')
+c1df <- read_re_output('mods/hcr1/cap1out.rep')
+c2df <- read_re_output('mods/hcr1/cap2out.rep')
+p1df <- read_re_output('mods/hcr1/par1out.rep')
+p2df <- read_re_output('mods/hcr1/par2out.rep')
 cdf  <- rbind(c1df %>% mutate(species="M.capensis"),p1df %>% mutate(species="M.paradoxus"))
 cdf2  <- rbind(c2df %>% mutate(species="M.capensis"),p2df %>% mutate(species="M.paradoxus"))
-cdf %>% mutate(year=round(year/12+1990,1)) %>% 
-         ggplot(aes(x=year, y=biomass,color=species,label=year,fill=species,ymin=LCI,ymax=UCI)) + 
+cdf %>% mutate(year=round(year/12+1990,1)) %>%
+         ggplot(aes(x=year, y=biomass,color=species,label=year,fill=species,ymin=LCI,ymax=UCI)) +
          geom_ribbon(alpha=.5,color="grey") + geom_line(size=1)  +
          geom_point(aes(x=year,y=srv_est),size=2) +
          expand_limits(y=0)
 glimpse(cdf)
 cdf %>% mutate(year=round(year/12+1990,2)) %>% tibble()%>% select(year,biomass,species) %>%
-         ggplot(aes(x=year, y=biomass,color=species,label=year,fill=species )) + 
+         ggplot(aes(x=year, y=biomass,color=species,label=year,fill=species )) +
          geom_area(stat='Identity') +
          expand_limits(y=0)
 ccf(c1df$biomass,c2df$biomass)
@@ -34,21 +33,20 @@ ccf(p1df$biomass,p2df$biomass)
 plot(c2df$biomass,p2df$biomass)
 cdf2 %>% filter(!is.na(srv_est)) %>% mutate(year=round(year/12+1990,2)) %>% tibble()%>% select(year,biomass,srv_est,species) %>%
          pivot_wider(names_from=species,values_from=srv_est) %>% print(n=Inf)
-         ggplot(aes(x=M.capensis, y=M.paradoxus,label=year)) + 
+         ggplot(aes(x=M.capensis, y=M.paradoxus,label=year)) +
          geom_point(size=2) + geom_smooth() +
          expand_limits(y=0,x=0)
  # not what you are looking for
- # not what you are looking for
-srv_sd <- out$srv_sd[!is.na(out$srv_sd)]
-srv_est <- out$srv_est[!is.na(out$srv_est)]
-yrs_srv <- out$year[!is.na(out$srv_est)]
+srv_sd <- c1df$srv_sd[!is.na(c1df$srv_sd)]
+srv_est <- c1df$srv_est[!is.na(c1df$srv_est)]
+yrs_srv <- c1df$year[!is.na(c1df$srv_est)]
 ## Convert SD back to CV which then gets converted internally
 ## back to SD
 srv_cv <- sqrt(exp(srv_sd^2)-1)
-data <- list(yrs=out$year, yrs_srv=yrs_srv,
-             yrs_srv_ind=match(yrs_srv, out$year)-1,
+data <- list(yrs=c1df$year, yrs_srv=yrs_srv,
+             yrs_srv_ind=match(yrs_srv, c1df$year)-1,
              srv_est=srv_est, srv_cv=srv_cv)
-pars <- list(logSdLam=1, biom=out$log_biomass)
+pars <- list(logSdLam=1, biom=c1df$log_biomass)
 obj <- MakeADFun(data, pars, random='biom')
 obj$env$beSilent()
 obj$fn()
@@ -96,6 +94,7 @@ biom <- bind_rows(biom.mcmc, biom.mle)
 g <- ggplot(biom, aes(year, med, ymin=lwr, ymax=upr, color=type, fill=type)) +
   geom_ribbon(alpha=.5) + geom_line() + labs(y='log biomass')
 ggsave('mcmc_vs_mle.png', g, width=7, height=5)
+g
 
 ## And the estimate of logSdLam
 hist(post[,1], freq=FALSE)
