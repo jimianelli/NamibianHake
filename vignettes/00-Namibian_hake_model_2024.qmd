@@ -102,6 +102,9 @@ theme_set(ggthemes::theme_few())
 ```{r getmods}
 #| echo: false
 #| output: false
+rn <- "bc"
+get(rn) <- run_nh(rn, runit = FALSE)
+?get
 bc <- run_nh("bc", runit = FALSE)
 m1 <- run_nh("m1", runit = FALSE)
 m2 <- run_nh("m2", runit = FALSE)
@@ -123,30 +126,30 @@ df <- rbind(
   data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5"),
   data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6")
 )
-bc <- run_nh("bc", runit = FALSE)
-m1 <- run_nh("m1", runit = FALSE)
-m2 <- run_nh("m2", runit = FALSE)
-m3 <- run_nh("m3", runit = FALSE)
-m5 <- run_nh("m5", runit = FALSE)
-m6 <- run_nh("m6", runit = FALSE)
-mods <- rbind(
-  read_csv(here("mods", "bc", "nh_out.csv")) |> mutate(Model = "Base Case"),
-  read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
-  read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
-  read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3"),
-  read_csv(here("mods", "m4", "nh_out.csv")) |> mutate(Model = "Model 4"),
-  read_csv(here("mods", "m5", "nh_out.csv")) |> mutate(Model = "Model 5"),
-  read_csv(here("mods", "m6", "nh_out.csv")) |> mutate(Model = "Model 6")
-)
-
+bc <- run_nh("bc",runit=FALSE)
+m1 <- run_nh("m1",runit=FALSE)
+m2 <- run_nh("m2",runit=FALSE)
+m3 <- run_nh("m3",runit=FALSE)
+m5 <- run_nh("m5",runit=FALSE)
+m6 <- run_nh("m6",runit=FALSE)
+mods <-  rbind(
+    read_csv(here("mods", "bc", "nh_out.csv")) |> mutate(Model = "Base Case"),
+    read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
+    read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
+    read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3"),
+    read_csv(here("mods", "m4", "nh_out.csv")) |> mutate(Model = "Model 4"),
+    read_csv(here("mods", "m5", "nh_out.csv")) |> mutate(Model = "Model 5"),
+    read_csv(here("mods", "m6", "nh_out.csv")) |> mutate(Model = "Model 6")
+    )
+  
 df <- rbind(
-  data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
-  data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
-  data.frame(SSB = m2$SSB, R = m2$Pred_Rec, Model = "Model 2"),
-  data.frame(SSB = m3$SSB, R = m3$Pred_Rec, Model = "Model 3"),
-  data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5"),
-  data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6")
-)
+    data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
+    data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
+    data.frame(SSB = m2$SSB, R = m2$Pred_Rec, Model = "Model 2"),
+    data.frame(SSB = m3$SSB, R = m3$Pred_Rec, Model = "Model 3") ,
+    data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5") ,
+    data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6") 
+  ) 
 ```
 
 ## Model runs
@@ -168,10 +171,11 @@ p1
 
 ```{r agecomps}
 #| echo: false
-#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the
+#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the 
 #| base case model uses a 'minus group' equal to '1' for the survey data."
-PlotAgeFit(x = bc, title = "Base case", type = "fishery", fage = 2, lage = 7)
-PlotAgeFit(x = bc, title = "Base case", type = "survey1", fage = 1, lage = 7)
+PlotAgeFit(x=bc, title="Base case",type="fishery",fage=2,lage=7)
+PlotAgeFit(x=bc, title="Base case",type="survey1",fage=1,lage=7)
+
 ```
 
 ### Selectivity
@@ -191,8 +195,8 @@ p1
 
 ```{r stockstatus}
 #| echo: false
-#| fig.cap: "Some reference point comparisons  among model runs.
-#| aveRY_90 is the average replacement yeild since 1990, aveRY is the average replacement yield over the most recent 5 years before the current year, Cur_90 is
+#| fig.cap: "Some reference point comparisons  among model runs. 
+#| aveRY_90 is the average replacement yeild since 1990, aveRY is the average replacement yield over the most recent 5 years before the current year, Cur_90 is 
 #| the current (terminal year) SSB over the estimate from 1990, Cur_B0 is over the unfished estimate, and Cur_Bmsy is the ratio of current SSB over the Bmsy estimate. "
 #| fig.width: 8
 #| fig.height: 5
@@ -208,6 +212,7 @@ mods |>
   ylab("Value") +
   xlab("") +
   facet_wrap(. ~ Variable, scales = "free")
+
 ```
 
 # Control rule application
@@ -241,3 +246,14 @@ We note that the specification of a survey linkage by the individual species pro
 Improvements to this approach could benefit from management that accounts for the depth of fishing Johnsen and Kathena (2012).
 These data were unavailable for inclusion in this study since they rely on predictions of the species mix based on the depth of fishing.
 Also, it is unclear that depth of fishing could be forecasted in a manner that could be built into a management measure.
+
+The approached applied a smoother to each of the species time-series of survey data.
+
+
+The above analysis provides a summary of the model runs and the design of a control rule that accounts for the signals in the data on the different species.
+
+# Notes
+
+Throughout the weeks, we scrutinized data inputs and found a couple of inconsistencies. 
+For example, data were provided for surveys in 2019 yet there were no observations in that year.
+Similarly, the abundance-at-length data from the surveys failed to identify strong periods of persistence by cohorts.
