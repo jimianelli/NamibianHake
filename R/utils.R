@@ -15,25 +15,29 @@
 #' str(x)
 #' library(ggplot)
 #' ggplot(x, aes(year, biomA))
-read_re_output <- function(file='rwout.rep', skip_data=FALSE,
-                           use_names=FALSE){
-  if(!file.exists(file))
+read_re_output <- function(file = "rwout.rep", skip_data = FALSE,
+                           use_names = FALSE) {
+  if (!file.exists(file)) {
     stop(paste(file, "not found, check path and file name"))
+  }
   out <- readLines(file)
-  colnames <- gsub(" ","", out[-grep(' ', out)])
-  out <- out[grep(' ', out)]
-  y <- lapply(out, function(x)  as.numeric(strsplit(x,' ')[[1]][-1]))
+  colnames <- gsub(" ", "", out[-grep(" ", out)])
+  out <- out[grep(" ", out)]
+  y <- lapply(out, function(x) as.numeric(strsplit(x, " ")[[1]][-1]))
   ## Since the data may have missing values split data and
   ## estimates into two then recombine
   d <- data.frame(do.call(cbind, y[1:3]))
   names(d) <- colnames[1:3]
   o <- data.frame(do.call(cbind, y[4:11]))
   names(o) <- colnames[4:11]
-  if(!skip_data)
-    o <- merge(o,d, by.x='yrs', by.y='yrs_srv', all.x=TRUE)
-  if(!use_names){
-    x <- c('year', 'LCI','biomass', 'UCI', 'low90th', 'upp90th',
-           'log_biomass', 'SE_log', 'srv_est', 'srv_sd')
+  if (!skip_data) {
+    o <- merge(o, d, by.x = "yrs", by.y = "yrs_srv", all.x = TRUE)
+  }
+  if (!use_names) {
+    x <- c(
+      "year", "LCI", "biomass", "UCI", "low90th", "upp90th",
+      "log_biomass", "SE_log", "srv_est", "srv_sd"
+    )
     names(o) <- x[1:ncol(o)]
   }
   return(o)
@@ -53,45 +57,48 @@ read_re_output <- function(file='rwout.rep', skip_data=FALSE,
 #' @return Nothing, a data file is written as \param{file}
 #'
 #' @seealso read_re_output
-write_re_input <- function(file, years, biomass, CV, tag=NULL,
-                           sp='species', survey='survey',
-                           yr_start=NULL, yr_end=NULL) {
+write_re_input <- function(file, years, biomass, CV, tag = NULL,
+                           sp = "species", survey = "survey",
+                           yr_start = NULL, yr_end = NULL) {
   ## input checks
   stopifnot(all.equal(length(years), length(biomass), length(CV)))
-  if(!all.equal(years, sort(years)))
+  if (!all.equal(years, sort(years))) {
     stop("years is not sorted")
+  }
   stopifnot(all(is.finite(CV)))
   stopifnot(all(is.finite(years)))
   stopifnot(all(is.finite(biomass)))
-  stopifnot(all(biomass>=0))
-  if(is.null(yr_start)) yr_start <- min(years)
-  if(is.null(yr_end)) yr_end <- max(years)
-  stopifnot(yr_start<= min(years))
-  stopifnot(yr_end>=max(years))
+  stopifnot(all(biomass >= 0))
+  if (is.null(yr_start)) yr_start <- min(years)
+  if (is.null(yr_end)) yr_end <- max(years)
+  stopifnot(yr_start <= min(years))
+  stopifnot(yr_end >= max(years))
 
   out <- file
-  write(paste("#", tag), out,ncolumns =  1 )
+  write(paste("#", tag), out, ncolumns = 1)
 
   ## Start new file
   N <- length(years)
-  write(noquote(paste("# RE input file written on", date(),
-                      "by write_re_input function")), out, append=FALSE)
-  write(noquote(paste("# For",sp, survey)) , out, append=TRUE)
+  write(noquote(paste(
+    "# RE input file written on", date(),
+    "by write_re_input function"
+  )), out, append = FALSE)
+  write(noquote(paste("# For", sp, survey)), out, append = TRUE)
   ## syr and nyr
-  write(noquote("# Start year and end year"), out, ncolumns=N, append=TRUE)
-  write(paste(yr_start, yr_end), out, ncolumns=N, append=TRUE)
-  ##nobs
-  write(noquote("# Nobs survey"), out, append=TRUE)
-  write(length(years), out, ncolumns=N, append=TRUE)
-  ##Years
-  write(noquote("# Years"),out, append=TRUE)
-  write(years, out, ncolumns=N, append=TRUE)
-  ##biomass
-  write(noquote("# Survey biomass"), out, append=TRUE)
-  write(biomass, out, ncolumns=N, append=TRUE)
-  ##CV
-  write(noquote("# Survey CV"), out, append=TRUE)
-  write(CV, out, ncolumns=N, append=TRUE)
+  write(noquote("# Start year and end year"), out, ncolumns = N, append = TRUE)
+  write(paste(yr_start, yr_end), out, ncolumns = N, append = TRUE)
+  ## nobs
+  write(noquote("# Nobs survey"), out, append = TRUE)
+  write(length(years), out, ncolumns = N, append = TRUE)
+  ## Years
+  write(noquote("# Years"), out, append = TRUE)
+  write(years, out, ncolumns = N, append = TRUE)
+  ## biomass
+  write(noquote("# Survey biomass"), out, append = TRUE)
+  write(biomass, out, ncolumns = N, append = TRUE)
+  ## CV
+  write(noquote("# Survey CV"), out, append = TRUE)
+  write(CV, out, ncolumns = N, append = TRUE)
   message(paste("Finished writing RE input for", survey, sp))
 }
 
@@ -106,44 +113,44 @@ write_re_input <- function(file, years, biomass, CV, tag=NULL,
 #' @return A data.frame with ADMB and TMB estimates for comparing
 #' @details It will throw an error if the results have changed,
 #'   otherwise results are consistent.
-test_re_species <- function(d, test_tmb=TRUE){
-  m <- gsub('.dat','',d)
-  file.copy(file.path('data', d), to=file.path('re_runs',d), overwrite=TRUE)
-  setwd('re_runs')
-  on.exit(setwd('..'))
+test_re_species <- function(d, test_tmb = TRUE) {
+  m <- gsub(".dat", "", d)
+  file.copy(file.path("data", d), to = file.path("re_runs", d), overwrite = TRUE)
+  setwd("re_runs")
+  on.exit(setwd(".."))
   message("Testing RE model for ", m)
-  if(file.exists('rwout.rep')) file.remove('rwout.rep')
-  test <- system(paste('./re -ind', d), ignore.stdout=TRUE)
-  if(!file.exists('rwout.rep')) stop('Failed to run ', m)
-  out <- read_re_output('rwout.rep')
+  if (file.exists("rwout.rep")) file.remove("rwout.rep")
+  test <- system(paste("./re -ind", d), ignore.stdout = TRUE)
+  if (!file.exists("rwout.rep")) stop("Failed to run ", m)
+  out <- read_re_output("rwout.rep")
   ## This is the piece that checks against previous runs, and
   ## does nothing if it matches, otherwise throws an error
-  expect_known_output(out, file=paste0('../testthat/_expect_', m))
+  expect_known_output(out, file = paste0("../testthat/_expect_", m))
   ## Get the data for TMB from the RE output
   srv_sd <- out$srv_sd[!is.na(out$srv_sd)]
   srv_est <- out$srv_est[!is.na(out$srv_est)]
   yrs_srv <- out$year[!is.na(out$srv_est)]
   ## Get the MLE to put into TMB so those match as good as
   ## possible
-  par.mle <- as.numeric(readLines('re.par')[3])
+  par.mle <- as.numeric(readLines("re.par")[3])
   ## Convert SD back to CV which then gets converted internally
   ## back to SD
-  srv_cv <- sqrt(exp(srv_sd^2)-1)
-  data <- list(yrs=out$year, yrs_srv=yrs_srv,
-               yrs_srv_ind=match(yrs_srv, out$year)-1,
-               srv_est=srv_est, srv_cv=srv_cv)
-  pars <- list(logSdLam=par.mle, biom=out$log_biomass)
-  obj <- MakeADFun(data, pars, random='biom')
+  srv_cv <- sqrt(exp(srv_sd^2) - 1)
+  data <- list(
+    yrs = out$year, yrs_srv = yrs_srv,
+    yrs_srv_ind = match(yrs_srv, out$year) - 1,
+    srv_est = srv_est, srv_cv = srv_cv
+  )
+  pars <- list(logSdLam = par.mle, biom = out$log_biomass)
+  obj <- MakeADFun(data, pars, random = "biom")
   obj$env$beSilent()
   obj$fn()
   ##   opt <- with(obj, nlminb(par, fn, gr))
   adrep <- sdreport(obj)
-  if(test_tmb){
-    expect_equal(out$log_biomass, as.numeric(adrep$value), tolerance=1e-4)
-    expect_equal(out$SE_log, as.numeric(adrep$sd), tolerance=1e-4)
+  if (test_tmb) {
+    expect_equal(out$log_biomass, as.numeric(adrep$value), tolerance = 1e-4)
+    expect_equal(out$SE_log, as.numeric(adrep$sd), tolerance = 1e-4)
   }
-  results <- cbind(species=m, out, tmb_log_biomass=adrep$value, tmb_SE_log=adrep$sd)
+  results <- cbind(species = m, out, tmb_log_biomass = adrep$value, tmb_SE_log = adrep$sd)
   return(results)
 }
-
-

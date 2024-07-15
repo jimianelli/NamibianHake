@@ -1,4 +1,3 @@
-
 #' Plot Age Fit
 #'
 #' This function creates a plot comparing observed and predicted age compositions for a specified type.
@@ -27,13 +26,15 @@ PlotAgeFit <- function(x = bc, title = NULL, type = "fishery", fage = 2, lage = 
   )
   names(dftmp) <- c("Year", fage:lage, "type")
   x <- pivot_longer(dftmp,
-                    cols = 2:(lage+2-fage),
-                    names_to = "Age", values_to = "proportion"
+    cols = 2:(lage + 2 - fage),
+    names_to = "Age", values_to = "proportion"
   )
   ggplot(x |> filter(type == "Obs"), aes(x = Age, y = proportion)) +
     geom_bar(stat = "Identity", fill = "salmon") +
     geom_point(
       data = x |> filter(type == "Pred"),
       aes(x = Age, y = proportion), size = 2, shape = 3
-    ) + facet_wrap(Year ~ .) + ggtitle(paste0(title, ", ", type))
+    ) +
+    facet_wrap(Year ~ .) +
+    ggtitle(paste0(title, ", ", type))
 }

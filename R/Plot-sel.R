@@ -15,24 +15,25 @@
 #'
 #' @examples
 #' \dontrun{
-#' plot_sel(Year = M$Year, sel = M[,2:10], styr = 1970, fage = 1, lage = 8)
+#' plot_sel(Year = M$Year, sel = M[, 2:10], styr = 1970, fage = 1, lage = 8)
 #' }
 #'
 #' @export
-plot_sel <- function(Year = M$Year, sel = M[,2:10], styr = 1964, fage = NULL, lage = NULL, alpha = 0.2, scale = 3.8, fill = "purple") {
+plot_sel <- function(Year = M$Year, sel = M[, 2:10], styr = 1964, fage = NULL, lage = NULL, alpha = 0.2, scale = 3.8, fill = "purple") {
   df <- data.frame(Year = Year, sel = sel)
   if (is.null(fage)) fage <- 0
   if (is.null(lage)) lage <- length(sel[1, ]) - 1
   df <- df |> select(1:(lage - fage + 2))
   names(df) <- c("Year", fage:lage)
   nages <- length(fage:lage)
-  sdf <- pivot_longer(df, names_to = "age", values_to = "sel", cols = 2:(nages + 1)) %>% 
-    filter(Year >= styr) %>% 
+  sdf <- pivot_longer(df, names_to = "age", values_to = "sel", cols = 2:(nages + 1)) %>%
+    filter(Year >= styr) %>%
     mutate(age = as.numeric(age))
-  p1 <- ggplot(sdf, aes(x = age, y = as.factor(Year), height = sel)) + 
-    geom_density_ridges(stat = "identity", scale = scale, alpha = alpha, fill = fill, color = "black") + 
+  p1 <- ggplot(sdf, aes(x = age, y = as.factor(Year), height = sel)) +
+    geom_density_ridges(stat = "identity", scale = scale, alpha = alpha, fill = fill, color = "black") +
     ggthemes::theme_few() +
-    ylab("Year") + xlab("Age (years)") +
+    ylab("Year") +
+    xlab("Age (years)") +
     scale_x_continuous(limits = c(fage, lage), breaks = fage:lage) +
     scale_y_discrete(limits = rev(levels(as.factor(sdf$Year))))
   return(p1)
