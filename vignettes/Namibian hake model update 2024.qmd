@@ -1,7 +1,10 @@
 ---
 title: "Namibian hake model update, 2024"
 author: "John Kathena, Jim Ianelli"
+date: today
+prefer-html: true
 vignette: >
+
   %\VignetteIndexEntry{Model update}
   %\VignetteEngine{quarto::html}
   %\VignetteEncoding{UTF-8}
@@ -11,8 +14,30 @@ vignette: >
 ## Example model runs
 
 Below are examples which show how models can be run based on the directory location.
-j
+
+### Model descriptions
+
+The following table was developed based on testing the model with different assumptions and data sources.
+Key differences from the 2023 assessment configuration was the assumption that 
+model estimation of variance terms was appropriate. This feature resulted in unacceptable 
+residual patterns and essentially a complete down weighting of the index data.
+We used the assumed variance terms (CVs) for the indices in all of the following 
+model configurations:
+
+| Model | Description    |
+|----------------------|--------------------------------------------------|
+| Basecase (bc)  | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated,  |
+| m1  | As base case but with survey catchability fixed at 1.0 |
+| m2  | As base case but with survey catchability fixed at 0.5 |
+| m3  | As base case but with natural mortality estimated   |
+| m4  | As 1.03 but with more ages in the SRR and steepness estimated with prior, sigmaR=0.6 |
+| m4  | As 1.03 but with more ages in the SRR and steepness estimated with prior, sigmaR=0.6 |
+| m5  | As 1.03 but with more ages in the SRR and steepness estimated with prior, sigmaR=0.6 |
+| m6  | As 1.03 but with more ages in the SRR and steepness estimated with prior, sigmaR=0.6 |
+
 ```{r startup}
+#| echo: false
+#| output: false
 
 library(NamibianHake)
 ## basic example code
@@ -24,7 +49,9 @@ theme_set(ggthemes::theme_few())
 ```
 
 ```{r getmods}
-bc <- run_nh("bc")
+#| echo: false
+#| output: false
+bc <- run_nh("bc",runit=FALSE)
 m1 <- run_nh("m1",runit=FALSE)
 m2 <- run_nh("m2",runit=FALSE)
 m3 <- run_nh("m3",runit=FALSE)
@@ -35,7 +62,6 @@ mods <-  rbind(
     read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3")
     )
   
-
 df <- rbind(
     data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
     data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
@@ -45,7 +71,8 @@ df <- rbind(
 ```
 
 ```{r plots}
-
+#| echo: false
+#| fig.cap: "Model runs"
 p1 <- df %>% ggplot(aes(x = SSB, y = R, color = Model, shape=Model)) +
   geom_point() +
   geom_line();p1

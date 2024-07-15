@@ -1,5 +1,9 @@
 
-# NamibianHake
+README
+================
+John Kathena
+Jim Ianelli
+2024-07-19
 
 <!-- badges: start -->
 <!-- badges: end -->
