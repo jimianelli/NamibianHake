@@ -4,4 +4,5 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^src$
 ^\.github$

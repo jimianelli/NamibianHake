@@ -25,21 +25,22 @@ editor_options:
 
 ```{r setup1}
 library(knitr)
-hook_output <- knit_hooks$get("output")
+hook_output = knit_hooks$get('output')
 knit_hooks$set(output = function(x, options) {
   # this hook is used only when the linewidth option is not NULL
   if (!is.null(n <- options$linewidth)) {
-    x <- knitr:::split_lines(x)
+    x = knitr:::split_lines(x)
     # any lines wider than n should be wrapped
-    if (any(nchar(x) > n)) x <- strwrap(x, width = n)
-    x <- paste(x, collapse = "\n")
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
   }
   hook_output(x, options)
 })
 
-knitr::opts_chunk$set(collapse = TRUE, comment = "  ", fig.align = "center", cache = FALSE, tidy.opts = list(width.cutoff = 80), tidy = TRUE)
-knitr::opts_knit$set(root.dir = here::here())
-# knitr::opts_chunk$set(warning=F, message=F, echo=F, results=F,fig.width=6, fig.height=5)
+knitr::opts_chunk$set(collapse = TRUE, comment = "  " ,fig.align = 'center', cache=FALSE,tidy.opts=list(width.cutoff=80), tidy=TRUE )
+knitr::opts_knit$set(root.dir=here::here())
+#knitr::opts_chunk$set(warning=F, message=F, echo=F, results=F,fig.width=6, fig.height=5)
+
 ```
 # Project overview
 
@@ -126,6 +127,7 @@ library(ggridges)
 theme_set(ggthemes::theme_few())
 library(xtable)
 library(kableExtra)
+
 ```
 
 ```{r getmods}
@@ -134,25 +136,24 @@ library(kableExtra)
 mod_ref <- c("old_bc", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
 mod_dir <- c("old_bc", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
 mod_label <- c("2023 base case", "2024 base case", "Model 1", "Model 2", "Model 3", "Model 4", "Model 5", "Model 6")
-res <- get_results(mod_names. = mod_label, moddir = mod_dir)
+res   <- get_results(mod_names.=mod_label,moddir=mod_dir)
 modlst <- res$modlst
 old_bc <- modlst[[1]]
 m0 <- modlst[[2]]
 moddiag <- res$moddiag
 dfsrr <- data.frame()
 for (i in 1:length(mod_ref)) {
-  # assign(modlst[[i]], run_nh(mod_dir[i] ,runit=FALSE) )
-  dfsrr <- rbind(dfsrr, data.frame(
-    Model = mod_label[i],
-    SSB = modlst[[i]]$SSB,
-    R = modlst[[i]]$Pred_Rec
-  ))
+  #assign(modlst[[i]], run_nh(mod_dir[i] ,runit=FALSE) )
+  dfsrr <- rbind(dfsrr, data.frame(Model = mod_label[i],   
+                                   SSB   = modlst[[i]]$SSB,  
+                                   R     =  modlst[[i]]$Pred_Rec)
+  )
 }
 mods <- data.frame()
 for (i in 1:length(mod_ref)) {
-  mods <- rbind(mods, data.frame(moddiag[[i]], Model = names(moddiag[i])))
+  mods <- rbind(mods,data.frame(moddiag[[i]], Model = names(moddiag[i])) )
 }
-# head(mods)
+#head(mods)
 ```
 
 
@@ -165,17 +166,14 @@ for (i in 1:length(mod_ref)) {
 #| label: fitidx1
 
 
-dfidx <- rbind(
-  data.frame(Year = 1964:2023, Obs = old_bc$Obs_Survey_1, predicted = old_bc$Pre_Survey_1, Model = "Base case 2023"),
-  data.frame(Year = 1964:2024, Obs = m0$Obs_Survey_1, predicted = m0$Pre_Survey_1, Model = "Base case 2024")
-)
-dfidx |>
-  filter(Obs > -0) |>
-  ggplot(aes(x = Year, y = Obs, color = Model)) +
-  geom_point(color = "black") +
-  ylim(0, NA) +
-  geom_line(aes(y = predicted)) +
-  geom_point(aes(y = predicted))
+  dfidx <- rbind(
+    data.frame(Year = 1964:2023,Obs = old_bc$Obs_Survey_1, predicted = old_bc$Pre_Survey_1, Model = "Base case 2023"),
+    data.frame(Year = 1964:2024,Obs = m0$Obs_Survey_1, predicted = m0$Pre_Survey_1, Model = "Base case 2024")
+  )
+  dfidx |> filter(Obs>-0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
+    geom_point(color="black") + ylim(0,NA)+
+    geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))
+  
 ```
 
 ```{r fitcpue3}
@@ -183,129 +181,146 @@ dfidx |>
 #| fig.cap: "Base case model fits to the CPUE index 3 data compared to the previous assessment."
 #| label: fitcpue3
 
-dfcpue <- rbind(
-  data.frame(Year = 1964:2023, Obs = old_bc$Obs_CPUE_3, predicted = old_bc$e_CPUE_3, Model = "Base case 2023"),
-  data.frame(Year = 1964:2024, Obs = m0$Obs_CPUE_3, predicted = m0$e_CPUE_3, Model = "Base case 2024")
-)
+  dfcpue <- rbind(
+    data.frame(Year = 1964:2023,Obs = old_bc$Obs_CPUE_3, predicted = old_bc$e_CPUE_3, Model = "Base case 2023"),
+    data.frame(Year = 1964:2024,Obs = m0$Obs_CPUE_3, predicted = m0$e_CPUE_3, Model = "Base case 2024")
+  )
+  
+  dfcpue |> filter(Obs>0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
+    geom_point(color="black") +
+    geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))+
+    ggtitle("CPUE 3") + ylim(0,NA)
 
-dfcpue |>
-  filter(Obs > 0) |>
-  ggplot(aes(x = Year, y = Obs, color = Model)) +
-  geom_point(color = "black") +
-  geom_line(aes(y = predicted)) +
-  geom_point(aes(y = predicted)) +
-  ggtitle("CPUE 3") +
-  ylim(0, NA)
 ```
 
 ```{r fitcpue1}
 #| fig.cap: "Base case model fits to the CPUE index 1 data compared to the previous assessment."
 #| label: fitcpue1
-dfcpue <- rbind(
-  data.frame(Year = 1964:2023, Obs = old_bc$Obs_CPUE_1, predicted = old_bc$e_CPUE_1, Model = "Base case 2023"),
-  data.frame(Year = 1964:2024, Obs = m0$Obs_CPUE_1, predicted = m0$e_CPUE_1, Model = "Base case 2024")
-)
-dfcpue |>
-  filter(Obs > 0) |>
-  ggplot(aes(x = Year, y = Obs, color = Model)) +
-  geom_point(color = "black") +
-  geom_line(aes(y = predicted)) +
-  geom_point(aes(y = predicted)) +
-  ggtitle("CPUE 1") +
-  ylim(0, NA)
+  dfcpue <- rbind(
+    data.frame(Year = 1964:2023,Obs = old_bc$Obs_CPUE_1, predicted = old_bc$e_CPUE_1, Model = "Base case 2023"),
+    data.frame(Year = 1964:2024,Obs = m0$Obs_CPUE_1, predicted = m0$e_CPUE_1, Model = "Base case 2024")
+  )
+  dfcpue |> filter(Obs>0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
+    geom_point(color="black") +
+    geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))+
+    ggtitle("CPUE 1") + ylim(0,NA)
+
+
 ```
 
 
 ### SSB results
+@fig-ssb shows the SSB estimates for the base case model compared to the previous assessment. The horizontal lines correspond to the Bmsy values for the separate models.
 
 ```{r SSB}
-#| echo: false
-#| fig.cap: "Base case model showing the SSB estimates compared to the previous assessment."
-#| label: fitssb
-mods |>
-  filter(Model %in% mod_label[1:2], Year > 1960, Variable == "SSB") |>
+#| fig.cap: "Base case model showing the SSB estimates compared to the previous assessment. The horizontal
+#| lines correspond to the Bmsy values for the separate models."
+#| label: fig-ssb
+dftmp <- data.frame(Model = mod_label[1], Bmsy=(modlst[[1]]$Bmsy))
+dftmp <- rbind(dftmp,data.frame(Model = mod_label[2], Bmsy=(modlst[[2]]$Bmsy)))
+mods |>  filter(Model %in% mod_label[1:2], Year > 1960, Variable == "SSB") |>
   ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
   geom_ribbon(alpha = .24) +
   ggthemes::theme_few() +
-  coord_cartesian(ylim = c(0, 6e3)) +
-  geom_line(aes(color = Model)) +
-  geom_point(aes(color = Model, shape = Model), size = 1.) +
-  ylab("SSB") +
-  xlab("Year")
-#  facet_wrap(. ~ Model, scales="fixed") +
+  coord_cartesian(ylim=c(0, 6e3)) +
+  geom_line(aes(color=Model )) + 
+  geom_hline(yintercept= dftmp$Bmsy[1],color=2) + 
+  geom_hline(yintercept= dftmp$Bmsy[2],color=3) + 
+  geom_point(aes(color=Model, shape=Model),size=1.) +
+  ylab("SSB") + xlab("Year")
 ```
 
-
+Another way to evaluate the relative trends in spawning biomass is to examine the so-called "depletion" levels.
+This is the ratio of the current SSB to the theoretical unfished value. The results are shown in @fig-depl for the base case model and in @fig-deplalt for the alternative models.
 
 ```{r depl}
 #| fig.cap: "Base case model showing the relative SSB estimates compared to the previous assessment."
-#| label: depl
-mods |>
-  filter(Model %in% mod_label[1:2], Year > 1960, Variable == "Depletion") |>
+#| label: fig-depl
+mods |>  filter(Model %in% mod_label[1:2], Year > 1960, Variable == "Depletion") |>
   ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
   geom_ribbon(alpha = .24) +
   ggthemes::theme_few() +
-  geom_line(aes(color = Model)) +
-  geom_point(aes(color = Model, shape = Model), size = 1.) +
-  ylab("Relative SSB") +
-  xlab("Year")
+  geom_line(aes(color=Model )) + 
+  geom_point(aes(color=Model, shape=Model),size=1.) +
+  ylab("Relative SSB") + xlab("Year")
+```
+
+```{r deplalt}
+#| fig.cap: "Alternative model results showing the relative SSB estimates."
+#| label: fig-deplalt
+mods |>  filter(Model %in% mod_label[2:9], Year > 1960, Variable == "Depletion") |>
+  ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
+  geom_ribbon(alpha = .24) +
+  ggthemes::theme_few() +
+  geom_line(aes(color=Model )) + 
+  geom_point(aes(color=Model, shape=Model),size=1.) +
+  ylab("Relative SSB") + xlab("Year")
 ```
 
 
+The recruitment results are consistent with those seen for the spawning biomass. 
+The base case model shows a decline in recruitment estimates compared to the previous assessment, as shown in @fig-rec.
+Compared to the base case model, the alternative models show a range of recruitment estimates, as shown in @fig-recalt.
+```{r rec}
+#| fig.cap: "Alternative model results on recruitment estimates."
+#| label: fig-rec
+mods |>  filter(Model %in% mod_label[1:2], Year > 2010, Variable == "R") |>
+  ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
+  geom_errorbar(width=0.95,position="dodge",alpha = .3) +
+  geom_bar(width=0.95,stat = "Identity",position="dodge") +
+  ggthemes::theme_few() +
+  ylab("Recruitment age 0") + xlab("Year")
+```
+
+```{r recalt}
+#| fig.cap: "Alternative model results on recruitment estimates."
+#| label: fig-recalt
+mods |>  filter(Model %in% mod_label[2:9], Year > 2010, Variable == "R") |>
+  ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
+  geom_errorbar(width=0.95,position="dodge",alpha = .3) +
+  geom_bar(width=0.95,stat = "Identity",position="dodge") +
+  ggthemes::theme_few() +
+  ylab("Recruitment age 0") + xlab("Year")
+```
+To show the history relative to the replacement yield, we can plot the 
+SSB/Bmsy and the catch/replacement yield (@fig-kobe). This shows a significant 
+difference between the previous assessment and that proposed as the base-case for
+this year. The alternative models show a range of results, as shown in @fig-kobe2.
+
+
 ```{r kobe}
-#| echo: false
 #| fig.cap: "Base case model showing the relative SSB estimates compared to the previous assessment."
-#| label: kobe
-# head(mods)
-tmp <- mods |>
-  select(Year, Model, Variable, value) |>
-  filter(Model %in% mod_label[1:2], Year > 1980, Variable %in% c("Catch_RY", "Depletion")) |>
-  pivot_wider(names_from = Variable, values_from = value)
+#| label: fig-kobe
+tmp <- mods |>  select(Year, Model,Variable,value) |> filter(Model %in% mod_label[1:2], Year > 1980,  Variable %in% c("Catch_RY","B_Bmsy"))  |> 
+  pivot_wider(names_from = Variable, values_from = value) |> arrange(Model,Year) #|>
+  tmp |> ggplot(aes(x = B_Bmsy, label=Year, y = Catch_RY, shape = Model, color=Model, fill = Model)) +
+  geom_path() + ggthemes::theme_few() + geom_point() + geom_text(alpha=.5) + geom_hline(yintercept = 1) +
+  geom_vline(xintercept = 1) + xlab("SSB/Bmsy") + ylab("Catch / replacement Yield") 
+  
+```
 
-tmp |> ggplot(aes(x = Depletion, y = Catch_RY, shape = Model, color = Model, fill = Model)) +
-  geom_path() +
-  ggthemes::theme_few() +
-  geom_point()
+```{r kobe2}
+#| fig.cap: "Base case model showing the relative SSB estimates compared to the 
+#| model alternatives assessment."
+#| label: fig-kobe2
+tmp <- mods |>  select(Year, Model,Variable,value) |> filter(Model %in% mod_label[1:2], Year > 1980, Variable %in% c("Catch_RY","Depletion")) |> pivot_wider(names_from = Variable, values_from = value) 
+  tmp <- mods |>  select(Year, Model,Variable,value) |> filter(Model %in% mod_label[c(2:3,7:8)], Year > 1980,  Variable %in% c("Catch_RY","B_Bmsy"))  |> 
+  pivot_wider(names_from = Variable, values_from = value) |> arrange(Model,Year) #|>
+  tmp |> ggplot(aes(x = B_Bmsy, label=Year, y = Catch_RY, shape = Model, color=Model, fill = Model)) +
+  geom_path() + ggthemes::theme_few() + geom_point() + geom_text(alpha=.5) + geom_hline(yintercept = 1) +
+  geom_vline(xintercept = 1) + xlab("SSB/Bmsy") + ylab("Catch / replacement Yield") 
 
-tmp <- mods |>
-  select(Year, Model, Variable, value) |>
-  filter(Model %in% mod_label[1:2], Year > 1980, Variable %in% c("Catch_RY", "B_Bmsy")) |>
-  pivot_wider(names_from = Variable, values_from = value) |>
-  arrange(Model, Year) #|>
-tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color = Model, fill = Model)) +
-  geom_path() +
-  ggthemes::theme_few() +
-  geom_point() +
-  geom_text(alpha = .5) +
-  geom_hline(yintercept = 1) +
-  geom_vline(xintercept = 1) +
-  xlab("SSB/Bmsy") +
-  ylab("Catch / replacement Yield")
-
-tmp <- mods |>
-  select(Year, Model, Variable, value) |>
-  filter(Model %in% mod_label[c(2:3, 7:8)], Year > 1980, Variable %in% c("Catch_RY", "B_Bmsy")) |>
-  pivot_wider(names_from = Variable, values_from = value) |>
-  arrange(Model, Year) #|>
-tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color = Model, fill = Model)) +
-  geom_path() +
-  ggthemes::theme_few() +
-  geom_point() +
-  geom_text(alpha = .5) +
-  geom_hline(yintercept = 1) +
-  geom_vline(xintercept = 1) +
-  xlab("SSB/Bmsy") +
-  ylab("Catch / replacement Yield")
 ```
 
 ### Age composition fits
 
 ```{r agecomps}
 #| echo: false
-#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the
+#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the 
 #| base case model uses a 'minus group' equal to '1' for the survey data."
-PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7)
-PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7)
+PlotAgeFit(x=m0, title="Base case",type="fishery",fage=2,lage=7)
+PlotAgeFit(x=m0, title="Base case",type="survey1",fage=1,lage=7)
+
 ```
 
 ### Selectivity
@@ -327,7 +342,7 @@ The following plot shows the stock-recruitment curves for the base case and mode
 ```{r srrplots}
 #| echo: false
 #| fig.cap: "Model runs"
-p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
+p1 <- dfsrr |>  ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
   geom_point() +
   geom_line()
 p1
@@ -341,45 +356,31 @@ Unclear why this table doesn't show up...
 ```{r mgt_quant, results = "asis"}
 #| echo: true
 #| results: asis
-#|
+#| 
 dftmp <- NULL
 mod_scen <- c(2:8)
-filler <- " "
-names(filler) <- "-ln(Likelihood)"
+filler <- " " ; names(filler) <- "-ln(Likelihood)"
 for (ii in mod_scen) {
-  x <- modlst[[ii]]
-  nll <- x$ObjFun
-  names(nll) <- "Overall"
-  CPUE <- x$CPUE_Like
-  names(CPUE) <- "CPUE"
-  surv <- x$Survey_Like
-  names(surv) <- "Survey"
-  caa <- x$CAA_Likelihood
-  names(caa) <- "Commercial CAA"
-  caas <- x$CAAS_Likelihood
-  names(caas) <- "Survey CAA"
-  rec <- x$RecRes_Likelihood
-  names(rec) <- "Rec. resids."
-  oneyrold <- x$Oneyearold_Likelihood
-  names(oneyrold) <- "One yr-old biomass"
-  NumPars <- x$Npars
-  names(NumPars) <- "Number parameters"
-  AIC <- x$Akaike
-  names(AIC) <- "AIC"
-  v <- c(filler, nll, CPUE, surv, caa, caas, rec, oneyrold, NumPars, AIC)
-  dftmp <- cbind(dftmp, v)
+    x      <- modlst[[ii]]
+    nll <- x$ObjFun        ; names(nll) <- "Overall"               
+    CPUE<- x$CPUE_Like     ; names(CPUE) <- "CPUE"
+    surv<-x$Survey_Like     ; names(surv) <- "Survey"      
+    caa  <- x$CAA_Likelihood  ; names(caa) <- "Commercial CAA"      
+    caas <- x$CAAS_Likelihood ; names(caas) <- "Survey CAA"      
+    rec  <- x$RecRes_Likelihood   ; names(rec) <- "Rec. resids." 
+    oneyrold <- x$Oneyearold_Likelihood ; names(oneyrold) <- "One yr-old biomass"
+    NumPars <- x$Npars                ; names(NumPars) <- "Number parameters" 
+    AIC <- x$Akaike                ; names(AIC) <- "AIC"
+    v      <- c(filler, nll, CPUE, surv, caa, caas, rec, oneyrold, NumPars, AIC)
+    dftmp  <- cbind(dftmp, v)
 }
-dftmp <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
-names(dftmp) <- c("Component", mod_label[mod_scen])
+dftmp        <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
+names(dftmp) <- c("Component",mod_label[mod_scen])
 tabcap <- "Model fits to data components"
-tab <- xtable(dftmp,
-  caption = tabcap, type = "html",
-  label = "tab:mgt_quants", digits = 0
-)
-# align=paste0("lll",strrep("r",length(mod_scen+1))))
-kable(tab, caption.placement = "top", include.rownames = FALSE, sanitize.text.function = function(x) {
-  x
-})
+tab <- xtable(dftmp, caption = tabcap, type="html",
+              label = "tab:mgt_quants", digits = 0)
+              #align=paste0("lll",strrep("r",length(mod_scen+1))))
+kable(tab, caption.placement = "top", include.rownames = FALSE, sanitize.text.function = function(x){x})
 ```
 
 
@@ -387,75 +388,52 @@ kable(tab, caption.placement = "top", include.rownames = FALSE, sanitize.text.fu
 dftmp <- NULL
 mod_scen <- c(2:8)
 for (ii in mod_scen) {
-  x <- modlst[[ii]]
-  "-ln(Likelihood)"
-  nll <- x$ObjFun
-  names(nll) <- "Overall"
-  CPUE <- x$CPUE_Like
-  names(CPUE) <- "CPUE"
-  surv <- x$Survey_Like
-  names(surv) <- "Survey"
-  caa <- x$CAA_Likelihood
-  names(caa) <- "Commercial CAA"
-  caas <- x$CAAS_Likelihood
-  names(caas) <- "Survey CAA"
-  rec <- x$RecRes_Likelihood
-  names(rec) <- "Rec. resids."
-  oneyrold <- x$Oneyearold_Likelihood
-  names(oneyrold) <- "One yr-old biomass"
-  NumPars <- x$Npars
-  names(NumPars) <- "Number parameters"
-  AIC <- x$Akaike
-  names(AIC) <- "AIC"
-  v <- c(nll, CPUE, surv, caa, caas, rec, oneyrold, NumPars, AIC)
-  dftmp <- cbind(dftmp, v)
+    x      <- modlst[[ii]]
+    Ksp <- round(x$KspSTD,0)        ; names(Ksp) <- "Unfished spawning biomass"               
+    Kexp <- round(x$KexpSTD,0)        ; names(Kexp) <- "Unfished expl. biomass"               
+    steepness<- round(x$Steep,3)     ; names(steepness) <- "SRR steepness"
+    Cur_B <-round(x$Bstd[length(x$Bstd)],3)     ; names(Cur_B) <- paste0("Current SSB (",tail(x$Year,1),")")      
+    Cur_B0<-round(x$Cur_B0,3)     ; names(Cur_B0) <- paste0("Current SSB over unfished")
+    Cur_Bmsy <-round(x$Cur_Bmsy,3)      ; names(Cur_Bmsy ) <- paste0("Current SSB over Bmsy")
+    MSY  <- round(x$MSY,0)  ; names(MSY) <- "MSY"      
+    ry <-round(x$aveRY_last5,0)      ; names(ry ) <- paste0("recent 5-yr average replacement yield")
+    ry_cur <-round(x$aveRY_last5*x$Cur_Bmsy,3) ; names(ry_cur ) <- paste0("Recent RY x current SSB /Bmsy")
+    v      <- c(Ksp, Kexp, steepness, Cur_B, Cur_B0, Cur_Bmsy, MSY, ry, ry_cur)
+    dftmp  <- cbind(dftmp, v)
 }
-dftmp <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
-names(dftmp) <- c("Component", mod_label[mod_scen])
-tabcap <- "Model fits to data components"
-tab <- xtable(dftmp,
-  caption = tabcap, type = "html",
-  label = "tab:mgt_quants", digits = 0
+dftmp        <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
+names(dftmp) <- c("Statistic",mod_label[mod_scen])
+tabcap <- "Selected management measures from alternative models. "
+library(flextable)
+set_flextable_defaults(
+  digits = 1,
+  decimal.mark = ".",
+  big.mark = ",",
+  na_str = "<na>"
 )
-# align=paste0("lll",strrep("r",length(mod_scen+1))))
-kable(tab, caption.placement = "top", include.rownames = FALSE, sanitize.text.function = function(x) {
-  x
-})
+flextable(dftmp) |>  
+  set_caption(caption = tabcap) |> 
+  colformat_double() |> 
+  autofit()
+              #align=paste0("lll",strrep("r",length(mod_scen+1))))
+#kable(tab, caption.placement = "top", include.rownames = FALSE, sanitize.text.function = function(x){x})
+#print(tab)
 ```
 
+
 But here the figure does...
-#| 
-# x$KspSTD                
-# x$KexpSTD               
-# Ksp
-# h
-# Bsp(2023)
-# Bexp(2023)
-# Bsp(2023)/Ksp
-# Bsp(2024)
-# Bexp(2024)
-# Bsp(2024)/Ksp
-# Bspmsy
-# Bspmsy/Ksp
-# Bsp(2023)/Bspmsy
-# Bsp(2024)/Bspmsy
-# MSY
-# AverageRY_5yrs
-# AverageRY_5yrs*Bsp/Bspmsy
-# ```{r mgt_quants, results = "asis"}
-# Mgt quants by model
 
 ```{r stockstatus}
 #| echo: false
-#| fig.cap: "Some reference point comparisons  among model runs.
-#| aveRY_90 is the average replacement yeild since 1990, aveRY is the average replacement yield over the most recent 5 years before the current year, Cur_90 is
+#| fig.cap: "Some reference point comparisons  among model runs. 
+#| aveRY_90 is the average replacement yeild since 1990, aveRY is the average replacement yield over the most recent 5 years before the current year, Cur_90 is 
 #| the current (terminal year) SSB over the estimate from 1990, Cur_B0 is over the unfished estimate, and Cur_Bmsy is the ratio of current SSB over the Bmsy estimate. "
 #| fig.width: 8
 #| fig.height: 5
 
 #--Plot the reference points-------------------
 mods |>
-  filter(Model != "2023 base case", Variable %in% c("aveRY_90", "aveRY_last5", "Cur_90", "Cur_B0", "Cur_Bmsy")) |>
+  filter(Model != "2023 base case", Variable %in% c("aveRY_90","aveRY_last5","Cur_90","Cur_B0","Cur_Bmsy")) |>
   ggplot(aes(x = Model, y = value, ymin = ymin, ymax = ymax, color = Model, fill = Model)) +
   geom_point(size = 3) +
   ggthemes::theme_few() +
@@ -464,6 +442,7 @@ mods |>
   ylab("Value") +
   xlab("") +
   facet_wrap(. ~ Variable, scales = "free")
+
 ```
 
 # Control rule application
