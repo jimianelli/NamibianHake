@@ -51,6 +51,28 @@ use_git()
 #> ✔ Initialising Git repo
 #> ✔ Adding '.Rproj.user', '.Rhis
 
+#--Read in age comparison datas-----
+df_age <- read_csv(here("mods", "data", "AgeCompare.csv"))
+glimpse(df_age)
+df_age |> pivot_longer(cols=2:11, names_to="Age", values_to="Value") |>
+  mutate(Age=as.numeric(Age)) |>
+  ggplot(aes(x = Age, y = Value, color = Source, shape=Source )) +
+  ggtitle("Survey 1") +
+  geom_point() +
+  geom_line(stat='Identity') +
+  facet_wrap(. ~ Year)
+ggsave(here("mods","figs","AgeCompareSurv.png"),width=9,height=8)
+df_age <- read_csv(here("mods", "data", "AgeCompareFish.csv"))
+glimpse(df_age)
+df_age |> pivot_longer(cols=2:11, names_to="Age", values_to="Value") |>
+  mutate(Age=as.numeric(Age)) |>
+  ggplot(aes(x = Age, y = Value, color = Source, shape=Source )) +
+  ggtitle("Fishery ") +
+  geom_point() +
+  geom_line(stat='Identity') +
+  facet_wrap(. ~ Year)
+ggsave(here("mods","figs","AgeCompareFish.png"),width=9,height=8)
+
 #--Read in model output files-----
 
   obc <- read_rep(here("mods", "Mod1", "nh_R.rep"))
