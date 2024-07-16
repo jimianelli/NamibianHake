@@ -19,12 +19,11 @@ TOP_OF_MAIN_SECTION
 //*****************************************************************************
 DATA_SECTION
 
-  number h_in ;
  LOCAL_CALCS
-  h_in = 0.7;
+    /*
   if (ad_comm::argc > 1) {
     int on=0;
-    if ( (on=option_match(ad_comm::argc,ad_comm::argv,"-steepness"))>-1) {
+		if ( (on=option_match(ad_comm::argc,ad_comm::argv,"-steepness"))>-1) {
       if (on>ad_comm::argc-2 | ad_comm::argv[on+1][0] == '-') {
         cerr << "Invalid number of arguments for command line option -steepness; option ignored" << endl;
       }
@@ -35,6 +34,7 @@ DATA_SECTION
       }
     }
   }
+  */
  END_CALCS
 
   // Read in text descriptor for run, then read in the name of the file where the data is used
@@ -52,7 +52,9 @@ DATA_SECTION
   init_int use_multinomial       //-1        // Flag to use multinomial likelihood (negative means use CVs as estimated)
   init_int est_add_seal_sigma    //-5        // Phase for estimation of added seal variance (-1 implies fix)
   init_int est_prop                          // Phase for estimating Proportion of Ksp increase 
-  init_int est_Steep
+  init_int est_Steep             // -5
+	init_number steep_in           //0.7      
+	init_number steep_cv           //0.1     if a prior should be specified...
   init_number Ksp_fraction                   // Fraction of Ksp in the initial study year
   init_int NSelPeriods           //3         // Number of periods of selectivity 
   init_imatrix SelYrs(1,NSelPeriods,1,2)     //1964, .....     // For each period which years
@@ -245,7 +247,7 @@ INITIALIZATION_SECTION
      par_B0 8.
      Prop 1.
      // SelSlopeS 0.1
-     Steep h_in
+     Steep steep_in 
     
 //*****************************************************************************
 PARAMETER_SECTION
@@ -353,7 +355,7 @@ PARAMETER_SECTION
   number count3;
   number count5;
   number countAll;
-  number Aike;
+  number Akaike;
   objective_function_value obj_fun
 
   // *** for std file ***
@@ -1800,8 +1802,8 @@ REPORT_SECTION
 
   p=initial_params::nvarcalc();
   n=countAll;
-  Aike=(2*obj_fun+2*p*(n/(n-p-1)));
-  report<<"Akaike_info_crit "<<Aike<<endl;
+  Akaike=(2*obj_fun+2*p*(n/(n-p-1)));
+  report<<"Akaike_info_crit "<<Akaike<<endl;
 
   report << " " << endl;
   report << "Ksp                "<<mfexp(par_B0)<<endl;
@@ -2070,9 +2072,9 @@ FINAL_SECTION
   Do_Projections();
   cout<<"Present Value "<<PresValue<<endl;
   //cout<<" f "<<f<<endl;
-  out4<<model_number<<" "<<model_name<<" "<<TotalB(last_yr)/TotalB(first_yr)<<" "<<TotalB(last_yr)/TotalB(1990)<<"  " <<Aike<<"   "<<Spawn(last_yr)/Spmsy<<"   "<<PresValue<<endl;
-  //"model_number","model_name","TotalB_depl", "TotalB_1990",  " Aike",   "SSB/Bmsy",   "PresValue"
-  Rreport<<model_number<<" "<<model_name<<" "<<TotalB(last_yr)/TotalB(first_yr)<<" "<<TotalB(last_yr)/TotalB(1990)<<"  " <<Aike<<"   "<<Spawn(last_yr)/Spmsy<<"   "<<PresValue<<endl;
+  out4<<model_number<<" "<<model_name<<" "<<TotalB(last_yr)/TotalB(first_yr)<<" "<<TotalB(last_yr)/TotalB(1990)<<"  " <<Akaike<<"   "<<Spawn(last_yr)/Spmsy<<"   "<<PresValue<<endl;
+  //"model_number","model_name","TotalB_depl", "TotalB_1990",  " Akaike",   "SSB/Bmsy",   "PresValue"
+  Rreport<<model_number<<" "<<model_name<<" "<<TotalB(last_yr)/TotalB(first_yr)<<" "<<TotalB(last_yr)/TotalB(1990)<<"  " <<Akaike<<"   "<<Spawn(last_yr)/Spmsy<<"   "<<PresValue<<endl;
   Rreport << "ObjFun"<<endl<<obj_fun<< endl;
   R_report(CPUE_Like);
   R_report(Survey_Like);
@@ -2081,6 +2083,7 @@ FINAL_SECTION
   R_report(RecRes_Likelihood);
   R_report(Oneyearold_Likelihood);
   Rreport << "Npars"<<endl<<initial_params::nvarcalc()<<endl;
+  R_report(Akaike);
   R_report(KspSTD);
   R_report(KexpSTD);
   R_report(TotalB);
@@ -2148,6 +2151,9 @@ FINAL_SECTION
   csvrep << "Cur_90"     <<",NA,"<< Cur_90      <<","<< Cur_90-1.96*Cur_90.sd <<","<< Cur_90+1.96*Cur_90.sd <<endl;
   csvrep << "aveRY_90"   <<",NA,"<< aveRY_90    <<","<< aveRY_90-1.96*aveRY_90.sd <<","<< aveRY_90+1.96*aveRY_90.sd <<endl;
   csvrep << "aveRY_last5"<<",NA,"<< aveRY_last5 <<","<< aveRY_last5-1.96*aveRY_last5.sd <<","<< aveRY_last5+1.96*aveRY_last5.sd <<endl;
+
+  double lbfy=value(Bstd(first_yr)/exp(2.*sqrt(log(1+square(Bstd.sd(first_yr))/square(Bstd(first_yr))))));
+  double ubfy=value(Bstd(first_yr)*exp(2.*sqrt(log(1+square(Bstd.sd(first_yr))/square(Bstd(first_yr))))));
   for (int Year=first_yr;Year<=last_yr;Year++){
     double lb=value(Rstd(Year)/exp(2.*sqrt(log(1+square(Rstd.sd(Year))/square(Rstd(Year))))));
     double ub=value(Rstd(Year)*exp(2.*sqrt(log(1+square(Rstd.sd(Year))/square(Rstd(Year))))));
@@ -2155,6 +2161,13 @@ FINAL_SECTION
     lb=value(Bstd(Year)/exp(2.*sqrt(log(1+square(Bstd.sd(Year))/square(Bstd(Year))))));
     ub=value(Bstd(Year)*exp(2.*sqrt(log(1+square(Bstd.sd(Year))/square(Bstd(Year))))));
     csvrep << "SSB"<<","<<Year<<","<< Bstd(Year) <<","<< lb <<","<< ub <<endl;
+    lb=value(Bstd(Year)/exp(2.*sqrt(log(1+square(Bstd.sd(Year))/square(Bstd(Year))))));
+    ub=value(Bstd(Year)*exp(2.*sqrt(log(1+square(Bstd.sd(Year))/square(Bstd(Year))))));
+    csvrep << "Depletion"<<","<<Year<<","<< Bstd(Year)/Bstd(first_yr) <<","<< lb/lbfy <<","<< ub/ubfy <<endl;
+    csvrep << "B_Bmsy"<<","<<Year<<","<< Spawn(Year)/Spmsy  <<","<< "NA" <<","<< "NA" <<endl;
+    csvrep << "Catch"<<","<<Year<<","<< Catch(Year) <<","<< "NA"<<","<< "NA"<<endl;
+    csvrep << "RY"<<","<<Year<<","<< RY(Year) <<","<< "NA"<<","<< "NA"<<endl;
+    csvrep << "Catch_RY"<<","<<Year<<","<< Catch(Year)/RY(Year) <<","<< "NA"<<","<< "NA"<<endl;
 	}
 
 

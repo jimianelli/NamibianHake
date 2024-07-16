@@ -396,23 +396,6 @@ read_rep <- read_admb
 fn
 mod_list  <- c("bc", "h4", "h4asymp", "h5", "h7", "h9")
 mod_names <- c("Base case", "h=0.4", "h=0.4, asymptotic", "h=0.5", "h=0.7", "h=0.9")
-length(dir_list)
-i=3
-nmods <- length(mod_names)
-num_cores <- parallel::detectCores() - 1
-cl <- parallel::makeCluster(num_cores)
-on.exit(parallel::stopCluster(cl))  # Ensure the cluster stops after function execution
-
-# Export necessary functions and objects to the cluster
-parallel::clusterExport(cl, c("read_fit", "read_admb", "read_rep"), envir=environment())
-
-# Fetch model results in parallel
-system.time(modlst <- parallel::parLapply(cl=cl, X=fn, fun=read_rep))
-fn <- paste0("mods/", dir_list, "/nh_out.csv")
-system.time(mod_diag <- parallel::parLapply(cl=cl, X=fn, fun=read_csv))
-read_csv(here("mods", "h5", "nh_out.csv")) |> mutate(Model = "Steepness=0.5 "),
-names(modlst) <- mod_names
-names(mod_diag) <- mod_names
 
 #---FishLife steepness--------
 library(FishLife)

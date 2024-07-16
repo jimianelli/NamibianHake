@@ -7,31 +7,53 @@ vignette: >
   %\VignetteIndexEntry{Model update}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{quarto::html}
+lightbox: true
 format:
-    html:
+  pdf:
+        code-summary: "Show the code"
         embed-resources: true
         toc: true
         toc-title: 'Contents'
         number-sections: false
+        code-fold: true
 editor: 
   markdown: 
-    wrap: sentence
+    wrap: 72
+editor_options: 
+  chunk_output_type: console
 ---
 
+```{r setup1}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(collapse = TRUE, comment = "  " ,fig.align = 'center', cache=FALSE,tidy.opts=list(width.cutoff=80), tidy=TRUE )
+knitr::opts_knit$set(root.dir=here::here())
+#knitr::opts_chunk$set(warning=F, message=F, echo=F, results=F,fig.width=6, fig.height=5)
+
+```
 # Project overview
 
 The following reflects my interpretation of the Marine Stewardship Council's certification request.
 There is a need to catch up on missed milestones and outlines the necessary steps for the upcoming Year 4 milestone.
-## Key Points: 1.
-Year 3 Milestone Missed: The milestone required revised stock assessments for M.
-paradoxus, which was not met.
-2.
-Year 4 Milestone: By February 2025, the MFMR must use the Harvest Control Rule (HCR) systematically to verify the TAC for paradoxus.
+
+### Key Points 
+  1. Year 3 Milestone Missed: The milestone required revised stock assessments for *M.
+paradoxus*, which was not met.
+  2. Year 4 Milestone: By February 2025, the MFMR must use the Harvest Control Rule (HCR) systematically to verify the TAC for *M. paradoxus*.
 This needs to be applied in the August/September 2024 management meetings.
-3.
-Namibian Stock Assessment: There's a recommendation to review and re-evaluate the assumptions and parameter values of assessment models, particularly the pessimistic base case model.
-4.
-Implementation Issues: MFMR has Dr. Ianelli’s report but not the code to run the model, and training is required for the Namibian team.
+  3. Namibian Stock Assessment: There's a recommendation to review and re-evaluate the assumptions and parameter values of assessment models, particularly the pessimistic base case model.
+  4. Implementation Issues: MFMR has Dr. Ianelli’s report but not the code to run the model, and training is required for the Namibian team.
 
 ## Draft agenda
 
@@ -41,7 +63,7 @@ The following draft agenda outlines the steps to address the missed milestones a
 
 1.  Day 1-2: Review and Planning
     -   Review the Year 3 milestone requirements and current progress.
-    -   Plan steps to implement the HCR for M. paradoxus.
+    -   Plan steps to implement the HCR for *M. paradoxus*.
 2.  Day 3-4: Data Preparation
     -   Gather and prepare Namibia stock assessment data.
     -   Coordinate with MFMR to understand current data handling and management practices.
@@ -67,6 +89,11 @@ Below are two main sections, first on model developments and second on applicati
 
 # Assessment model runs
 
+The original base-case model was evaluated for a number of features and extensions. These
+included focus on what data components were fit well and how improvements in consistency
+can be made. For the latter part, we found that the fits to the index and CPUE data were particularly
+poor and could be improved. 
+
 Below are examples which show how models can be run based on the directory location.
 
 ### Model descriptions
@@ -78,14 +105,15 @@ We used the assumed variance terms (CVs) for the indices in all of the following
 
 | Model         | Description                                                                                                                                                                                     |
 |-----------------------|-------------------------------------------------|
-| Basecase (bc) | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified. |
-| m1            | As base case but with survey catchability fixed at 1.0                                                                                                                                          |
-| m2            | As base case but with survey catchability fixed at 0.5                                                                                                                                          |
-| m3            | As base case but with natural mortality estimated                                                                                                                                               |
-| m4            | As base case but with fishery selectivity allowed to be dome-shaped                                                                                                                             |
-| m5            | As base case but with stock-recruit steepness fixed at 0.43                                                                                                                                     |
-| m6            | As base case but with stock-recruit steepness fixed at 0.9                                                                                                                                      |
-| m7            | As base case but with early indices dropped (pre 1990)                                                                                                                                          |
+| Previous base case  | As specified in past assessments, estimated steepness and all variance terms  |
+| Base case (m0) | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified. |
+| m1            | As base case but with survey catchability fixed at 1.0 |
+| m2            | As base case but with survey catchability fixed at 0.5 |
+| m3            | As base case but with natural mortality estimated      |
+| m4            | As base case but with fishery selectivity allowed to be dome-shaped |
+| m5            | As base case but with stock-recruit steepness fixed at 0.43         |
+| m6            | As base case but with stock-recruit steepness fixed at 0.9          |
+<!-- | m7            | As base case but with early indices dropped (pre 1990)              | -->
 
 ```{r startup}
 #| echo: false
@@ -97,74 +125,142 @@ library(here)
 library(tidyverse)
 library(ggridges)
 theme_set(ggthemes::theme_few())
+library(xtable)
+library(kableExtra)
+
 ```
 
 ```{r getmods}
-#| echo: false
 #| output: false
-rn <- "bc"
-get(rn) <- run_nh(rn, runit = FALSE)
-?get
-bc <- run_nh("bc", runit = FALSE)
-m1 <- run_nh("m1", runit = FALSE)
-m2 <- run_nh("m2", runit = FALSE)
-m3 <- run_nh("m3", runit = FALSE)
-m5 <- run_nh("m5", runit = FALSE)
-m6 <- run_nh("m6", runit = FALSE)
-mods <- rbind(
-  read_csv(here("mods", "bc", "nh_out.csv")) |> mutate(Model = "Base Case"),
-  read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
-  read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
-  read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3")
-)
-
-df <- rbind(
-  data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
-  data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
-  data.frame(SSB = m2$SSB, R = m2$Pred_Rec, Model = "Model 2"),
-  data.frame(SSB = m3$SSB, R = m3$Pred_Rec, Model = "Model 3"),
-  data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5"),
-  data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6")
-)
-bc <- run_nh("bc", runit = FALSE)
-m1 <- run_nh("m1", runit = FALSE)
-m2 <- run_nh("m2", runit = FALSE)
-m3 <- run_nh("m3", runit = FALSE)
-m5 <- run_nh("m5", runit = FALSE)
-m6 <- run_nh("m6", runit = FALSE)
-mods <- rbind(
-  read_csv(here("mods", "bc", "nh_out.csv")) |> mutate(Model = "Base Case"),
-  read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
-  read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
-  read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3"),
-  read_csv(here("mods", "m4", "nh_out.csv")) |> mutate(Model = "Model 4"),
-  read_csv(here("mods", "m5", "nh_out.csv")) |> mutate(Model = "Model 5"),
-  read_csv(here("mods", "m6", "nh_out.csv")) |> mutate(Model = "Model 6")
-)
-
-df <- rbind(
-  data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
-  data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
-  data.frame(SSB = m2$SSB, R = m2$Pred_Rec, Model = "Model 2"),
-  data.frame(SSB = m3$SSB, R = m3$Pred_Rec, Model = "Model 3"),
-  data.frame(SSB = m5$SSB, R = m5$Pred_Rec, Model = "Model 5"),
-  data.frame(SSB = m6$SSB, R = m6$Pred_Rec, Model = "Model 6")
-)
+mod_ref <- c("old_bc", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
+mod_dir <- c("old_bc", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
+mod_label <- c("2023 base case", "2024 base case", "Model 1", "Model 2", "Model 3", "Model 4", "Model 5", "Model 6")
+res   <- get_results(mod_names.=mod_label,moddir=mod_dir)
+modlst <- res$modlst
+old_bc <- modlst[[1]]
+m0 <- modlst[[2]]
+moddiag <- res$moddiag
+dfsrr <- data.frame()
+for (i in 1:length(mod_ref)) {
+  #assign(modlst[[i]], run_nh(mod_dir[i] ,runit=FALSE) )
+  dfsrr <- rbind(dfsrr, data.frame(Model = mod_label[i],   
+                                   SSB   = modlst[[i]]$SSB,  
+                                   R     =  modlst[[i]]$Pred_Rec)
+  )
+}
+mods <- data.frame()
+for (i in 1:length(mod_ref)) {
+  mods <- rbind(mods,data.frame(moddiag[[i]], Model = names(moddiag[i])) )
+}
 ```
 
-## Model runs
 
-### Stock-recruitment curves
 
-The following plot shows the stock-recruitment curves for the base case and models 1, 2, 3, and 5 and 6.
+### Fits to index data
 
-```{r srrplots}
+```{r fitsurv}
 #| echo: false
-#| fig.cap: "Model runs"
-p1 <- df %>% ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
-  geom_point() +
-  geom_line()
-p1
+#| fig.cap: "Base case model fits to main survey data compared to the previous assessment."
+#| label: fitidx1
+
+
+  dfidx <- rbind(
+    data.frame(Year = 1964:2023,Obs = old_bc$Obs_Survey_1, predicted = old_bc$Pre_Survey_1, Model = "Base case 2023"),
+    data.frame(Year = 1964:2024,Obs = m0$Obs_Survey_1, predicted = m0$Pre_Survey_1, Model = "Base case 2024")
+  )
+  dfidx |> filter(Obs>-0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
+    geom_point(color="black") + ylim(0,NA)+
+    geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))
+  
+```
+
+```{r fitcpue3}
+#| echo: false
+#| fig.cap: "Base case model fits to the CPUE index 3 data compared to the previous assessment."
+#| label: fitcpue3
+
+  dfcpue <- rbind(
+    data.frame(Year = 1964:2023,Obs = old_bc$Obs_CPUE_3, predicted = old_bc$e_CPUE_3, Model = "Base case 2023"),
+    data.frame(Year = 1964:2024,Obs = m0$Obs_CPUE_3, predicted = m0$e_CPUE_3, Model = "Base case 2024")
+  )
+  
+  dfcpue |> filter(Obs>0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
+    geom_point(color="black") +
+    geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))+
+    ggtitle("CPUE 3") + ylim(0,NA)
+
+```
+
+```{r fitcpue1}
+#| fig.cap: "Base case model fits to the CPUE index 1 data compared to the previous assessment."
+#| label: fitcpue1
+  dfcpue <- rbind(
+    data.frame(Year = 1964:2023,Obs = old_bc$Obs_CPUE_1, predicted = old_bc$e_CPUE_1, Model = "Base case 2023"),
+    data.frame(Year = 1964:2024,Obs = m0$Obs_CPUE_1, predicted = m0$e_CPUE_1, Model = "Base case 2024")
+  )
+  dfcpue |> filter(Obs>0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
+    geom_point(color="black") +
+    geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))+
+    ggtitle("CPUE 1") + ylim(0,NA)
+
+
+```
+
+
+### SSB results
+
+```{r SSB}
+#| echo: false
+#| fig.cap: "Base case model showing the SSB estimates compared to the previous assessment."
+#| label: fitssb
+mods |>  filter(Model %in% mod_label[1:2], Year > 1960, Variable == "SSB") |>
+  ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
+  geom_ribbon(alpha = .24) +
+  ggthemes::theme_few() +
+  coord_cartesian(ylim=c(0, 6e3)) +
+  geom_line(aes(color=Model )) + 
+  geom_point(aes(color=Model, shape=Model),size=1.) +
+  ylab("SSB") + xlab("Year")
+#  facet_wrap(. ~ Model, scales="fixed") +
+```
+
+
+
+```{r depl}
+#| fig.cap: "Base case model showing the relative SSB estimates compared to the previous assessment."
+#| label: depl
+mods |>  filter(Model %in% mod_label[1:2], Year > 1960, Variable == "Depletion") |>
+  ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
+  geom_ribbon(alpha = .24) +
+  ggthemes::theme_few() +
+  geom_line(aes(color=Model )) + 
+  geom_point(aes(color=Model, shape=Model),size=1.) +
+  ylab("Relative SSB") + xlab("Year")
+```
+
+
+```{r kobe}
+#| echo: false
+#| fig.cap: "Base case model showing the relative SSB estimates compared to the previous assessment."
+#| label: kobe
+#head(mods)
+tmp <- mods |>  select(Year, Model,Variable,value) |> filter(Model %in% mod_label[1:2], Year > 1980, Variable %in% c("Catch_RY","Depletion")) |> pivot_wider(names_from = Variable, values_from = value) 
+
+tmp |> ggplot(aes(x = Depletion, y = Catch_RY, shape = Model, color=Model, fill = Model)) +
+  geom_path() + ggthemes::theme_few() + geom_point()
+
+tmp <- mods |>  select(Year, Model,Variable,value) |> filter(Model %in% mod_label[1:2], Year > 1980,  Variable %in% c("Catch_RY","B_Bmsy"))  |> 
+  pivot_wider(names_from = Variable, values_from = value) |> arrange(Model,Year) #|>
+  tmp |> ggplot(aes(x = B_Bmsy, label=Year, y = Catch_RY, shape = Model, color=Model, fill = Model)) +
+  geom_path() + ggthemes::theme_few() + geom_point() + geom_text(alpha=.5) + geom_hline(yintercept = 1) +
+  geom_vline(xintercept = 1) + xlab("SSB/Bmsy") + ylab("Catch / replacement Yield") 
+  
+  tmp <- mods |>  select(Year, Model,Variable,value) |> filter(Model %in% mod_label[c(2:3,7:8)], Year > 1980,  Variable %in% c("Catch_RY","B_Bmsy"))  |> 
+  pivot_wider(names_from = Variable, values_from = value) |> arrange(Model,Year) #|>
+  tmp |> ggplot(aes(x = B_Bmsy, label=Year, y = Catch_RY, shape = Model, color=Model, fill = Model)) +
+  geom_path() + ggthemes::theme_few() + geom_point() + geom_text(alpha=.5) + geom_hline(yintercept = 1) +
+  geom_vline(xintercept = 1) + xlab("SSB/Bmsy") + ylab("Catch / replacement Yield") 
+
 ```
 
 ### Age composition fits
@@ -173,8 +269,9 @@ p1
 #| echo: false
 #| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the
 #| base case model uses a 'minus group' equal to '1' for the survey data."
-PlotAgeFit(x = bc, title = "Base case", type = "fishery", fage = 2, lage = 7)
-PlotAgeFit(x = bc, title = "Base case", type = "survey1", fage = 1, lage = 7)
+PlotAgeFit(x=m0, title="Base case",type="fishery",fage=2,lage=7)
+PlotAgeFit(x=m0, title="Base case",type="survey1",fage=1,lage=7)
+
 ```
 
 ### Selectivity
@@ -185,12 +282,80 @@ PlotAgeFit(x = bc, title = "Base case", type = "survey1", fage = 1, lage = 7)
 #| fig.width: 4
 #| fig.height: 9
 
-M <- data.frame(Year = 1964:2023, Sel = bc$S[1:60, ], Model = "h=0.7, base case")
+M <- data.frame(Year = 1964:2023, Sel = m0$S[1:60, ], Model = "h=0.7, base case")
 p1 <- plot_sel()
 p1
 ```
+### Stock-recruitment curves
+
+The following plot shows the stock-recruitment curves for the base case and models 1, 2, 3, and 5 and 6.
+
+```{r srrplots}
+#| echo: false
+#| fig.cap: "Model runs"
+p1 <- dfsrr |>  ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
+  geom_point() +
+  geom_line()
+p1
+```
+
 
 ### Stock status comparisons
+
+Unclear why this table doesn't show up...
+
+```{r mgt_quant, results = "asis"}
+#| echo: true
+#| results: asis
+#| 
+dftmp <- NULL
+mod_scen <- c(2:5)
+for (ii in mod_scen) {
+    x      <- modlst[[ii]]
+    "-ln(Likelihood)"
+    nll <- x$ObjFun        ; names(nll) <- "Overall"               
+    CPUE<- x$CPUE_Like     ; names(CPUE) <- "CPUE"
+    surv<-x$Survey_Like     ; names(surv) <- "Survey"      
+    caa  <- x$CAA_Likelihood  ; names(caa) <- "Commercial CAA"      
+    caas <- x$CAAS_Likelihood ; names(caas) <- "Survey CAA"      
+    rec  <- x$RecRes_Likelihood   ; names(x$RecRes_Likelihood) <- "Recruitment Residuals" 
+    oneyrold <- x$Oneyearold_Likelihood ; names(oneyrold) <- "One year old Biomass"
+    NumPars <- x$Npars                ; names(NumPars) <- "Number of parameters estimated" 
+    AIC <- x$Akaike                ; names(AIC) <- "AIC"
+
+    v      <- c(nll, CPUE, surv, caa, caas, rec, oneyrold, NumPars, AIC)
+    dftmp  <- cbind(dftmp, v)
+}
+dftmp        <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
+names(dftmp) <- c("Component",mod_label[mod_scen])
+tabcap <- "Model fits to data components"
+tab <- xtable(dftmp, caption = tabcap, type="html",
+              label = "tab:mgt_quants", digits = 3)
+              #align=paste0("lll",strrep("r",length(mod_scen+1))))
+print(tab, caption.placement = "top", include.rownames = FALSE, sanitize.text.function = function(x){x})
+```
+
+But here the figure does...
+#| 
+# x$KspSTD                
+# x$KexpSTD               
+# Ksp
+# h
+# Bsp(2023)
+# Bexp(2023)
+# Bsp(2023)/Ksp
+# Bsp(2024)
+# Bexp(2024)
+# Bsp(2024)/Ksp
+# Bspmsy
+# Bspmsy/Ksp
+# Bsp(2023)/Bspmsy
+# Bsp(2024)/Bspmsy
+# MSY
+# AverageRY_5yrs
+# AverageRY_5yrs*Bsp/Bspmsy
+# ```{r mgt_quants, results = "asis"}
+# Mgt quants by model
 
 ```{r stockstatus}
 #| echo: false
@@ -202,7 +367,7 @@ p1
 
 #--Plot the reference points-------------------
 mods |>
-  filter(Variable != "R" & Variable != "SSB") |>
+  filter(Model != "2023 base case", Variable %in% c("aveRY_90","aveRY_last5","Cur_90","Cur_B0","Cur_Bmsy")) |>
   ggplot(aes(x = Model, y = value, ymin = ymin, ymax = ymax, color = Model, fill = Model)) +
   geom_point(size = 3) +
   ggthemes::theme_few() +
@@ -223,21 +388,20 @@ Fortunately, survey data are available that can be used to distinguish trends in
 The design of the triggered control rule therefore must consider patterns in the relative biomass from the survey data, the absolute biomass of the combined catch and biomass as modeled from the combined-stocks assessment.
 This provides a pragmatic approach using available data.
 
-The steps in the control rule would be first to run a simple model that projected the survey biomass and relative proportion of M.
-paradoxus.
+The steps in the control rule would be first to run a simple model that projected the survey biomass and relative proportion of *M.
+paradoxus*.
 Then, given the mean proportion over the period, compute the adjustment needed to the overarching control rule for the management procedure.
 For example, the historical range based on the survey has been between about one third of the mean value (in the earliest part of the period) to about 70% above the mean proportion.
 This range (especially the lower value) was used as a semi-empirical way to develop a minimum stock size threshold as part of the control rule.
-That is, when the stock of M.
-paradoxus drops below 30% of the mean proportion of the combined stocks estimate, the TAC recommendation for the combined stock would be zero.
-So if proportion of M.
-paradoxus (p_y) is greater than 30% of the long-term mean proportion, then
+That is, when the stock of *M.
+paradoxus* drops below 30% of the mean proportion of the combined stocks estimate, the TAC recommendation for the combined stock would be zero.
+So if proportion of *M.
+paradoxus* $(p_y)$ is greater than 30% of the long-term mean proportion, then
 
 $TAC_y=(0.8 \sum_{y}^{y-4}\frac{RY_y} 5) \min(1,B_y/B_{MSY})  \min(1,p_y/\bar{p})$
 
-In words, the TAC in year y is equal to the catch under the current control rule times the ratio of the spawning biomass relative to BMSY (or proxy) and the externally estimated proportion of M.
-paradoxus from survey data.
-The second and third terms on the right hands side are depicted in Table 1 (and include the zero catch recommended if the M. paradoxus proportion dropped below the lowest value historically observed).
+In words, the TAC in year y is equal to the catch under the current control rule times the ratio of the spawning biomass relative to BMSY (or proxy) and the externally estimated proportion of *M. paradoxus* from survey data.
+The second and third terms on the right hands side are depicted in Table 1 (and include the zero catch recommended if the *M. paradoxus* proportion dropped below the lowest value historically observed).
 The values of γ,λ were both set to 1.0 but could be adjusted (say to 0.5) to have a more gradual transition as the proportion or aggregate stock conditions drop below mean levels.
 We note that the specification of a survey linkage by the individual species provides a trigger (30% of long-term mean) that reduces the exploitation rate as the point of recruitment impairment (PRI) is approached.
 
@@ -247,11 +411,32 @@ Also, it is unclear that depth of fishing could be forecasted in a manner that c
 
 The approached applied a smoother to each of the species time-series of survey data.
 
+## Modeling Namibian hake survey data by species
+Fisheries stock assessments require data that are reliably collected and compiled. Secondarily, assessment models should be
+configured to match the assumptions associated with the observed data. To account for survey trends between the two species of
+hake we applied the estimated observation errors to a simple state-space random walk model. This approach has a number of 
+options for how process-errors can be specified and estimated. The observation model applies the observation-error variances
+$(σ_(j,t)^2)$ for the $j^{th}$ species in year $t (x_(j,t) )$. The indices are fit to latent state variables, e.g., the underlying
+population trend $ln(Z ̂_(j,t )$ as follows:
+
+$ln(Z_(j,t) ) = ln(Z ̂_(j,t) )+ϵ_(j,t),"where " ϵ_(j,t)∼N(0,σ_(j,t)^2 )$
+
+and the state equation and associated process error variance σ_PE^2 is defined as
+
+$ln(Z ̂_(j,t+1) )=ln(Z ̂_(j,t) )+η_(j,t),"where " η_(j,t)∼N(0,τ_j^2 ).$
+
+The process error variances τ_j^2 (which may or may not vary across indices) are fixed effect parameters and the unobserved species combined population ln(Z_(j,t) ) is estimated as a series of random effects. The model is fit using maximum likelihood estimation in TMB using the R package “rema” (Sullivan 2022). The survey data for each species was used with CVs applied for observation error specifications. The values for τ_j^2 were estimated for each species since their inherent variability may differ.
+
+
 
 The above analysis provides a summary of the model runs and the design of a control rule that accounts for the signals in the data on the different species.
+
+
 
 # Notes
 
 Throughout the weeks, we scrutinized data inputs and found a couple of inconsistencies. 
 For example, data were provided for surveys in 2019 yet there were no observations in that year.
 Similarly, the abundance-at-length data from the surveys failed to identify strong periods of persistence by cohorts.
+
+Ignore 7-vessel CPUE data set.

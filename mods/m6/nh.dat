@@ -1,6 +1,6 @@
 1
 #M6h9
-minus1,h7,asymp,sigmafixed,tvs
+minus1,h9,asymp,sigmafixed,tvs
 ../data/namhakdata24.dat 
 20
 1964
@@ -13,6 +13,8 @@ minus1,h7,asymp,sigmafixed,tvs
 -5
 -1
 -4
+0.9
+0.1
 1
 10
 1964
@@ -74,8 +76,8 @@ minus1,h7,asymp,sigmafixed,tvs
 0.33
 0.33
 1
-0
-0
+1
+1
 0
 2
 #

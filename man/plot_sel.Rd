@@ -40,7 +40,7 @@ This function creates a plot of selectivity across years and ages.
 }
 \examples{
 \dontrun{
-plot_sel(Year = M$Year, sel = M[,2:10], styr = 1970, fage = 1, lage = 8)
+plot_sel(Year = M$Year, sel = M[, 2:10], styr = 1970, fage = 1, lage = 8)
 }
 
 }
