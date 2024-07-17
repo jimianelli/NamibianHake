@@ -53,8 +53,8 @@ DATA_SECTION
   init_int est_add_seal_sigma    //-5        // Phase for estimation of added seal variance (-1 implies fix)
   init_int est_prop                          // Phase for estimating Proportion of Ksp increase 
   init_int est_Steep             // -5
-	init_number steep_in           //0.7      
-	init_number steep_cv           //0.1     if a prior should be specified...
+  init_number steep_in           //0.7      
+  init_number steep_cv           //0.1     if a prior should be specified...
   init_number Ksp_fraction                   // Fraction of Ksp in the initial study year
   init_int NSelPeriods           //3         // Number of periods of selectivity 
   init_imatrix SelYrs(1,NSelPeriods,1,2)     //1964, .....     // For each period which years
@@ -140,6 +140,8 @@ DATA_SECTION
   log_input(est_add_seal_sigma);
   log_input(est_prop);
   log_input(est_Steep);
+  log_input(steep_in);
+  log_input(steep_cv);
   log_input(Ksp_fraction);
   log_input(NSelPeriods);
   log_input(SelYrs);
@@ -560,15 +562,15 @@ PROCEDURE_SECTION
 
      //cout<<"Get sd report numbers ok"<<endl;
 
-	// Slight penalty on changes of selex over time
-	sel_pen.initialize();
+  // Slight penalty on changes of selex over time
+  sel_pen.initialize();
   for (int SelPeriod=1;SelPeriod<=NSelPeriods;SelPeriod++) {
     int Year = SelYrs(SelPeriod,1);
-	  sel_pen = 12.5*norm2(log(S(Year)-log(S(Year+1))));
-	}
+  sel_pen = 12.5*norm2(log(S(Year)-log(S(Year+1))));
+  }
 
-   obj_fun = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood + 
-	            weight*Oneyearold_Likelihood + negpen + sel_pen  + prior;
+  obj_fun = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood + 
+  weight*Oneyearold_Likelihood + negpen + sel_pen  + prior;
 
   //f = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood + negpen;
   
@@ -2096,6 +2098,10 @@ FINAL_SECTION
   R_report(MSY);
   R_report(DepspSTD);
   R_report(DepexSTD);
+	Rreport <<"Year"<<endl;
+  for (int Year=first_yr; Year<=last_yr; Year++)
+	  Rreport <<Year<< " ";
+	Rreport<<endl;
 
  // ==+==+==+== Fit to abundance data ==+==+==+==
   for (int Iser=1; Iser<=NCpueSeries; Iser++){

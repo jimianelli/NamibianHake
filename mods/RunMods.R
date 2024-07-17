@@ -77,7 +77,8 @@ ggsave(here("mods","figs","AgeCompareFish.png"),width=9,height=8)
 
   obc <- read_rep(here("mods", "Mod1", "nh_R.rep"))
   bc <- read_rep(here("mods", "bc", "nh_R.rep"))
-  m1 <- read_rep(here("mods", "m1", "nh_R.rep"))
+  m0 <- read_rep(here("mods", "m0", "nh_R.rep"))
+  m0_old <- read_rep(here("mods", "m0_old", "nh_R.rep"))
 
   m2 <- read_rep(here("mods", "m2", "nh_R.rep"))
   m3 <- read_rep(here("mods", "m3", "nh_R.rep"))
@@ -117,13 +118,14 @@ ggsave(here("mods","figs","AgeCompareFish.png"),width=9,height=8)
   #-- Read in the output files for diagnostics and error bars---
 {
   mods <-  rbind(
-    read_csv(here("mods", "bc", "nh_out.csv")) |> mutate(Model = "Base Case"),
-    read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
-    read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
-    read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3"),
+    read_csv(here("mods", "m0", "nh_out.csv")) |> mutate(Model = "Base Case, update data"),
+    read_csv(here("mods", "m0_old", "nh_out.csv")) |> mutate(Model = "Base Case")
+    #read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
+    #read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
+    #read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3"),
     #read_csv(here("mods", "m4", "nh_out.csv")) |> mutate(Model = "Model 4"),
     #read_csv(here("mods", "m5", "nh_out.csv")) |> mutate(Model = "Model 5"),
-    read_csv(here("mods", "m6", "nh_out.csv")) |> mutate(Model = "Model 6")
+    #read_csv(here("mods", "m6", "nh_out.csv")) |> mutate(Model = "Model 6")
     #read_csv(here("mods", "Mod1", "nh_out.csv")) |> mutate(Model = "Base Case"),
     #read_csv(here("mods", "h4", "nh_out.csv")) |> mutate(Model = "Steepness=0.4 "),
     #read_csv(here("mods", "h4a", "nh_out.csv")) |> mutate(Model = "Steepness=0.4a "),
@@ -160,7 +162,7 @@ mods %>%
 
 #--Recruits---
 mods %>%
-  filter(Year > 2010, Variable == "R") |>
+  filter(Year > 1990, Variable == "R") |>
   ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, color = Model, fill = Model)) +
   geom_errorbar(width=0.5,position="dodge",alpha = .3) +
   ggthemes::theme_few() +
