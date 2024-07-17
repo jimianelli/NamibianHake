@@ -146,7 +146,7 @@ mod_label <- c("2023 base case", "2024 base case", "Model 1", "Model 2", "Model 
 
 
 #---Main code that extracts all the results from the model lists above------
-res   <- get_results(mod_names.=mod_label,moddir=mod_dir)
+res <- get_results(mod_names. = mod_label, moddir = mod_dir)
 
 modlst <- res$modlst
 old_bc <- modlst[[1]]
@@ -154,10 +154,11 @@ m0 <- modlst[[2]]
 moddiag <- res$moddiag
 dfsrr <- data.frame()
 for (i in 1:length(mod_ref)) {
-  dfsrr <- rbind(dfsrr, data.frame(Model = mod_label[i],   
-                                   SSB   = modlst[[i]]$SSB,  
-                                   R     =  modlst[[i]]$Pred_Rec)
-  )
+  dfsrr <- rbind(dfsrr, data.frame(
+    Model = mod_label[i],
+    SSB = modlst[[i]]$SSB,
+    R = modlst[[i]]$Pred_Rec
+  ))
 }
 mods <- data.frame()
 for (i in 1:length(mod_ref)) {
@@ -226,14 +227,18 @@ dfcpue |>
 ```{r fitcpue1}
 #| fig.cap: "Base case model fits to the CPUE index 1 data compared to the previous assessment."
 #| label: fig-fitcpue1
-  dfcpue <- rbind(
-    data.frame(Year = 1964:2023,Obs = old_bc$Obs_CPUE_1, predicted = old_bc$e_CPUE_1, Model = "Base case 2023"),
-    data.frame(Year = 1964:2024,Obs = m0$Obs_CPUE_1, predicted = m0$e_CPUE_1, Model = "Base case 2024")
-  )
-  dfcpue |> filter(Obs>0) |> ggplot(aes(x = Year, y = Obs, color = Model)) +
-    geom_point(color="black") +
-    geom_line(aes(y = predicted)) + geom_point(aes(y=predicted))+
-    ggtitle("CPUE 1") + ylim(0,NA)
+dfcpue <- rbind(
+  data.frame(Year = 1964:2023, Obs = old_bc$Obs_CPUE_1, predicted = old_bc$e_CPUE_1, Model = "Base case 2023"),
+  data.frame(Year = 1964:2024, Obs = m0$Obs_CPUE_1, predicted = m0$e_CPUE_1, Model = "Base case 2024")
+)
+dfcpue |>
+  filter(Obs > 0) |>
+  ggplot(aes(x = Year, y = Obs, color = Model)) +
+  geom_point(color = "black") +
+  geom_line(aes(y = predicted)) +
+  geom_point(aes(y = predicted)) +
+  ggtitle("CPUE 1") +
+  ylim(0, NA)
 ```
 
 
@@ -376,15 +381,15 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
 #| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the
 #| base case model uses a 'minus group' equal to '1' for the survey data."
 #| label: fig-agecomps1
-PlotAgeFit(x=m0, title="Base case",type="fishery",fage=2,lage=7)
+PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7)
 ```
 
 ```{r agecomps2}
 #| echo: false
-#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the 
+#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the
 #| base case model uses a 'minus group' equal to '1' for the survey data."
 #| label: fig-agecomps2
-PlotAgeFit(x=m0, title="Base case",type="survey1",fage=1,lage=7)
+PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7)
 dim(m0$Obs_Survey_1)
 names(m0)
 PlotAgeFit
@@ -430,27 +435,35 @@ mod_scen <- c(2:8)
 filler <- " "
 names(filler) <- "-ln(Likelihood)"
 for (ii in mod_scen) {
-    x        <- modlst[[ii]]
-    nll      <- round(x$ObjFun, 0)              ; names(nll)  <- "Overall"               
-    CPUE     <- round(x$CPUE_Like, 0)           ; names(CPUE) <- "CPUE"
-    surv     <- round(x$Survey_Like, 0)         ; names(surv) <- "Survey"      
-    caa      <- round(x$CAA_Likelihood, 0)      ; names(caa)  <- "Commercial CAA"      
-    caas     <- round(x$CAAS_Likelihood, 0)     ; names(caas) <- "Survey CAA"      
-    rec      <- round(x$RecRes_Likelihood, 0)   ; names(rec)  <- "Rec. resids." 
-    oneyrold <- round(x$Oneyearold_Likelihood, 0) ; names(oneyrold) <- "One yr-old biomass"
-    NumPars  <- round(x$Npars, 0)               ; names(NumPars)    <- "Number parameters" 
-    AIC      <- round(x$Akaike, 1)              ; names(AIC)  <- "AIC"
-    v        <- c(filler, nll, CPUE, surv, caa, caas, rec, oneyrold, NumPars, AIC)
-    dftmp    <- cbind(dftmp, v)
+  x <- modlst[[ii]]
+  nll <- round(x$ObjFun, 0)
+  names(nll) <- "Overall"
+  CPUE <- round(x$CPUE_Like, 0)
+  names(CPUE) <- "CPUE"
+  surv <- round(x$Survey_Like, 0)
+  names(surv) <- "Survey"
+  caa <- round(x$CAA_Likelihood, 0)
+  names(caa) <- "Commercial CAA"
+  caas <- round(x$CAAS_Likelihood, 0)
+  names(caas) <- "Survey CAA"
+  rec <- round(x$RecRes_Likelihood, 0)
+  names(rec) <- "Rec. resids."
+  oneyrold <- round(x$Oneyearold_Likelihood, 0)
+  names(oneyrold) <- "One yr-old biomass"
+  NumPars <- round(x$Npars, 0)
+  names(NumPars) <- "Number parameters"
+  AIC <- round(x$Akaike, 1)
+  names(AIC) <- "AIC"
+  v <- c(filler, nll, CPUE, surv, caa, caas, rec, oneyrold, NumPars, AIC)
+  dftmp <- cbind(dftmp, v)
 }
 dftmp <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
 names(dftmp) <- c("Component", mod_label[mod_scen])
 tabcap <- "Model fits to data components"
-flextable(dftmp) |> 
-  set_caption(caption = tabcap) |> 
-  colformat_double() |> 
+flextable(dftmp) |>
+  set_caption(caption = tabcap) |>
+  colformat_double() |>
   autofit()
-
 ```
 
 
@@ -459,26 +472,34 @@ flextable(dftmp) |>
 dftmp <- NULL
 mod_scen <- c(2:8)
 for (ii in mod_scen) {
-    x      <- modlst[[ii]]
-    Ksp    <- round(x$KspSTD, 0)               ; names(Ksp) <- "Unfished spawning biomass"               
-    Kexp   <- round(x$KexpSTD, 0)              ; names(Kexp) <- "Unfished expl. biomass"               
-    steepness<- round(x$Steep, 3)              ; names(steepness) <- "SRR steepness"
-    Cur_B  <- round(x$Bstd[length(x$Bstd)], 0); names(Cur_B) <- "2024 SSB"
-    Cur_B0 <- round(x$Cur_B0, 0)
-    names(Cur_B0) <- "Current SSB over unfished"
-    Cur_Bmsy <- round(x$Cur_Bmsy, 3)           ; names(Cur_Bmsy) <- paste0("Current SSB over Bmsy")
-    MSY    <- round(x$MSY, 0)                  ; names(MSY) <- "MSY"      
-    ry     <- round(x$aveRY_last5, 0)          ; names(ry ) <- paste0("recent 5-yr average replacement yield")
-    ry_cur <- round(x$aveRY_last5*x$Cur_Bmsy, 3); names(ry_cur ) <- paste0("Recent RY x current SSB /Bmsy")
-    v      <- c(Ksp, Kexp, steepness, Cur_B, Cur_B0, Cur_Bmsy, MSY, ry, ry_cur)
-    dftmp  <- cbind(dftmp, v)
+  x <- modlst[[ii]]
+  Ksp <- round(x$KspSTD, 0)
+  names(Ksp) <- "Unfished spawning biomass"
+  Kexp <- round(x$KexpSTD, 0)
+  names(Kexp) <- "Unfished expl. biomass"
+  steepness <- round(x$Steep, 3)
+  names(steepness) <- "SRR steepness"
+  Cur_B <- round(x$Bstd[length(x$Bstd)], 0)
+  names(Cur_B) <- "2024 SSB"
+  Cur_B0 <- round(x$Cur_B0, 0)
+  names(Cur_B0) <- "Current SSB over unfished"
+  Cur_Bmsy <- round(x$Cur_Bmsy, 3)
+  names(Cur_Bmsy) <- paste0("Current SSB over Bmsy")
+  MSY <- round(x$MSY, 0)
+  names(MSY) <- "MSY"
+  ry <- round(x$aveRY_last5, 0)
+  names(ry) <- paste0("recent 5-yr average replacement yield")
+  ry_cur <- round(x$aveRY_last5 * x$Cur_Bmsy, 3)
+  names(ry_cur) <- paste0("Recent RY x current SSB /Bmsy")
+  v <- c(Ksp, Kexp, steepness, Cur_B, Cur_B0, Cur_Bmsy, MSY, ry, ry_cur)
+  dftmp <- cbind(dftmp, v)
 }
 dftmp <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
 names(dftmp) <- c("Statistic", mod_label[mod_scen])
 tabcap <- "Selected management measures from alternative models. "
-flextable(dftmp) |>  
-  set_caption(caption = tabcap) |> 
-  colformat_double() |> 
+flextable(dftmp) |>
+  set_caption(caption = tabcap) |>
+  colformat_double() |>
   autofit()
 # align=paste0("lll",strrep("r",length(mod_scen+1))))
 # kable(tab, caption.placement = "top", include.rownames = FALSE, sanitize.text.function = function(x){x})
@@ -491,8 +512,8 @@ A comparison among the models for stock status and
 ```{r stockstatus}
 #| echo: false
 #| label: fig-stockstatus
-#| fig.cap: "Some reference point comparisons  among model runs. 
-#| aveRY_90 is the average replacement yeild since 1990, aveRY is the average replacement yield over the most recent 5 years before the current year, Cur_90 is 
+#| fig.cap: "Some reference point comparisons  among model runs.
+#| aveRY_90 is the average replacement yeild since 1990, aveRY is the average replacement yield over the most recent 5 years before the current year, Cur_90 is
 #| the current (terminal year) SSB over the estimate from 1990, Cur_B0 is over the unfished estimate, and Cur_Bmsy is the ratio of current SSB over the Bmsy estimate. "
 #| fig.width: 8
 #| fig.height: 5
