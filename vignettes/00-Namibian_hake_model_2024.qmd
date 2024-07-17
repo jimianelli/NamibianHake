@@ -173,7 +173,7 @@ After delving into the details of the model specifications, our main conclusion
 was that the previous assessments were generally insensitive to the trend data (surveys and
 CPUE series). This was due to the fact that the variance terms (CVs) were estimated.
 A more standard approach, where CVs are specified based on the data (e.g., from design-based
-sampling theory), was used and this performed better (@fig-idx1, @fig-fitcpue3). In
+sampling theory), was used and this performed better (@fig-fitidx1, @fig-fitcpue3). In
 the previous assessment, the fit tot he early period of CPUE data was better, but in 
 this case the CV was estimated to be about 10%, and extremely low value for this
 type of data (@fig-fitcpue1). 
