@@ -415,7 +415,8 @@ The following plot shows the stock-recruitment curves for the base case and mode
 #| fig.cap: "Model runs"
 p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
   geom_point() +
-  geom_line() + xlim(c(0,4000))
+  geom_line() +
+  xlim(c(0, 4000))
 p1
 ```
 
@@ -479,7 +480,7 @@ for (ii in mod_scen) {
   names(steepness) <- "SRR steepness"
   Cur_B <- round(x$Bstd[length(x$Bstd)], 3)
   names(Cur_B) <- "2024 SSB"
-  Bmsy <- round(x$Spmsy, 0) 
+  Bmsy <- round(x$Spmsy, 0)
   names(Bmsy) <- "SSB_msy"
   Cur_B0 <- round(x$Cur_B0, 3)
   names(Cur_B0) <- "Current SSB over unfished"
