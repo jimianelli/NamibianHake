@@ -14,8 +14,8 @@
 #' }
 #'
 #' @export
-model="m1"
-steepness=.7
+model <- "m1"
+steepness <- .7
 
 run_nh <- function(model = "m1", runit = TRUE) {
   if (runit) {
