@@ -14,15 +14,21 @@
 #' }
 #'
 #' @export
-run_nh <- function(model = "m1", steepness = 0.7, runit = TRUE) {
+model="m1"
+steepness=.7
+
+run_nh <- function(model = "m1", runit = TRUE) {
   if (runit) {
     run_dir <- here("mods", model)
-    nh <- "..//..//src//nh"
-    arg <- paste0(" -steepness ", steepness)
+    arg <- " -iprint 400 "
     setwd(run_dir)
-    getwd()
-    run <- paste0(nh, arg)
-    system(run)
+    if (.Platform$OS.type == "windows") {
+      run <- paste0("..\\..\\source\\nh", arg)
+      shell(run)
+    } else {
+      run <- paste0("../../source/nh", arg)
+      system(run)
+    }
     setwd(here())
   }
   out <- read_rep(here("mods", model, "nh_R.rep"))
