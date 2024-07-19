@@ -17,7 +17,7 @@
 run_nh <- function(model = "m1", runit = TRUE) {
   if (runit) {
     run_dir <- here("mods", model)
-    arg <- " -iprint 400 "
+    arg <- " -iprint 400 -hbf 1"
     setwd(run_dir)
     if (.Platform$OS.type == "windows") {
       run <- paste0("..\\..\\source\\nh", arg)
