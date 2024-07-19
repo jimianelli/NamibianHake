@@ -247,6 +247,8 @@ INITIALIZATION_SECTION
      sig_seal_added 0.001;
      Addvar 0.00001
      par_B0 8.
+		 SurvAd 0.15
+		 SurvA50 0.95
      Prop 1.
      // SelSlopeS 0.1
      Steep steep_in 

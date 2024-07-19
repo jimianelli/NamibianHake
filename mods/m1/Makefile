@@ -1,5 +1,5 @@
 EXEC = nh
-DIST = ../../src/
+DIST = ../../source/
 ARGS = -nox -iprint 150  -hbf 1
 ARGS2 = -nox -iprint 150 -binp pm.bar -phase 22 -sdonly
 
@@ -15,7 +15,7 @@ $(EXEC): $(DIST)$(EXEC).tpl
 	ln -sf $(DIST)$(EXEC).tpl $@.tpl
 
 $(DIST)$(EXEC).tpl:
-	$(MAKE) --directory=../Models/src
+	$(MAKE) --directory=../Models/source
 
 
 mpd: $(EXEC)

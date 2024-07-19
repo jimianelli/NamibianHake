@@ -1,1 +1,1 @@
-../../src/nh.tpl
+../../source/nh.tpl
