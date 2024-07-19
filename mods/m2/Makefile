@@ -1,6 +1,6 @@
 EXEC = nh
 DIST = ../../source/
-ARGS = -nox -iprint 150  -ind Namhak.dat -steepness 0.7
+ARGS = -nox -iprint 150  -hbf 1
 ARGS2 = -nox -iprint 150 -binp pm.bar -phase 22 -sdonly
 
 ifdef ComSpec
