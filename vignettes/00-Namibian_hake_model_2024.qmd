@@ -848,7 +848,7 @@ tabcap <- "Selected management measures from alternative models. "
 flextable(dftmp) |>
   set_caption(caption = tabcap) |>
   colformat_double() |>
-  hline(i=3) |> 
+  hline(i = 3) |>
   autofit()
 ```
 
