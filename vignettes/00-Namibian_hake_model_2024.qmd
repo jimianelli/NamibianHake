@@ -131,7 +131,7 @@ theme_set(ggthemes::theme_few())
 library(xtable)
 library(kableExtra)
 set_flextable_defaults(
-  digits = 1,
+  digits = 3,
   decimal.mark = ".",
   big.mark = ",",
   na_str = "<na>"
@@ -376,22 +376,21 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
 
 ### Age composition fits
 
+The age composition fits for the base case model are shown inf @fig-agecomps1 and @fig-agecomps2. The base case model uses a 'minus group' equal to '1' for the survey data and for the fishery it was set to 2 (as was done previously).
+
 ```{r agecomps1}
-#| echo: false
-#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the
-#| base case model uses a 'minus group' equal to '1' for the survey data."
+#| fig.cap: "Base case model fits to the fishery age composition data. Note that the
+#| base case model uses a 'minus group' equal to '2' for the fishery data."
 #| label: fig-agecomps1
 PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7)
 ```
 
 ```{r agecomps2}
-#| echo: false
-#| fig.cap: "Base case model fits to survey and fishery age composition data. Note that the
+#| fig.cap: "Base case model fits to the survey age composition data. Note that the
 #| base case model uses a 'minus group' equal to '1' for the survey data."
 #| label: fig-agecomps2
 PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7)
 dim(m0$Obs_Survey_1)
-names(m0)
 PlotAgeFit
 ```
 
@@ -413,11 +412,11 @@ p1
 The following plot shows the stock-recruitment curves for the base case and models 1, 2, 3, and 5 and 6.
 
 ```{r srrplots}
-#| echo: false
 #| fig.cap: "Model runs"
 p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  xlim(c(0, 4000))
 p1
 ```
 
@@ -479,9 +478,11 @@ for (ii in mod_scen) {
   names(Kexp) <- "Unfished expl. biomass"
   steepness <- round(x$Steep, 3)
   names(steepness) <- "SRR steepness"
-  Cur_B <- round(x$Bstd[length(x$Bstd)], 0)
+  Cur_B <- round(x$Bstd[length(x$Bstd)], 3)
   names(Cur_B) <- "2024 SSB"
-  Cur_B0 <- round(x$Cur_B0, 0)
+  Bmsy <- round(x$Spmsy, 0)
+  names(Bmsy) <- "SSB_msy"
+  Cur_B0 <- round(x$Cur_B0, 3)
   names(Cur_B0) <- "Current SSB over unfished"
   Cur_Bmsy <- round(x$Cur_Bmsy, 3)
   names(Cur_Bmsy) <- paste0("Current SSB over Bmsy")
@@ -491,7 +492,7 @@ for (ii in mod_scen) {
   names(ry) <- paste0("recent 5-yr average replacement yield")
   ry_cur <- round(x$aveRY_last5 * x$Cur_Bmsy, 3)
   names(ry_cur) <- paste0("Recent RY x current SSB /Bmsy")
-  v <- c(Ksp, Kexp, steepness, Cur_B, Cur_B0, Cur_Bmsy, MSY, ry, ry_cur)
+  v <- c(Ksp, Kexp, steepness, Cur_B, Bmsy, Cur_B0, Cur_Bmsy, MSY, ry, ry_cur)
   dftmp <- cbind(dftmp, v)
 }
 dftmp <- data.frame(rownames(dftmp), dftmp, row.names = NULL)

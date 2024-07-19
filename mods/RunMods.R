@@ -79,7 +79,9 @@ ggsave(here("mods","figs","AgeCompareFish.png"),width=9,height=8)
   bc <- read_rep(here("mods", "bc", "nh_R.rep"))
   m0 <- read_rep(here("mods", "m0", "nh_R.rep"))
   m0_old <- read_rep(here("mods", "m0_old", "nh_R.rep"))
+  setwd(here())
 
+  m1 <- read_rep(here("mods", "m1", "nh_R.rep"))
   m2 <- read_rep(here("mods", "m2", "nh_R.rep"))
   m3 <- read_rep(here("mods", "m3", "nh_R.rep"))
   m4 <- read_rep(here("mods", "m4", "nh_R.rep"))
@@ -96,7 +98,7 @@ ggsave(here("mods","figs","AgeCompareFish.png"),width=9,height=8)
   h9 <- read_rep(here("mods", "h9", "nh_R.rep"))
 
   df <- rbind(
-    data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
+    data.frame(SSB = m0$SSB, R = m0$Pred_Rec, Model = "Base Case"),
     data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
     data.frame(SSB = m2$SSB, R = m2$Pred_Rec, Model = "Model 2"),
     data.frame(SSB = m3$SSB, R = m3$Pred_Rec, Model = "Model 3"),

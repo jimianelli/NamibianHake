@@ -14,9 +14,6 @@
 #' }
 #'
 #' @export
-model="m0"
-steepness=.7
-
 run_nh <- function(model = "m1", runit = TRUE) {
   if (runit) {
     run_dir <- here("mods", model)
