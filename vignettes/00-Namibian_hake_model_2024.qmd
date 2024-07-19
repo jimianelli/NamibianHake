@@ -46,12 +46,6 @@ knitr::opts_knit$set(root.dir = here::here())
 # knitr::opts_chunk$set(warning=F, message=F, echo=F, results=F,fig.width=6, fig.height=5)
 ```
 
-``` yaml
-project:
-  render: ['*.qmd']
-     - name: Set up Quarto
-       uses: quarto-dev/quarto-actions/setup@v2
-```
 
 # Project overview
 
