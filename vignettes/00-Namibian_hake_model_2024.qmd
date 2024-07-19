@@ -214,8 +214,8 @@ Similarly, we re-evaluated the ability of this model to estimate the
 stock recruitment productivity parameter (steepness). It is extremely
 rare that sufficient data are available to freely estimate this, even
 with extensive high-quality index data. Therefore we evaluated what
-assumptions were taken elsewhere (for this and related species) and ran
-the models with steepness fixed at 0.7.
+assumptions were taken elsewhere (for this and related species, e.g., South African
+hake) and ran the models with steepness fixed at 0.7.
 
 ```{r fitsurv}
 #| echo: false
@@ -515,7 +515,11 @@ ggsave(here("mods", "figs", "kobe2.png"), width = 6, height = 5)
 The @tbl-quant show the results of the base case model compared to the
 alternative models for a number of key statistics. Among these, the best
 fitting models were the base-case and Model 5. However, model 5 fits
-indicated that the
+indicated that the basis for fitting the data was virtually identical and
+that the slight benefit based on the AIC arises from the stock-recruitment
+residuals. For advice and consistency with productivity assumptions (i.e., the
+specification of the steepness parameter fixed at 0.7 as done for South Africa) 
+we selected the base-case scenario.
 
 ```{r mgt_quant, results = "asis"}
 #| echo: true
