@@ -240,7 +240,7 @@ dfidx |>
   ylim(0, NA) +
   geom_line(aes(y = predicted)) +
   geom_point(aes(y = predicted))
- ggsave(here("mods","figs","fitidx1.png"),width=6,height=5)
+ggsave(here("mods", "figs", "fitidx1.png"), width = 6, height = 5)
 ```
 
 ```{r fitcpue3}
@@ -261,7 +261,7 @@ dfcpue |>
   geom_point(aes(y = predicted)) +
   ggtitle("CPUE 3") +
   ylim(0, NA)
- ggsave(here("mods","figs","cpue3.png"),width=6,height=5)
+ggsave(here("mods", "figs", "cpue3.png"), width = 6, height = 5)
 ```
 
 ```{r fitcpue1}
@@ -279,7 +279,7 @@ dfcpue |>
   geom_point(aes(y = predicted)) +
   ggtitle("CPUE 1") +
   ylim(0, NA)
- ggsave(here("mods","figs","cpue1.png"),width=6,height=5)
+ggsave(here("mods", "figs", "cpue1.png"), width = 6, height = 5)
 ```
 
 ### SSB results
@@ -306,7 +306,7 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("SSB") +
   xlab("Year")
- ggsave(here("mods","figs","ssb1.png"),width=6,height=5)
+ggsave(here("mods", "figs", "ssb1.png"), width = 6, height = 5)
 ```
 
 Another way to evaluate the relative trends in spawning biomass is to
@@ -327,7 +327,7 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("Relative SSB") +
   xlab("Year")
- ggsave(here("mods","figs","depl1.png"),width=6,height=5)
+ggsave(here("mods", "figs", "depl1.png"), width = 6, height = 5)
 ```
 
 ```{r deplalt}
@@ -342,7 +342,7 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("Relative SSB") +
   xlab("Year")
- ggsave(here("mods","figs","depl2.png"),width=6,height=5)
+ggsave(here("mods", "figs", "depl2.png"), width = 6, height = 5)
 ```
 
 The recruitment results are consistent with those seen for the spawning
@@ -362,7 +362,7 @@ mods |>
   ggthemes::theme_few() +
   ylab("Recruitment age 0") +
   xlab("Year")
- ggsave(here("mods","figs","rec.png"),width=6,height=5)
+ggsave(here("mods", "figs", "rec.png"), width = 6, height = 5)
 ```
 
 ```{r recalt}
@@ -376,7 +376,7 @@ mods |>
   ggthemes::theme_few() +
   ylab("Recruitment age 0") +
   xlab("Year")
- ggsave(here("mods","figs","recalt.png"),width=6,height=5)
+ggsave(here("mods", "figs", "recalt.png"), width = 6, height = 5)
 ```
 
 To show the history relative to the replacement yield, we can plot the
@@ -402,7 +402,7 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
   geom_vline(xintercept = 1) +
   xlab("SSB/Bmsy") +
   ylab("Catch / replacement Yield")
- ggsave(here("mods","figs","kobe1.png"),width=6,height=5)
+ggsave(here("mods", "figs", "kobe1.png"), width = 6, height = 5)
 ```
 
 ```{r kobe2}
@@ -427,7 +427,7 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
   geom_vline(xintercept = 1) +
   xlab("SSB/Bmsy") +
   ylab("Catch / replacement Yield")
- ggsave(here("mods","figs","kobe2.png"),width=6,height=5)
+ggsave(here("mods", "figs", "kobe2.png"), width = 6, height = 5)
 ```
 
 ### Age composition fits
@@ -441,16 +441,16 @@ to 2 (as was done previously).
 #| fig.cap: "Base case model fits to the fishery age composition data. Note that the
 #| base case model uses a 'minus group' equal to '2' for the fishery data."
 #| label: fig-agecomps1
-PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7) + ggthemes::theme_few(base_size=10)
- ggsave(here("mods","figs","Age_comp_fish.png"),width=9,height=8)
+PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7) + ggthemes::theme_few(base_size = 10)
+ggsave(here("mods", "figs", "Age_comp_fish.png"), width = 9, height = 8)
 ```
 
 ```{r agecomps2}
 #| fig.cap: "Base case model fits to the survey age composition data. Note that the
 #| base case model uses a 'minus group' equal to '1' for the survey data."
 #| label: fig-agecomps2
-PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7) + ggthemes::theme_few(base_size=10)
-ggsave(here("mods","figs","Age_comp_surv.png"),width=9,height=8)
+PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7) + ggthemes::theme_few(base_size = 10)
+ggsave(here("mods", "figs", "Age_comp_surv.png"), width = 9, height = 8)
 ```
 
 ### Selectivity
@@ -464,7 +464,7 @@ ggsave(here("mods","figs","Age_comp_surv.png"),width=9,height=8)
 M <- data.frame(Year = 1964:2023, Sel = m0$S[1:60, ], Model = "h=0.7, base case")
 p1 <- plot_sel()
 p1
-ggsave(here("mods","figs","selectivity.png"),width=5,height=9)
+ggsave(here("mods", "figs", "selectivity.png"), width = 5, height = 9)
 ```
 
 ### Stock-recruitment curves
@@ -479,7 +479,7 @@ p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
   geom_line() +
   xlim(c(0, 4000))
 p1
-ggsave(here("mods","figs","srr_curves.png"),width=6,height=5)
+ggsave(here("mods", "figs", "srr_curves.png"), width = 6, height = 5)
 ```
 
 ### Stock status comparisons
@@ -515,7 +515,7 @@ for (ii in mod_scen) {
   names(oneyrold) <- "One yr-old biomass"
   rec <- round(x$RecRes_Likelihood, 0)
   names(rec) <- "Rec. resids."
-  datalike <- nll-rec
+  datalike <- nll - rec
   names(datalike) <- "Data likelihood sub-total"
   NumPars <- round(x$Npars, 0)
   names(NumPars) <- "Number parameters"
@@ -596,7 +596,7 @@ mods |>
   ylab("Value") +
   xlab("") +
   facet_wrap(. ~ Variable, scales = "free")
-ggsave(here("mods","figs","refpoints.png"),width=6,height=5)
+ggsave(here("mods", "figs", "refpoints.png"), width = 6, height = 5)
 ```
 
 # Control rule application
@@ -655,17 +655,19 @@ aspect of the MP is shown in @fig-adjust.
 
 biom_out <- get_relative_biomass()
 
-p1 <-  biom_out$biomass_by_strata |> filter(strata=="paradoxus") |>
-  ggplot(aes(x=year,ymin=pred_lci,ymax=pred_uci,fill=strata,y=obs)) +
-  geom_ribbon(alpha=.6) +
+p1 <- biom_out$biomass_by_strata |>
+  filter(strata == "paradoxus") |>
+  ggplot(aes(x = year, ymin = pred_lci, ymax = pred_uci, fill = strata, y = obs)) +
+  geom_ribbon(alpha = .6) +
   scale_y_continuous(labels = scales::comma, expand = c(0, 0), limits = c(0, NA)) +
-  geom_errorbar(aes(x = year, ymin = obs_lci, ymax = obs_uci),width=.2,alpha=.4) +
-  geom_line(aes(x = year, y = pred)) + ylab("Biomass (kt)") +
+  geom_errorbar(aes(x = year, ymin = obs_lci, ymax = obs_uci), width = .2, alpha = .4) +
+  geom_line(aes(x = year, y = pred)) +
+  ylab("Biomass (kt)") +
   ggthemes::theme_few() +
-  geom_point(alpha=.7)
-mean_mp<-exp(mean(p1$data$log_pred))
+  geom_point(alpha = .7)
+mean_mp <- exp(mean(p1$data$log_pred))
 p1 + geom_hline(yintercept = mean_mp, linetype = "dashed", color = "blue")
-ggsave(here("mods","figs","biom_paradoxus.png"),width=6,height=5)
+ggsave(here("mods", "figs", "biom_paradoxus.png"), width = 6, height = 5)
 ```
 
 ```{r relmean}
@@ -673,18 +675,26 @@ ggsave(here("mods","figs","biom_paradoxus.png"),width=6,height=5)
 #| label: fig-adjust
 #| fig.cap: "Historical adjustments for different reactivities to *M. paradoxus* biomass."
 #---Plot the adjustment factors for different reactivities to M. paradoxus biomass----
-dftmp <- p1$data |> select(Year=year, Index = pred) |> mutate(
-  'Gamma = 0.1' = if_else( Index/mean_mp>1,1,Index/mean_mp)^0.1,
-  'Gamma = 0.5' = if_else( Index/mean_mp>1,1,(Index/mean_mp)^.5),
-  'Gamma = 0.25' = if_else( Index/mean_mp>1,1,(Index/mean_mp)^.25)
-  ) |> pivot_longer(cols = -Year, names_to = "Reactivity", values_to = "Index")
-dftmp |> filter(Reactivity != "Index") |>
-      ggplot(aes(x = Year, y = Index, color=Reactivity)) + geom_line() +
-      ggtitle("Historical adjustments for different reactivities to M. paradoxus biomass") +
-      ggthemes::theme_few() + ylab("TAC adjustment based on M. paradoxus biomass")
-ggsave(here("mods","figs","adj_paradoxus.png"),width=6,height=5)
-cur_mp <- dftmp |> filter(Year==2025,Reactivity=="Gamma = 0.25") |> pull(Index)
-cur_mp <- round(cur_mp,3)
+dftmp <- p1$data |>
+  select(Year = year, Index = pred) |>
+  mutate(
+    "Gamma = 0.1" = if_else(Index / mean_mp > 1, 1, Index / mean_mp)^0.1,
+    "Gamma = 0.5" = if_else(Index / mean_mp > 1, 1, (Index / mean_mp)^.5),
+    "Gamma = 0.25" = if_else(Index / mean_mp > 1, 1, (Index / mean_mp)^.25)
+  ) |>
+  pivot_longer(cols = -Year, names_to = "Reactivity", values_to = "Index")
+dftmp |>
+  filter(Reactivity != "Index") |>
+  ggplot(aes(x = Year, y = Index, color = Reactivity)) +
+  geom_line() +
+  ggtitle("Historical adjustments for different reactivities to M. paradoxus biomass") +
+  ggthemes::theme_few() +
+  ylab("TAC adjustment based on M. paradoxus biomass")
+ggsave(here("mods", "figs", "adj_paradoxus.png"), width = 6, height = 5)
+cur_mp <- dftmp |>
+  filter(Year == 2025, Reactivity == "Gamma = 0.25") |>
+  pull(Index)
+cur_mp <- round(cur_mp, 3)
 ```
 
 ## Control rule developments
@@ -751,7 +761,7 @@ The TAC advice for the combined stocks is then given in @tbl-controlrule.
 #| label:tbl-controlrule
 dftmp <- NULL
 mod_scen <- c(2:8)
-ii=2
+ii <- 2
 names(cur_mp) <- "Ratio of paradoxus to mean "
 for (ii in mod_scen) {
   x <- modlst[[ii]]
@@ -759,34 +769,41 @@ for (ii in mod_scen) {
   names(Cur_Bmsy) <- paste0("Current B over Bmsy")
   ry <- round(x$aveRY_last5, 0)
   names(ry) <- paste0("recent 5-yr avg repl. yield")
-  
-  ry_cur <- round(x$aveRY_last5 * min(1,x$Cur_Bmsy), 3)
-  #names(ry_cur) <- ("Recent RY x current B/Bmsy")
-  
-  lambda=1.5; gamma=0.25
-  if (Cur_Bmsy>0.5) adj = 1 else adj = Cur_Bmsy^lambda/0.5^lambda
-  tac1 <- round(0.8*ry*adj*min(1,cur_mp)^gamma,2)
-  names(tac1) <- paste0("opt 1, lambda=",lambda," gamma=",gamma)
-  
-  lambda=2; gamma=0.25
-  if (Cur_Bmsy>.5) adj = 1 else adj = Cur_Bmsy^lambda/0.5^lambda
-  tac2 <- round(0.8*ry*adj*min(1,cur_mp)^gamma,2)
-  names(tac2) <- paste0("opt 2, lambda=",lambda," gamma=",gamma)
-  
-  lambda=2; gamma=0.1
-  if (Cur_Bmsy>.5) adj = 1 else adj = Cur_Bmsy^lambda/0.5^lambda
-  adj;Cur_Bmsy
-  tac3 <- round(0.8*ry*adj*min(1,cur_mp)^gamma,2)
-  names(tac3) <- paste0("opt 3, lambda=",lambda," gamma=",gamma)
-  
-  lambda=2; gamma=1.0
-  if (Cur_Bmsy>.5) adj = 1 else adj = Cur_Bmsy^lambda/0.5^lambda
-  adj;Cur_Bmsy
-  tac4 <- round(0.8*ry*adj*min(1,cur_mp)^gamma,2)
-  names(tac4) <- paste0("opt 4, lambda=",lambda," gamma=",gamma)
-  
-  filler="";names(filler)<-"TAC"
-  
+
+  ry_cur <- round(x$aveRY_last5 * min(1, x$Cur_Bmsy), 3)
+  # names(ry_cur) <- ("Recent RY x current B/Bmsy")
+
+  lambda <- 1.5
+  gamma <- 0.25
+  if (Cur_Bmsy > 0.5) adj <- 1 else adj <- Cur_Bmsy^lambda / 0.5^lambda
+  tac1 <- round(0.8 * ry * adj * min(1, cur_mp)^gamma, 2)
+  names(tac1) <- paste0("opt 1, lambda=", lambda, " gamma=", gamma)
+
+  lambda <- 2
+  gamma <- 0.25
+  if (Cur_Bmsy > .5) adj <- 1 else adj <- Cur_Bmsy^lambda / 0.5^lambda
+  tac2 <- round(0.8 * ry * adj * min(1, cur_mp)^gamma, 2)
+  names(tac2) <- paste0("opt 2, lambda=", lambda, " gamma=", gamma)
+
+  lambda <- 2
+  gamma <- 0.1
+  if (Cur_Bmsy > .5) adj <- 1 else adj <- Cur_Bmsy^lambda / 0.5^lambda
+  adj
+  Cur_Bmsy
+  tac3 <- round(0.8 * ry * adj * min(1, cur_mp)^gamma, 2)
+  names(tac3) <- paste0("opt 3, lambda=", lambda, " gamma=", gamma)
+
+  lambda <- 2
+  gamma <- 1.0
+  if (Cur_Bmsy > .5) adj <- 1 else adj <- Cur_Bmsy^lambda / 0.5^lambda
+  adj
+  Cur_Bmsy
+  tac4 <- round(0.8 * ry * adj * min(1, cur_mp)^gamma, 2)
+  names(tac4) <- paste0("opt 4, lambda=", lambda, " gamma=", gamma)
+
+  filler <- ""
+  names(filler) <- "TAC"
+
   v <- c(ry, Cur_Bmsy, cur_mp, filler, tac1, tac2, tac3, tac4)
   dftmp <- cbind(dftmp, v)
 }
@@ -797,7 +814,6 @@ flextable(dftmp) |>
   set_caption(caption = tabcap) |>
   colformat_double() |>
   autofit()
-
 ```
 
 ```{r gamma}
@@ -805,33 +821,38 @@ flextable(dftmp) |>
 #| fig.cap: "TAC adjustments for different  levels of current biomass of M. paradoxus biomass."
 #--- Plot the adjustment factors for different reactivities to M. paradoxus biomass----
 df01 <- tibble(
-  relbiom  = 1:20/20,
-  'Gamma = 0.1'=(1:20/20)^0.1,
-  'Gamma = 0.5'=(1:20/20)^.5,
-  'Gamma = 0.25'=(1:20/20)^.25,
-  ) |>  pivot_longer(cols = -relbiom, names_to = "Reactivity", values_to = "adjustment" )
+  relbiom = 1:20 / 20,
+  "Gamma = 0.1" = (1:20 / 20)^0.1,
+  "Gamma = 0.5" = (1:20 / 20)^.5,
+  "Gamma = 0.25" = (1:20 / 20)^.25,
+) |> pivot_longer(cols = -relbiom, names_to = "Reactivity", values_to = "adjustment")
 df01 |>
-  ggplot(aes(y =  adjustment, x=relbiom, color=Reactivity)) + geom_line() +
-  xlab("Relative M. paradoxus biomass") + ylab("TAC adjustment") +
+  ggplot(aes(y = adjustment, x = relbiom, color = Reactivity)) +
+  geom_line() +
+  xlab("Relative M. paradoxus biomass") +
+  ylab("TAC adjustment") +
   ggthemes::theme_few() #+ ylab("TAC adjustment based on M. paradoxus biomass")```{r lam_gam}
-ggsave(here("mods","figs","gamma.png"),width=6,height=5)
+ggsave(here("mods", "figs", "gamma.png"), width = 6, height = 5)
 ```
 
 ```{r lambda}
 #| label: fig-lambda
 #| fig.cap: "TAC adjustments for different  levels of current biomass relative to Bmsy "
 #---Plot the adjustment factors for different reactivities to M. paradoxus biomass----
-df01<-tibble()
-df01 <- rbind(df01,
-              tibble( relbiom  = 1:100/100, lambda   = rep(0.5,100)),
-              tibble( relbiom  = 1:100/100, lambda   = rep(1,100)),
-              tibble( relbiom  = 1:100/100, lambda   = rep(1.5,100)),
-              tibble( relbiom  = 1:100/100, lambda   = rep(2,100))
-  ) |>  mutate(adjustment = if_else(relbiom<0.5,relbiom^lambda/0.5^lambda,1),lambda = as.factor(lambda))
-df01 |>  ggplot(aes(y =  adjustment, x=relbiom, color=lambda)) + geom_line() +
-  xlab("Spawning biomass relative Bmsy") + ylab("TAC adjustment") +
+df01 <- tibble()
+df01 <- rbind(
+  df01,
+  tibble(relbiom = 1:100 / 100, lambda = rep(0.5, 100)),
+  tibble(relbiom = 1:100 / 100, lambda = rep(1, 100)),
+  tibble(relbiom = 1:100 / 100, lambda = rep(1.5, 100)),
+  tibble(relbiom = 1:100 / 100, lambda = rep(2, 100))
+) |> mutate(adjustment = if_else(relbiom < 0.5, relbiom^lambda / 0.5^lambda, 1), lambda = as.factor(lambda))
+df01 |> ggplot(aes(y = adjustment, x = relbiom, color = lambda)) +
+  geom_line() +
+  xlab("Spawning biomass relative Bmsy") +
+  ylab("TAC adjustment") +
   ggthemes::theme_few() #+ ylab("TAC adjustment based on M. paradoxus biomass")
-ggsave(here("mods","figs","lambda.png"),width=6,height=5)
+ggsave(here("mods", "figs", "lambda.png"), width = 6, height = 5)
 ```
 
 
