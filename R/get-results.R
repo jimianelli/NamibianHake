@@ -14,7 +14,7 @@ get_results <- function(mod_names. = mod_names,
                         rundir = "mods",
                         moddir = mod_dir,
                         run_on_mac = TRUE,
-                        do_estimation=FALSE) {
+                        do_estimation = FALSE) {
   if (run_on_mac) {
     fn <- paste0(rundir, "/", moddir, "/nh_R.rep")
   } else {
@@ -33,10 +33,8 @@ get_results <- function(mod_names. = mod_names,
   )
 
   # Run model parallel
-  if (do_estimation)
-  {
+  if (do_estimation) {
     system.time(modlst <- parallel::parLapply(cl = cl, X = fn, fun = run_nh))
-
   }
   # Fetch model results in parallel
   system.time(modlst <- parallel::parLapply(cl = cl, X = fn, fun = read_rep))
