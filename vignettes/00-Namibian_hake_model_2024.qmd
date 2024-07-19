@@ -758,12 +758,12 @@ estimate, the TAC recommendation for the combined stock would be zero.
 So if proportion of *M. paradoxus* $(p_y)$ is greater than 30% of the
 long-term mean proportion, then
 
-$TAC_y=(R \sum_{y}^{y-4}\frac{RY_y} 5) \min(1.0,B_y/B_{MSY})^\lambda{0.5}^{-\lambda}  )\min(1,\dot{p_y}/\dot{\bar{p}})^\gamma$
+$TAC_y=(\delta \sum_{y}^{y-4}\frac{RY_y} 5) \min(1.0,B_y/B_{MSY})^\lambda{0.5}^{-\lambda}  )\min(1,\dot{p_y}/\dot{\bar{p}})^\gamma$
 
-where the rebuilding factor ($R$) is set to 0.8 when the spawning
+where the rebuilding factor ($\delta$) is set to 0.8 when the spawning
 biomass is below $B_{MSY}$ and 1.0 when above. In words, the TAC in year
 y is equal to the catch under the current control rule times the ratio
-of the spawning biomass relative to BMSY (or proxy) and the externally
+of the spawning biomass relative to $B_{MSY}$ (or proxy) and the externally
 estimated proportion of *M. paradoxus* from survey data. The second term
 relates $B_{MSY}$ and is intended to take fast action (for
 $\lambda >1.0$) when the biomass falls below 0.5 of that value (a
@@ -771,8 +771,8 @@ standard in many places to define "overfished"). The third term on the
 right hand side reflects the impact the *M. paradoxus* biomass projected
 from a survey smoother (described below) and adjusts the TAC advice
 downwards when the projected $\dot{p_y}$ drops below the mean value. The
-values of $\gamma, \lambda$ were evaluated and are shown in Table xx. We
-note that the specification of a survey linkage by the individual
+values of $\gamma, \lambda$ were evaluated and are shown in @tbl-controlrule. 
+We note that the specification of a survey linkage by the individual
 species provides an appropriate adjustment that reduces the exploitation
 rate and prevents potential for "the point of recruitment impairment"
 (PRI).
@@ -783,7 +783,7 @@ adjusted. These are shown in @fig-gamma. For the purposes of this
 analysis, we set $\gamma = .25$. For $\lambda$, most models evaluated were
 above 0.5 of $B_{MSY}$ so there was no added adjustment beyond the $R=0.8$. 
 So, following the TAC as
-specified, the base-case model was below $B_{MSY} so $R=0.8$ with
+specified, the base-case model was below $B_{MSY}$ so $\delta=0.8$ with
 the average replacement yield over the last 5 years is
 recommended, with the adjustment based on the relative biomass of *M.
 paradoxus* and the long-term mean biomass of the species.
@@ -793,6 +793,7 @@ The TAC advice for the combined stocks is then given in @tbl-controlrule.
 ```{r controlrule}
 #| label: tbl-controlrule
 #| tbl-cap: "Namibian hake specification of different options for TAC considerations"
+#|
 dftmp <- NULL
 mod_scen <- c(2:8)
 ii <- 2
@@ -847,6 +848,7 @@ tabcap <- "Selected management measures from alternative models. "
 flextable(dftmp) |>
   set_caption(caption = tabcap) |>
   colformat_double() |>
+  hline(i=3) |> 
   autofit()
 ```
 
