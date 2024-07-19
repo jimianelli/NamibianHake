@@ -16,7 +16,7 @@
 #' @import here
 #'
 #' @export
-get_relative_biomass <- function(spp="paradoxus", endyr=2025) {
+get_relative_biomass <- function(spp = "paradoxus", endyr = 2025) {
   data <- rema::prepare_rema_input(
     model_name = spp,
     multi_survey = 0,
