@@ -276,7 +276,46 @@ dfcpue |>
 ggsave(here("mods", "figs", "cpue1.png"), width = 6, height = 5)
 ```
 
-### SSB results
+
+### Age composition fits
+
+The age composition fits for the base case model are shown inf
+@fig-agecomps1 and @fig-agecomps2. The base case model uses a 'minus
+group' equal to '1' for the survey data and for the fishery it was set
+to 2 (as was done previously).
+
+```{r agecomps1}
+#| fig.cap: "Base case model fits to the fishery age composition data. Note that the
+#| base case model uses a 'minus group' equal to '2' for the fishery data."
+#| label: fig-agecomps1
+PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7) + ggthemes::theme_few(base_size = 10)
+ggsave(here("mods", "figs", "Age_comp_fish.png"), width = 9, height = 8)
+```
+
+```{r agecomps2}
+#| fig.cap: "Base case model fits to the survey age composition data. Note that the
+#| base case model uses a 'minus group' equal to '1' for the survey data."
+#| label: fig-agecomps2
+PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7) + ggthemes::theme_few(base_size = 10)
+ggsave(here("mods", "figs", "Age_comp_surv.png"), width = 9, height = 8)
+```
+
+### Selectivity
+
+```{r selex}
+#| echo: false
+#| fig.cap: "Selectivity estimates for the base-case model run."
+#| fig.width: 4
+#| fig.height: 9
+
+M <- data.frame(Year = 1964:2023, Sel = m0$S[1:60, ], Model = "h=0.7, base case")
+p1 <- plot_sel()
+p1
+ggsave(here("mods", "figs", "selectivity.png"), width = 5, height = 9)
+```
+
+
+### Spawning biomass trends 
 
 @fig-ssb shows the SSB estimates for the base case model compared to the
 previous assessment. The horizontal lines correspond to the Bmsy values
@@ -339,6 +378,8 @@ mods |>
 ggsave(here("mods", "figs", "depl2.png"), width = 6, height = 5)
 ```
 
+### Recruitment estimates
+
 The recruitment results are consistent with those seen for the spawning
 biomass. The base case model shows a decline in recruitment estimates
 compared to the previous assessment, as shown in @fig-rec. Compared to
@@ -372,6 +413,47 @@ mods |>
   xlab("Year")
 ggsave(here("mods", "figs", "recalt.png"), width = 6, height = 5)
 ```
+
+### Stock recruitment relationships
+
+For each of the models there were some specified and estimated 
+differences in the stock-recruitment relationships (@fig-srrplots). 
+When overlain with the recruitment estimates, these relationships appear
+to be relatively poorly defined  (@fig-srr). 
+
+
+```{r srrplots}
+#| fig.cap: "Stock-recruitment curves noted for the previous base-case and
+#| the updated model alternatives."
+#| label: fig-srrplots
+p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
+  geom_point() +
+  geom_line() +
+  xlim(c(0, 4000))
+p1
+ggsave(here("mods", "figs", "srr_curves.png"), width = 6, height = 5)
+```
+
+
+```{r srr}
+#| label: fig-srr
+#| fig.cap: "Stock-recruitment curves and year-class estimates for alternative models"
+#| fig.width: 9
+#| fig.height: 7
+#| 
+mods |> 
+  filter(Model %in% mod_label[2:9], Variable == "R" | Variable == "SSB") |>
+  select(c(1:3, 6)) |>
+  pivot_wider(names_from = Variable, values_from = value) |>
+  ggplot(aes(x = SSB, y = R, label = Year, color = Model, fill = Model)) +
+  geom_text(alpha = .7, size=3) +
+  ggthemes::theme_few() +
+  facet_wrap(. ~ Model) +
+  geom_line(data = dfsrr |> filter(Model %in% mod_label[2:9]) , 
+            aes(y = R, x = SSB, color = Model), inherit.aes = FALSE)
+ggsave(here("mods", "figs", "srr_yrs.png"), width = 6, height = 5)
+```
+
 
 To show the history relative to the replacement yield, we can plot the
 SSB/Bmsy and the catch/replacement yield (@fig-kobe). This shows a
@@ -424,57 +506,7 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
 ggsave(here("mods", "figs", "kobe2.png"), width = 6, height = 5)
 ```
 
-### Age composition fits
 
-The age composition fits for the base case model are shown inf
-@fig-agecomps1 and @fig-agecomps2. The base case model uses a 'minus
-group' equal to '1' for the survey data and for the fishery it was set
-to 2 (as was done previously).
-
-```{r agecomps1}
-#| fig.cap: "Base case model fits to the fishery age composition data. Note that the
-#| base case model uses a 'minus group' equal to '2' for the fishery data."
-#| label: fig-agecomps1
-PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7) + ggthemes::theme_few(base_size = 10)
-ggsave(here("mods", "figs", "Age_comp_fish.png"), width = 9, height = 8)
-```
-
-```{r agecomps2}
-#| fig.cap: "Base case model fits to the survey age composition data. Note that the
-#| base case model uses a 'minus group' equal to '1' for the survey data."
-#| label: fig-agecomps2
-PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7) + ggthemes::theme_few(base_size = 10)
-ggsave(here("mods", "figs", "Age_comp_surv.png"), width = 9, height = 8)
-```
-
-### Selectivity
-
-```{r selex}
-#| echo: false
-#| fig.cap: "Selectivity estimates for the base-case model run."
-#| fig.width: 4
-#| fig.height: 9
-
-M <- data.frame(Year = 1964:2023, Sel = m0$S[1:60, ], Model = "h=0.7, base case")
-p1 <- plot_sel()
-p1
-ggsave(here("mods", "figs", "selectivity.png"), width = 5, height = 9)
-```
-
-### Stock-recruitment curves
-
-The following plot shows the stock-recruitment curves for the base case
-and models 1, 2, 3, and 5 and 6.
-
-```{r srrplots}
-#| fig.cap: "Model runs"
-p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
-  geom_point() +
-  geom_line() +
-  xlim(c(0, 4000))
-p1
-ggsave(here("mods", "figs", "srr_curves.png"), width = 6, height = 5)
-```
 
 ### Stock status comparisons
 
@@ -487,7 +519,7 @@ indicated that the
 #| echo: true
 #| results: asis
 #| label: tbl-quant
-#| tabcap: "Model fits to data components"
+#| tbl-cap: "Model fits to data components"
 #|
 dftmp <- NULL
 mod_scen <- c(2:8)
@@ -529,6 +561,7 @@ flextable(dftmp) |>
 
 ```{r status}
 #| label: tbl-stockstatus
+#| tbl-cap: "Namibian hake stock estimates by model alternative."
 dftmp <- NULL
 mod_scen <- c(2:8)
 for (ii in mod_scen) {
@@ -752,7 +785,8 @@ paradoxus* and the long-term mean biomass of the species.
 The TAC advice for the combined stocks is then given in @tbl-controlrule. 
 
 ```{r controlrule}
-#| label:tbl-controlrule
+#| label: tbl-controlrule
+#| tbl-cap: "Namibian hake specification of different options for TAC considerations"
 dftmp <- NULL
 mod_scen <- c(2:8)
 ii <- 2
@@ -858,4 +892,14 @@ there were no observations in that year. Similarly, the
 abundance-at-length data from the surveys failed to identify strong
 periods of persistence by cohorts.
 
-Ignore 7-vessel CPUE data set.
+Should a run be done where we ignore 7-vessel CPUE data set?
+
+```{{r run_nh}}
+#| echo: true
+
+#---Run all the models----------
+for (i in 1:length(mod_dir))
+  run_nh(model = mod_dir[i])
+get_results()
+
+```

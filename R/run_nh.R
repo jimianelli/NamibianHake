@@ -6,7 +6,7 @@
 #' @param steepness A numeric value for the steepness parameter. Default is 0.7.
 #' @param runit A logical value indicating whether to run the model. Default is TRUE.
 #'
-#' @return The function returns the output read from the `nh_R.rep` file in the specified model directory.
+#' @return The function returns the output read from the `nh_R.rep` and `nh_out.csv` file in the specified model directory.
 #'
 #' @examples
 #' \dontrun{

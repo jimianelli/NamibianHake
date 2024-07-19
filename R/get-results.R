@@ -5,13 +5,16 @@
 #' @param mod_names. A character vector of model names. Default is 'mod_names'.
 #' @param rundir The main sub directory path for the models. Default is 'runs'
 #' @param moddir The main directory path for the models. Default is 'mod_dir'
+#' @param run_on_mac boolean if running on a mac
+#' @param do_estimation boolean run estimation
 #' @return A list containing model results.
 #' @export
 # mod_names. = mod_label; rundir = "mods"; moddir = mod_dir;
 get_results <- function(mod_names. = mod_names,
                         rundir = "mods",
                         moddir = mod_dir,
-                        run_on_mac = TRUE) {
+                        run_on_mac = TRUE,
+                        do_estimation=FALSE) {
   if (run_on_mac) {
     fn <- paste0(rundir, "/", moddir, "/nh_R.rep")
   } else {
@@ -25,11 +28,16 @@ get_results <- function(mod_names. = mod_names,
 
   # Export necessary functions and objects to the cluster
   # source("R/read-admb2.R")
-  parallel::clusterExport(cl, c("read_fit", "read_admb", "read_rep"),
-    envir =
-      environment()
+  parallel::clusterExport(cl, c("read_fit", "read_admb", "read_rep", "run_nh"),
+    envir = environment()
   )
 
+  # Run model parallel
+  if (do_estimation)
+  {
+    system.time(modlst <- parallel::parLapply(cl = cl, X = fn, fun = run_nh))
+
+  }
   # Fetch model results in parallel
   system.time(modlst <- parallel::parLapply(cl = cl, X = fn, fun = read_rep))
   fn <- paste0("mods/", moddir, "/nh_out.csv")
