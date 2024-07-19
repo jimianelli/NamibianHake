@@ -19,6 +19,10 @@ format:
 editor: 
   markdown: 
     wrap: 72
+project:
+  render: ['*.qmd']
+       # - name: Set up Quarto
+       # uses: quarto-dev/quarto-actions/setup@v2
 editor_options: 
   chunk_output_type: console
 ---
@@ -41,22 +45,40 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "  ", fig.align = "center", cac
 knitr::opts_knit$set(root.dir = here::here())
 # knitr::opts_chunk$set(warning=F, message=F, echo=F, results=F,fig.width=6, fig.height=5)
 ```
+
+``` yaml
+project:
+  render: ['*.qmd']
+     - name: Set up Quarto
+       uses: quarto-dev/quarto-actions/setup@v2
+```
+
 # Project overview
 
-The following reflects my interpretation of the Marine Stewardship Council's certification request.
-There is a need to catch up on missed milestones and outlines the necessary steps for the upcoming Year 4 milestone.
+The following reflects my interpretation of the Marine Stewardship
+Council's certification request. There is a need to catch up on missed
+milestones and outlines the necessary steps for the upcoming Year 4
+milestone.
 
-### Key Points 
-  1. Year 3 Milestone Missed: The milestone required revised stock assessments for *M.
-paradoxus*, which was not met.
-  2. Year 4 Milestone: By February 2025, the MFMR must use the Harvest Control Rule (HCR) systematically to verify the TAC for *M. paradoxus*.
-This needs to be applied in the August/September 2024 management meetings.
-  3. Namibian Stock Assessment: There's a recommendation to review and re-evaluate the assumptions and parameter values of assessment models, particularly the pessimistic base case model.
-  4. Implementation Issues: MFMR has Dr. Ianelli’s report but not the code to run the model, and training is required for the Namibian team.
+### Key Points
+
+1.  Year 3 Milestone Missed: The milestone required revised stock
+    assessments for *M. paradoxus*, which was not met.
+2.  Year 4 Milestone: By February 2025, the MFMR must use the Harvest
+    Control Rule (HCR) systematically to verify the TAC for *M.
+    paradoxus*. This needs to be applied in the August/September 2024
+    management meetings.
+3.  Namibian Stock Assessment: There's a recommendation to review and
+    re-evaluate the assumptions and parameter values of assessment
+    models, particularly the pessimistic base case model.
+4.  Implementation Issues: MFMR has Dr. Ianelli’s report but not the
+    code to run the model, and training is required for the Namibian
+    team.
 
 ## Draft agenda
 
-The following draft agenda outlines the steps to address the missed milestones and prepare for the upcoming Year 4 milestone.
+The following draft agenda outlines the steps to address the missed
+milestones and prepare for the upcoming Year 4 milestone.
 
 ### Week 1:
 
@@ -65,10 +87,13 @@ The following draft agenda outlines the steps to address the missed milestones a
     -   Plan steps to implement the HCR for *M. paradoxus*.
 2.  Day 3-4: Data Preparation
     -   Gather and prepare Namibia stock assessment data.
-    -   Coordinate with MFMR to understand current data handling and management practices.
+    -   Coordinate with MFMR to understand current data handling and
+        management practices.
 3.  Day 5: Meeting Preparation
-    -   Prepare documentation and a presentation for the MFMR management meeting.
-    -   Outline the steps needed for the August/September 2024 meeting to include HCR in TAC setting.
+    -   Prepare documentation and a presentation for the MFMR management
+        meeting.
+    -   Outline the steps needed for the August/September 2024 meeting
+        to include HCR in TAC setting.
 
 ### Week 2:
 
@@ -76,47 +101,59 @@ The following draft agenda outlines the steps to address the missed milestones a
     -   Review developments and report key elements for implementation.
     -   Develop a preliminary implementation plan for the HCR model.
 5.  Day 3-4: Training Coordination
-    -   Arrange a training session with Dr. Ianelli or another suitable individual for MFMR.
-    -   Coordinate with the training provider and MFMR to schedule the session.
+    -   Arrange a training session with Dr. Ianelli or another suitable
+        individual for MFMR.
+    -   Coordinate with the training provider and MFMR to schedule the
+        session.
 6.  Day 5: Reporting
-    -   Compile a progress report summarizing activities, challenges, and next steps.
+    -   Compile a progress report summarizing activities, challenges,
+        and next steps.
     -   Send the report to Hugh and relevant stakeholders for feedback.
 
-This agenda ensures a systematic approach to address the milestones and prepare for the upcoming management meeting, focusing on implementing the HCR and providing necessary training to MFMR.
+This agenda ensures a systematic approach to address the milestones and
+prepare for the upcoming management meeting, focusing on implementing
+the HCR and providing necessary training to MFMR.
 
-Below are two main sections, first on model developments and second on application of the
-control rule that accounts for the signals in the data on the different species.
+Below are two main sections, first on model developments and second on
+application of the control rule that accounts for the signals in the
+data on the different species.
 
 # Assessment model runs
 
-The original base-case model was evaluated for a number of features and extensions. These
-included focus on what data components were fit well and how improvements in consistency
-can be made. For the latter part, we found that the fits to the index and CPUE data were particularly
-poor and could be improved. We reviewed the model from Ianelli et al. (2023) and
-decided that whilst reassuring that alternative assessment approach provide similar results,
-for consistency and due to the added features of the Namibian model, it was preferred
-to make necessary changes in that code base. Give the short time available for training
-and implementation, we decided to focus on the base-case model and make necessary changes.
-The following sections outline the model runs and the results relative to the previous
-assessment.
+The original base-case model was evaluated for a number of features and
+extensions. These included focus on what data components were fit well
+and how improvements in consistency can be made. For the latter part, we
+found that the fits to the index and CPUE data were particularly poor
+and could be improved. We reviewed the model from Ianelli et al. (2023)
+and decided that whilst reassuring that alternative assessment approach
+provide similar results, for consistency and due to the added features
+of the Namibian model, it was preferred to make necessary changes in
+that code base. Give the short time available for training and
+implementation, we decided to focus on the base-case model and make
+necessary changes. The following sections outline the model runs and the
+results relative to the previous assessment.
 
 ### Model descriptions
 
-The following table was developed based on testing the model with different assumptions and data sources.
-Key differences from the 2023 assessment configuration was the assumption that model estimation of variance terms was appropriate.
-This feature resulted in unacceptable residual patterns and essentially a complete down weighting of the index data.
-We used the assumed variance terms (CVs) for the indices in all of the following model configurations:
+The following table was developed based on testing the model with
+different assumptions and data sources. Key differences from the 2023
+assessment configuration was the assumption that model estimation of
+variance terms was appropriate. This feature resulted in unacceptable
+residual patterns and essentially a complete down weighting of the index
+data. We used the assumed variance terms (CVs) for the indices in all of
+the following model configurations:
 
-| Model         | Description                                                                                                                                                                                     |
-|-----------------------|-------------------------------------------------|
-| Previous base case  | As specified in past assessments, estimated steepness and all variance terms  |
-| Base case (m0) | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified. |
-| m1            | As base case but with survey catchability fixed at 1.0 |
-| m2            | As base case but with survey catchability fixed at 0.5 |
-| m3            | As base case but with natural mortality estimated      |
-| m4            | As base case but with fishery selectivity allowed to be dome-shaped |
-| m5            | As base case but with stock-recruit steepness fixed at 0.5         |
-| m6            | As base case but with stock-recruit steepness fixed at 0.9          |
+| Model              | Description                                                                                                                                                                                     |
+|------------------------|-----------------------------------------------|
+| Previous base case | As specified in past assessments, estimated steepness and all variance terms                                                                                                                    |
+| Base case (m0)     | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified. |
+| m1                 | As base case but with survey catchability fixed at 1.0                                                                                                                                          |
+| m2                 | As base case but with survey catchability fixed at 0.5                                                                                                                                          |
+| m3                 | As base case but with natural mortality estimated                                                                                                                                               |
+| m4                 | As base case but with fishery selectivity allowed to be dome-shaped                                                                                                                             |
+| m5                 | As base case but with stock-recruit steepness fixed at 0.5                                                                                                                                      |
+| m6                 | As base case but with stock-recruit steepness fixed at 0.9                                                                                                                                      |
+
 <!-- | m7            | As base case but with early indices dropped (pre 1990)              | -->
 
 ```{r startup}
@@ -166,24 +203,25 @@ for (i in 1:length(mod_ref)) {
 }
 ```
 
-
 ### Fits to index data
 
-After delving into the details of the model specifications, our main conclusion
-was that the previous assessments were generally insensitive to the trend data (surveys and
-CPUE series). This was due to the fact that the variance terms (CVs) were estimated.
-A more standard approach, where CVs are specified based on the data (e.g., from design-based
-sampling theory), was used and this performed better (@fig-fitidx1, @fig-fitcpue3). In
-the previous assessment, the fit tot he early period of CPUE data was better, but in 
-this case the CV was estimated to be about 10%, and extremely low value for this
-type of data (@fig-fitcpue1). 
+After delving into the details of the model specifications, our main
+conclusion was that the previous assessments were generally insensitive
+to the trend data (surveys and CPUE series). This was due to the fact
+that the variance terms (CVs) were estimated. A more standard approach,
+where CVs are specified based on the data (e.g., from design-based
+sampling theory), was used and this performed better (@fig-fitidx1,
+@fig-fitcpue3). In the previous assessment, the fit tot he early period
+of CPUE data was better, but in this case the CV was estimated to be
+about 10%, and extremely low value for this type of data
+(@fig-fitcpue1).
 
-Similarly,
-we re-evaluated the ability of this model to estimate the stock recruitment productivity
-parameter (steepness). It is extremely rare that sufficient data are available to 
-freely estimate this, even with extensive high-quality index data. 
-Therefore we evaluated what assumptions were taken elsewhere (for this and related species)
-and ran the models with steepness fixed at 0.7. 
+Similarly, we re-evaluated the ability of this model to estimate the
+stock recruitment productivity parameter (steepness). It is extremely
+rare that sufficient data are available to freely estimate this, even
+with extensive high-quality index data. Therefore we evaluated what
+assumptions were taken elsewhere (for this and related species) and ran
+the models with steepness fixed at 0.7.
 
 ```{r fitsurv}
 #| echo: false
@@ -202,6 +240,7 @@ dfidx |>
   ylim(0, NA) +
   geom_line(aes(y = predicted)) +
   geom_point(aes(y = predicted))
+ ggsave(here("mods","figs","fitidx1.png"),width=6,height=5)
 ```
 
 ```{r fitcpue3}
@@ -222,6 +261,7 @@ dfcpue |>
   geom_point(aes(y = predicted)) +
   ggtitle("CPUE 3") +
   ylim(0, NA)
+ ggsave(here("mods","figs","cpue3.png"),width=6,height=5)
 ```
 
 ```{r fitcpue1}
@@ -239,11 +279,14 @@ dfcpue |>
   geom_point(aes(y = predicted)) +
   ggtitle("CPUE 1") +
   ylim(0, NA)
+ ggsave(here("mods","figs","cpue1.png"),width=6,height=5)
 ```
 
-
 ### SSB results
-@fig-ssb shows the SSB estimates for the base case model compared to the previous assessment. The horizontal lines correspond to the Bmsy values for the separate models.
+
+@fig-ssb shows the SSB estimates for the base case model compared to the
+previous assessment. The horizontal lines correspond to the Bmsy values
+for the separate models.
 
 ```{r SSB}
 #| fig.cap: "Base case model showing the SSB estimates compared to the previous assessment. The horizontal
@@ -263,10 +306,14 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("SSB") +
   xlab("Year")
+ ggsave(here("mods","figs","ssb1.png"),width=6,height=5)
 ```
 
-Another way to evaluate the relative trends in spawning biomass is to examine the so-called "depletion" levels.
-This is the ratio of the current SSB to the theoretical unfished value. The results are shown in @fig-depl for the base case model and in @fig-deplalt for the alternative models.
+Another way to evaluate the relative trends in spawning biomass is to
+examine the so-called "depletion" levels. This is the ratio of the
+current SSB to the theoretical unfished value. The results are shown in
+@fig-depl for the base case model and in @fig-deplalt for the
+alternative models.
 
 ```{r depl}
 #| fig.cap: "Base case model showing the relative SSB estimates compared to the previous assessment."
@@ -280,6 +327,7 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("Relative SSB") +
   xlab("Year")
+ ggsave(here("mods","figs","depl1.png"),width=6,height=5)
 ```
 
 ```{r deplalt}
@@ -294,12 +342,15 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("Relative SSB") +
   xlab("Year")
+ ggsave(here("mods","figs","depl2.png"),width=6,height=5)
 ```
 
+The recruitment results are consistent with those seen for the spawning
+biomass. The base case model shows a decline in recruitment estimates
+compared to the previous assessment, as shown in @fig-rec. Compared to
+the base case model, the alternative models show a range of recruitment
+estimates, as shown in @fig-recalt.
 
-The recruitment results are consistent with those seen for the spawning biomass. 
-The base case model shows a decline in recruitment estimates compared to the previous assessment, as shown in @fig-rec.
-Compared to the base case model, the alternative models show a range of recruitment estimates, as shown in @fig-recalt.
 ```{r rec}
 #| fig.cap: "Alternative model results on recruitment estimates."
 #| label: fig-rec
@@ -311,6 +362,7 @@ mods |>
   ggthemes::theme_few() +
   ylab("Recruitment age 0") +
   xlab("Year")
+ ggsave(here("mods","figs","rec.png"),width=6,height=5)
 ```
 
 ```{r recalt}
@@ -324,12 +376,14 @@ mods |>
   ggthemes::theme_few() +
   ylab("Recruitment age 0") +
   xlab("Year")
+ ggsave(here("mods","figs","recalt.png"),width=6,height=5)
 ```
-To show the history relative to the replacement yield, we can plot the 
-SSB/Bmsy and the catch/replacement yield (@fig-kobe). This shows a significant 
-difference between the previous assessment and that proposed as the base-case for
-this year. The alternative models show a range of results, as shown in @fig-kobe2.
 
+To show the history relative to the replacement yield, we can plot the
+SSB/Bmsy and the catch/replacement yield (@fig-kobe). This shows a
+significant difference between the previous assessment and that proposed
+as the base-case for this year. The alternative models show a range of
+results, as shown in @fig-kobe2.
 
 ```{r kobe}
 #| fig.cap: "Base case model showing the relative SSB estimates compared to the previous assessment."
@@ -348,6 +402,7 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
   geom_vline(xintercept = 1) +
   xlab("SSB/Bmsy") +
   ylab("Catch / replacement Yield")
+ ggsave(here("mods","figs","kobe1.png"),width=6,height=5)
 ```
 
 ```{r kobe2}
@@ -372,28 +427,31 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
   geom_vline(xintercept = 1) +
   xlab("SSB/Bmsy") +
   ylab("Catch / replacement Yield")
+ ggsave(here("mods","figs","kobe2.png"),width=6,height=5)
 ```
 
 ### Age composition fits
 
-The age composition fits for the base case model are shown inf @fig-agecomps1 and @fig-agecomps2. The base case model uses a 'minus group' equal to '1' for the survey data and for the fishery it was set to 2 (as was done previously).
+The age composition fits for the base case model are shown inf
+@fig-agecomps1 and @fig-agecomps2. The base case model uses a 'minus
+group' equal to '1' for the survey data and for the fishery it was set
+to 2 (as was done previously).
 
 ```{r agecomps1}
 #| fig.cap: "Base case model fits to the fishery age composition data. Note that the
 #| base case model uses a 'minus group' equal to '2' for the fishery data."
 #| label: fig-agecomps1
-PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7)
+PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7) + ggthemes::theme_few(base_size=10)
+ ggsave(here("mods","figs","Age_comp_fish.png"),width=9,height=8)
 ```
 
 ```{r agecomps2}
 #| fig.cap: "Base case model fits to the survey age composition data. Note that the
 #| base case model uses a 'minus group' equal to '1' for the survey data."
 #| label: fig-agecomps2
-PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7)
-dim(m0$Obs_Survey_1)
-PlotAgeFit
+PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7) + ggthemes::theme_few(base_size=10)
+ggsave(here("mods","figs","Age_comp_surv.png"),width=9,height=8)
 ```
-
 
 ### Selectivity
 
@@ -406,10 +464,13 @@ PlotAgeFit
 M <- data.frame(Year = 1964:2023, Sel = m0$S[1:60, ], Model = "h=0.7, base case")
 p1 <- plot_sel()
 p1
+ggsave(here("mods","figs","selectivity.png"),width=5,height=9)
 ```
+
 ### Stock-recruitment curves
 
-The following plot shows the stock-recruitment curves for the base case and models 1, 2, 3, and 5 and 6.
+The following plot shows the stock-recruitment curves for the base case
+and models 1, 2, 3, and 5 and 6.
 
 ```{r srrplots}
 #| fig.cap: "Model runs"
@@ -418,16 +479,21 @@ p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
   geom_line() +
   xlim(c(0, 4000))
 p1
+ggsave(here("mods","figs","srr_curves.png"),width=6,height=5)
 ```
-
 
 ### Stock status comparisons
 
-The following tables show the results of the base case model compared to the alternative models for a number of key statistics.
+The @tbl-quant show the results of the base case model compared to the
+alternative models for a number of key statistics. Among these, the best
+fitting models were the base-case and Model 5. However, model 5 fits
+indicated that the
 
 ```{r mgt_quant, results = "asis"}
 #| echo: true
 #| results: asis
+#| label: tbl-quant
+#| tabcap: "Model fits to data components"
 #|
 dftmp <- NULL
 mod_scen <- c(2:8)
@@ -445,15 +511,17 @@ for (ii in mod_scen) {
   names(caa) <- "Commercial CAA"
   caas <- round(x$CAAS_Likelihood, 0)
   names(caas) <- "Survey CAA"
-  rec <- round(x$RecRes_Likelihood, 0)
-  names(rec) <- "Rec. resids."
   oneyrold <- round(x$Oneyearold_Likelihood, 0)
   names(oneyrold) <- "One yr-old biomass"
+  rec <- round(x$RecRes_Likelihood, 0)
+  names(rec) <- "Rec. resids."
+  datalike <- nll-rec
+  names(datalike) <- "Data likelihood sub-total"
   NumPars <- round(x$Npars, 0)
   names(NumPars) <- "Number parameters"
   AIC <- round(x$Akaike, 1)
   names(AIC) <- "AIC"
-  v <- c(filler, nll, CPUE, surv, caa, caas, rec, oneyrold, NumPars, AIC)
+  v <- c(filler, nll, CPUE, surv, caa, caas, oneyrold, datalike, rec, NumPars, AIC)
   dftmp <- cbind(dftmp, v)
 }
 dftmp <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
@@ -465,9 +533,8 @@ flextable(dftmp) |>
   autofit()
 ```
 
-
 ```{r status}
-#| label: tab-stockstatus
+#| label: tbl-stockstatus
 dftmp <- NULL
 mod_scen <- c(2:8)
 for (ii in mod_scen) {
@@ -491,7 +558,7 @@ for (ii in mod_scen) {
   ry <- round(x$aveRY_last5, 0)
   names(ry) <- paste0("recent 5-yr average replacement yield")
   ry_cur <- round(x$aveRY_last5 * x$Cur_Bmsy, 3)
-  names(ry_cur) <- paste0("Recent RY x current SSB /Bmsy")
+  names(ry_cur) <- "Recent RY x current SSB /Bmsy"
   v <- c(Ksp, Kexp, steepness, Cur_B, Bmsy, Cur_B0, Cur_Bmsy, MSY, ry, ry_cur)
   dftmp <- cbind(dftmp, v)
 }
@@ -507,8 +574,7 @@ flextable(dftmp) |>
 # print(tab)
 ```
 
-
-A comparison among the models for stock status and 
+A comparison among the models for stock status and
 
 ```{r stockstatus}
 #| echo: false
@@ -530,74 +596,251 @@ mods |>
   ylab("Value") +
   xlab("") +
   facet_wrap(. ~ Variable, scales = "free")
+ggsave(here("mods","figs","refpoints.png"),width=6,height=5)
 ```
 
 # Control rule application
 
-## Design of triggered control rule
-
-The situation for developing a two-species control rule where catches between species and the trend in overall biomass for both species is combined is challenging.
-For management purposes, the goal is to avoid incidental takes in the proportion of one species that exceeds the historical levels of depletion for either stock.
-Fortunately, survey data are available that can be used to distinguish trends in the relative biomass for both stocks.
-The design of the triggered control rule therefore must consider patterns in the relative biomass from the survey data, the absolute biomass of the combined catch and biomass as modeled from the combined-stocks assessment.
-This provides a pragmatic approach using available data.
-
-The steps in the control rule would be first to run a simple model that projected the survey biomass and relative proportion of *M.
-paradoxus*.
-Then, given the mean proportion over the period, compute the adjustment needed to the overarching control rule for the management procedure.
-For example, the historical range based on the survey has been between about one third of the mean value (in the earliest part of the period) to about 70% above the mean proportion.
-This range (especially the lower value) was used as a semi-empirical way to develop a minimum stock size threshold as part of the control rule.
-That is, when the stock of *M.
-paradoxus* drops below 30% of the mean proportion of the combined stocks estimate, the TAC recommendation for the combined stock would be zero.
-So if proportion of *M.
-paradoxus* $(p_y)$ is greater than 30% of the long-term mean proportion, then
-
-$TAC_y=(0.8 \sum_{y}^{y-4}\frac{RY_y} 5) \min(1,B_y/B_{MSY})^\lambda  \min(1,p_y/\bar{p})^\gamma$
-
-In words, the TAC in year y is equal to the catch under the current control rule times the ratio of the spawning biomass relative to BMSY (or proxy) and the externally estimated proportion of *M. paradoxus* from survey data.
-The second and third terms on the right hands side are depicted in Table 1 (and include the zero catch recommended if the *M. paradoxus* proportion dropped below the lowest value historically observed).
-The values of $\gamma, \lambda$ were both set to 1.0 but could be adjusted (say to 0.5) to have a more gradual transition as the proportion or aggregate stock conditions drop below mean levels.
-We note that the specification of a survey linkage by the individual species provides a trigger (30% of long-term mean) that reduces the exploitation rate as the point of recruitment impairment (PRI) is approached.
-
-Improvements to this approach could benefit from management that accounts for the depth of fishing Johnsen and Kathena (2012).
-These data were unavailable for inclusion in this study since they rely on predictions of the species mix based on the depth of fishing.
-Also, it is unclear that depth of fishing could be forecasted in a manner that could be built into a management measure.
-
-The approached applied a smoother to each of the species time-series of survey data.
-
 ## Modeling Namibian hake survey data by species
-Fisheries stock assessments require data that are reliably collected and compiled. Secondarily, assessment models should be
-configured to match the assumptions associated with the observed data. To account for survey trends between the two species of
-hake we applied the estimated observation errors to a simple state-space random walk model. This approach has a number of 
-options for how process-errors can be specified and estimated. The observation model applies the observation-error variances
-$(\sigma_{j,t}^2)$ for the $j^{th}$ species in year $t (x_{j,t} )$. The indices are fit to latent state variables, e.g., the underlying
-population trend $ln(\hat{Z}_{j,t} $ as follows:
 
-$ln(Z_{j,t} ) = ln(\hat{Z}_{j,t} )+\epsilon_{j,t}$ where 
+Fisheries stock assessments require data that are reliably collected and
+compiled. Secondarily, assessment models should be configured to match
+the assumptions associated with the observed data. To account for survey
+trends between the two species of hake we applied the estimated
+observation errors to a simple state-space random walk model. This
+approach has a number of options for how process-errors can be specified
+and estimated. The observation model applies the observation-error
+variances $(\sigma_{j,t}^2)$ for the $j^{th}$ species in year
+$t (x_{j,t} )$. The indices are fit to latent state variables, e.g., the
+underlying population trend $ln(\hat{Z}_{j,t})$ as follows:
+
+$ln(Z_{j,t} ) = ln(\hat{Z}_{j,t} )+\epsilon_{j,t}$ where
 $\epsilon_{j,t}∼N(0,\sigma_{j,t}^2 )$
 
-and the state equation and associated process error variance σ_PE^2 is defined as
+and the state equation and associated process error variance
+$\sigma_{PE}^2$ is defined as
 
-$ln(\hat{Z}_{j,t+1} = ln(\hat{Z}_{j,t+}  )+\eta_{j,t},$
-where $\eta_{j,t}∼N(0,\tau_j^2 ).$
+$ln(\hat{Z}_{j,t+1} = ln(\hat{Z}_{j,t+}  )+\eta_{j,t},$ where
+$\eta_{j,t}∼N(0,\tau_j^2 ).$
 
-The process error variances $\tau_j^2$ (which may or may not vary across indices) are fixed 
-effect parameters and the unobserved species combined population $ln(Z_{j,t} )$ is 
-estimated as a series of random effects. The model is fit using maximum likelihood 
-estimation in TMB using the R package “rema” (Sullivan 2022). The survey data 
-for each species was used with CVs applied for observation error specifications. 
-The values for $\tau_j^2$ were tested for each species and found to be similar so they were 
-set to the same values.
+The process error variances $\tau_j^2$ (which may or may not vary across
+indices) are fixed effect parameters and the unobserved species combined
+population $ln(Z_{j,t} )$ is estimated as a series of random effects.
+The model is fit using maximum likelihood estimation in TMB using the R
+package “rema” (Sullivan 2022). The survey data for each species was
+used with CVs applied for observation error specifications. The values
+for $\tau_j^2$ were tested for each species and found to be similar so
+they were set to the same values.
 
-The above analysis provides a summary of the model runs and the design of a control rule that accounts for the signals in the data on the different species.
+The above analysis provides a summary of the model runs and the design
+of a control rule that accounts for the signals in the data on the
+different species.
 
-# Sensitivity to TAC variables
+## Application to the Namibian hake stocks
+
+The control rule was first applied to the Namibian hake stocks using the
+survey data and the relative proportions of the two species. However, we
+wish to have a more robust control rule that accounts for the signals in
+the data on *M. paradoxus* biomass and have that be independent of *M.
+capensis* (e.g., @fig-relmean). For that case, we applied the survey
+smoothing model to *paradoxus* alone. The next step was to compute mean
+biomass over the period 1990-2024, and evaluate the adustment for
+different levels of $\gamma$. The historical adjustments based on this
+aspect of the MP is shown in @fig-adjust.
+
+```{r relmean}
+#| echo: false
+#| label: fig-relmean
+#| fig.cap: "Historical biomass estimates for M. paradoxus and the mean biomass over the period 1990-2024."
+
+biom_out <- get_relative_biomass()
+
+p1 <-  biom_out$biomass_by_strata |> filter(strata=="paradoxus") |>
+  ggplot(aes(x=year,ymin=pred_lci,ymax=pred_uci,fill=strata,y=obs)) +
+  geom_ribbon(alpha=.6) +
+  scale_y_continuous(labels = scales::comma, expand = c(0, 0), limits = c(0, NA)) +
+  geom_errorbar(aes(x = year, ymin = obs_lci, ymax = obs_uci),width=.2,alpha=.4) +
+  geom_line(aes(x = year, y = pred)) + ylab("Biomass (kt)") +
+  ggthemes::theme_few() +
+  geom_point(alpha=.7)
+mean_mp<-exp(mean(p1$data$log_pred))
+p1 + geom_hline(yintercept = mean_mp, linetype = "dashed", color = "blue")
+ggsave(here("mods","figs","biom_paradoxus.png"),width=6,height=5)
+```
+
+```{r relmean}
+#| echo: false
+#| label: fig-adjust
+#| fig.cap: "Historical adjustments for different reactivities to *M. paradoxus* biomass."
+#---Plot the adjustment factors for different reactivities to M. paradoxus biomass----
+dftmp <- p1$data |> select(Year=year, Index = pred) |> mutate(
+  'Gamma = 0.1' = if_else( Index/mean_mp>1,1,Index/mean_mp)^0.1,
+  'Gamma = 0.5' = if_else( Index/mean_mp>1,1,(Index/mean_mp)^.5),
+  'Gamma = 0.25' = if_else( Index/mean_mp>1,1,(Index/mean_mp)^.25)
+  ) |> pivot_longer(cols = -Year, names_to = "Reactivity", values_to = "Index")
+dftmp |> filter(Reactivity != "Index") |>
+      ggplot(aes(x = Year, y = Index, color=Reactivity)) + geom_line() +
+      ggtitle("Historical adjustments for different reactivities to M. paradoxus biomass") +
+      ggthemes::theme_few() + ylab("TAC adjustment based on M. paradoxus biomass")
+ggsave(here("mods","figs","adj_paradoxus.png"),width=6,height=5)
+cur_mp <- dftmp |> filter(Year==2025,Reactivity=="Gamma = 0.25") |> pull(Index)
+cur_mp <- round(cur_mp,3)
+```
+
+## Control rule developments
+
+The situation for developing a two-species control rule where catches
+between species and the trend in overall biomass for both species is
+combined is challenging. For management purposes, the goal is to avoid
+incidental takes in the proportion of one species that exceeds the
+historical levels of depletion for either stock. Fortunately, survey
+data are available that can be used to distinguish trends in the
+relative biomass for both stocks. The design of the triggered control
+rule therefore must consider patterns in the relative biomass from the
+survey data, the absolute biomass of the combined catch and biomass as
+modeled from the combined-stocks assessment. This provides a pragmatic
+approach using available data.
+
+The steps in the control rule would be first to run a simple model that
+projected the survey biomass and relative proportion of *M. paradoxus*.
+Then, given the mean proportion over the period, compute the adjustment
+needed to the overarching control rule for the management procedure. For
+example, the historical range based on the survey has been between about
+one third of the mean value (in the earliest part of the period) to
+about 70% above the mean proportion. This range (especially the lower
+value) was used as a semi-empirical way to develop a minimum stock size
+threshold as part of the control rule. That is, when the stock of *M.
+paradoxus* drops below 30% of the mean proportion of the combined stocks
+estimate, the TAC recommendation for the combined stock would be zero.
+So if proportion of *M. paradoxus* $(p_y)$ is greater than 30% of the
+long-term mean proportion, then
+
+$TAC_y=(R \sum_{y}^{y-4}\frac{RY_y} 5) \min(1.0,B_y/B_{MSY})^\lambda{0.5}^{-\lambda}  )\min(1,\dot{p_y}/\dot{\bar{p}})^\gamma$
+
+where the rebuilding factor ($R$) is set to 0.8 when the spawning
+biomass is below $B_{MSY}$ and 1.0 when above. In words, the TAC in year
+y is equal to the catch under the current control rule times the ratio
+of the spawning biomass relative to BMSY (or proxy) and the externally
+estimated proportion of *M. paradoxus* from survey data. The second term
+relates $B_{MSY}$ and is intended to take fast action (for
+$\lambda >1.0$) when the biomass falls below 0.5 of that value (a
+standard in many places to define "overfished"). The third term on the
+right hand side reflects the impact the *M. paradoxus* biomass projected
+from a survey smoother (described below) and adjusts the TAC advice
+downwards when the projected $\dot{p_y}$ drops below the mean value. The
+values of $\gamma, \lambda$ were evaluated and are shown in Table xx. We
+note that the specification of a survey linkage by the individual
+species provides an appropriate adjustment that reduces the exploitation
+rate and prevents potential for "the point of recruitment impairment"
+(PRI).
+
+For the control rule as specified, the reactivity of the TAC advice to
+changes in either B/Bmsy or the biomass of *M. paradoxus* biomass can be
+adjusted. These are shown in @fig-gamma. For the purposes of this
+analysis, we set $\gamma = .25$. For $\lambda$, most models evaluated were
+above 0.5 of $B_{MSY}$ so there was no added adjustment beyond the $R=0.8$. 
+So, following the TAC as
+specified, the base-case model was below $B_{MSY} so $R=0.8$ with
+the average replacement yield over the last 5 years is
+recommended, with the adjustment based on the relative biomass of *M.
+paradoxus* and the long-term mean biomass of the species.
+
+The TAC advice for the combined stocks is then given in @tbl-controlrule. 
+
+```{r controlrule}
+#| label:tbl-controlrule
+dftmp <- NULL
+mod_scen <- c(2:8)
+ii=2
+names(cur_mp) <- "Ratio of paradoxus to mean "
+for (ii in mod_scen) {
+  x <- modlst[[ii]]
+  Cur_Bmsy <- round(x$Cur_Bmsy, 3)
+  names(Cur_Bmsy) <- paste0("Current B over Bmsy")
+  ry <- round(x$aveRY_last5, 0)
+  names(ry) <- paste0("recent 5-yr avg repl. yield")
+  
+  ry_cur <- round(x$aveRY_last5 * min(1,x$Cur_Bmsy), 3)
+  #names(ry_cur) <- ("Recent RY x current B/Bmsy")
+  
+  lambda=1.5; gamma=0.25
+  if (Cur_Bmsy>0.5) adj = 1 else adj = Cur_Bmsy^lambda/0.5^lambda
+  tac1 <- round(0.8*ry*adj*min(1,cur_mp)^gamma,2)
+  names(tac1) <- paste0("opt 1, lambda=",lambda," gamma=",gamma)
+  
+  lambda=2; gamma=0.25
+  if (Cur_Bmsy>.5) adj = 1 else adj = Cur_Bmsy^lambda/0.5^lambda
+  tac2 <- round(0.8*ry*adj*min(1,cur_mp)^gamma,2)
+  names(tac2) <- paste0("opt 2, lambda=",lambda," gamma=",gamma)
+  
+  lambda=2; gamma=0.1
+  if (Cur_Bmsy>.5) adj = 1 else adj = Cur_Bmsy^lambda/0.5^lambda
+  adj;Cur_Bmsy
+  tac3 <- round(0.8*ry*adj*min(1,cur_mp)^gamma,2)
+  names(tac3) <- paste0("opt 3, lambda=",lambda," gamma=",gamma)
+  
+  lambda=2; gamma=1.0
+  if (Cur_Bmsy>.5) adj = 1 else adj = Cur_Bmsy^lambda/0.5^lambda
+  adj;Cur_Bmsy
+  tac4 <- round(0.8*ry*adj*min(1,cur_mp)^gamma,2)
+  names(tac4) <- paste0("opt 4, lambda=",lambda," gamma=",gamma)
+  
+  filler="";names(filler)<-"TAC"
+  
+  v <- c(ry, Cur_Bmsy, cur_mp, filler, tac1, tac2, tac3, tac4)
+  dftmp <- cbind(dftmp, v)
+}
+dftmp <- data.frame(rownames(dftmp), dftmp, row.names = NULL)
+names(dftmp) <- c("Statistic", mod_label[mod_scen])
+tabcap <- "Selected management measures from alternative models. "
+flextable(dftmp) |>
+  set_caption(caption = tabcap) |>
+  colformat_double() |>
+  autofit()
+
+```
+
+```{r gamma}
+#| label: fig-gamma
+#| fig.cap: "TAC adjustments for different  levels of current biomass of M. paradoxus biomass."
+#--- Plot the adjustment factors for different reactivities to M. paradoxus biomass----
+df01 <- tibble(
+  relbiom  = 1:20/20,
+  'Gamma = 0.1'=(1:20/20)^0.1,
+  'Gamma = 0.5'=(1:20/20)^.5,
+  'Gamma = 0.25'=(1:20/20)^.25,
+  ) |>  pivot_longer(cols = -relbiom, names_to = "Reactivity", values_to = "adjustment" )
+df01 |>
+  ggplot(aes(y =  adjustment, x=relbiom, color=Reactivity)) + geom_line() +
+  xlab("Relative M. paradoxus biomass") + ylab("TAC adjustment") +
+  ggthemes::theme_few() #+ ylab("TAC adjustment based on M. paradoxus biomass")```{r lam_gam}
+ggsave(here("mods","figs","gamma.png"),width=6,height=5)
+```
+
+```{r lambda}
+#| label: fig-lambda
+#| fig.cap: "TAC adjustments for different  levels of current biomass relative to Bmsy "
+#---Plot the adjustment factors for different reactivities to M. paradoxus biomass----
+df01<-tibble()
+df01 <- rbind(df01,
+              tibble( relbiom  = 1:100/100, lambda   = rep(0.5,100)),
+              tibble( relbiom  = 1:100/100, lambda   = rep(1,100)),
+              tibble( relbiom  = 1:100/100, lambda   = rep(1.5,100)),
+              tibble( relbiom  = 1:100/100, lambda   = rep(2,100))
+  ) |>  mutate(adjustment = if_else(relbiom<0.5,relbiom^lambda/0.5^lambda,1),lambda = as.factor(lambda))
+df01 |>  ggplot(aes(y =  adjustment, x=relbiom, color=lambda)) + geom_line() +
+  xlab("Spawning biomass relative Bmsy") + ylab("TAC adjustment") +
+  ggthemes::theme_few() #+ ylab("TAC adjustment based on M. paradoxus biomass")
+ggsave(here("mods","figs","lambda.png"),width=6,height=5)
+```
 
 
 # Notes
 
-Throughout the weeks, we scrutinized data inputs and found a couple of inconsistencies. 
-For example, data were provided for surveys in 2019 yet there were no observations in that year.
-Similarly, the abundance-at-length data from the surveys failed to identify strong periods of persistence by cohorts.
+Throughout the weeks, we scrutinized data inputs and found a couple of
+inconsistencies. For example, data were provided for surveys in 2019 yet
+there were no observations in that year. Similarly, the
+abundance-at-length data from the surveys failed to identify strong
+periods of persistence by cohorts.
 
 Ignore 7-vessel CPUE data set.

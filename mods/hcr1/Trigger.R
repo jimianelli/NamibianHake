@@ -3,35 +3,12 @@ library(patchwork)
 library(tidyverse)
 library(here)
 
-#---Fit smoother to capensis ----
-read_csv(here("mods","hcr1","capensis.csv"))
-?prepare_rema_input
-cap<-prepare_rema_input(
-  model_name = "Capensis",
-  multi_survey = 0,
-  admb_re = NULL,
-  biomass_dat = read_csv(here("mods","hcr1","capensis.csv")) |> mutate(strata="Capensis"),
-  cpue_dat = NULL,
-  sum_cpue_index = FALSE,
-  start_year = NULL,
-  end_year = 2024,
-  wt_biomass = NULL,
-  wt_cpue = NULL,
-  PE_options = NULL,
-  q_options = NULL,
-  zeros = NULL,
-  extra_biomass_cv = NULL,
-  extra_cpue_cv = NULL
-)
-
-m <- fit_rema(cap)
-
 #---Cape-hakes, fit smoother to both species----
 caphakes<-prepare_rema_input(
   model_name = "Same PE",
   multi_survey = 0,
   admb_re = NULL,
-  biomass_dat = read_csv(here("mods","hcr1","CapeHakes.csv")),
+  biomass_dat = read_csv(here("mods","data","CapeHakes.csv")),
   cpue_dat = NULL,
   sum_cpue_index = FALSE,
   start_year = NULL,
@@ -52,10 +29,17 @@ df_obs<- tibble(year=caphakes$data$model_yrs,
 df_obs
 
 m <- fit_rema(caphakes)
+#names(m)
+output <- tidy_rema(rema_model = m)
+output$biomass_by_strata # data.frame of predicted and observed biomass by stratum
+output$total_predicted_biomass # total predicted biomass (same as biomass_by_strata for univariate models)
+
+
+
 
 caphakes2 <-prepare_rema_input(
   model_name = "Variable PE",
-  biomass_dat = read_csv(here("mods","hcr1","CapeHakes.csv")),
+  biomass_dat = read_csv(here("mods","data","CapeHakes.csv")),
   end_year = 2025,
 )
 caphakes2$data$pointer_PE_biomass
@@ -65,21 +49,12 @@ caphakes2$map$log_PE <-  as.factor(caphakes$par$log_PE <- c(1,1))
 
 m2 <- fit_rema(caphakes2)
 names(m)
-output <- tidy_rema(rema_model = m)
 output <- tidy_rema(rema_model = m2)
 names(output)
 output$parameter_estimates # estimated fixed effects parameters
-output$biomass_by_strata # data.frame of predicted and observed biomass by stratum
-output$total_predicted_biomass # total predicted biomass (same as biomass_by_strata for univariate models)
 unique(output$biomass_by_strata$strata) # total predicted biomass (same as biomass_by_strata for univariate models)
 names(output$biomass_by_strata )
-output$biomass_by_strata |>
-  ggplot(aes(x=year,ymin=pred_lci,ymax=pred_uci,fill=strata,y=obs)) +
-  geom_ribbon(alpha=.6) +
-  scale_y_continuous(labels = scales::comma, expand = c(0, 0), limits = c(0, NA)) +
-  geom_errorbar(aes(x = year, ymin = obs_lci, ymax = obs_uci),width=.2,alpha=.4) +
-  geom_line(aes(x = year, y = pred)) + ylab("Biomass (kt)") +
-  ggthemes::theme_few() + geom_point(alpha=.7)
+
 
 # Sum over the species
 tail(output$proportion_biomass_by_strata)
@@ -139,3 +114,10 @@ compare$plots$biomass_by_strata
 compare$aic
 names(compare)
 names(compare$output)
+
+#---Fit smoother to capensis ----
+spp="paradoxus"
+endyr=2025
+
+
+names(biom_out)
