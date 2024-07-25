@@ -11,6 +11,8 @@ on:
 
 name: pkgdown
 
+project:
+  render: ['*.qmd']
 permissions: read-all
 
 jobs:
