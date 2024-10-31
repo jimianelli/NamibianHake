@@ -940,16 +940,21 @@ These were based on the 2024 catch estimates (lower and higher values) for contr
 #| echo: false
 #| fig.cap: "40-year projections at different levels of catch related to the catch in 2024 (e.g., 0.5*C_24 is constant catch at 50% of the catch estimated for 2024). The scenario labeled 'Replacement yld' is just the catch set to the replacement yield. The cases with '10yr' represent catch scenarios where the catch is increased (and decreased) by 10% of the 2024 catch and thereafter set equal to the 2024 catch."
 
-prj <- read_csv("mods/m0/main.out",col_names = FALSE)
-names(prj )<- c("Scenario","Year", "Var", "Value")
-scen <- c( "0.5*C_24", "0.75*C_24", "0.9*C_24", "C_24", "1.1*C_24", "1.5*C_24", "2.0*C_24", "10yr up 10%", "10yr down 10%", "Replacement yld" )
+prj <- read_csv("mods/m0/main.out", col_names = FALSE)
+names(prj) <- c("Scenario", "Year", "Var", "Value")
+scen <- c("0.5*C_24", "0.75*C_24", "0.9*C_24", "C_24", "1.1*C_24", "1.5*C_24", "2.0*C_24", "10yr up 10%", "10yr down 10%", "Replacement yld")
 prj$Projection <- scen[prj$Scenario]
-#glimpse(prj)Var=="RY" | Var=="SSB" | 
+# glimpse(prj)Var=="RY" | Var=="SSB" |
 plotly::ggplotly(
-prj |>  filter(Var=="Catch" | Var=="Depletion", 
-               Scenario %in% c(1,4:5,8:10)) |> mutate(Scenario=as.factor(Scenario)) |> 
-  ggplot(aes(x=Year, y=Value, color=Projection)) + geom_line() + geom_point() +
-  facet_grid(Var ~ ., scales="free") + ylim(c(0,NA))
+  prj |> filter(
+    Var == "Catch" | Var == "Depletion",
+    Scenario %in% c(1, 4:5, 8:10)
+  ) |> mutate(Scenario = as.factor(Scenario)) |>
+    ggplot(aes(x = Year, y = Value, color = Projection)) +
+    geom_line() +
+    geom_point() +
+    facet_grid(Var ~ ., scales = "free") +
+    ylim(c(0, NA))
 )
 ```
 
