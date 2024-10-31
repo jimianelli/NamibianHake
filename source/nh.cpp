@@ -1839,29 +1839,69 @@ void model_parameters::Do_Projections(void)
   int u=0;
   PresValue=0;
   
-   
-    
+  for (int iscen=1; iscen<=10; iscen++)
+	{
   // *** DO for each year of the projection period ***
   // -------------------------------------------------
   for (Year=last_yr; Year<=last_yr+NProj; Year++)
   {
-    aveRYT = 0;  
+    switch (iscen)
     {
-      aveRYT = aveRYT + RY(Year-1) + RY(Year-2)+ RY(Year-3)+ RY(Year-4)+RY(Year);
-      aveRYT = aveRYT/5;
-    }
-    futCatch(last_yr-1) = 148;
-    futCatch(Year) = 0.8*aveRYT;
-    futCatch(last_yr) = 150;
-      
-    if (futCatch(Year)>1.1*futCatch(Year-1))
-    {
-      futCatch(Year)=1.1*futCatch(Year-1);
-    }     
-    if (futCatch(Year)<0.9*futCatch(Year-1))
-    {
-      futCatch(Year)=0.9*futCatch(Year-1);
-    }
+      case 1: 
+        futCatch(Year) = 0.5*Catch(last_yr);
+        break;
+      case 2: 
+        futCatch(Year) = .75*Catch(last_yr);
+        break;
+      case 3: 
+        futCatch(Year) = 0.9*  Catch(last_yr);
+        break;
+      case 4: 
+        futCatch(Year) = Catch(last_yr);
+        break;
+      case 5: 
+        futCatch(Year) = 1.1 *  Catch(last_yr);
+        break;
+      case 6: 
+        futCatch(Year) = 1.5 *  Catch(last_yr);
+        break;
+      case 7: 
+        futCatch(Year) = 2. *  Catch(last_yr);
+        break;
+      case 8: 
+			  if(Year<=last_yr+10)
+          futCatch(Year) = .95 *  Catch(last_yr);
+				else
+          futCatch(Year) = 1.05 *  Catch(last_yr);
+        break;
+      case 9: 
+			  if(Year<=last_yr+10)
+          futCatch(Year) = 1.05 *  Catch(last_yr);
+				else
+          futCatch(Year) = 0.95 *  Catch(last_yr);
+        break;
+      case 10: 
+        futCatch(Year) = Catch(last_yr);
+      if (Year==last_yr){
+        aveRYT = aveRY_last5 ;
+			  futCatch(last_yr) = Catch(last_yr);
+		    }
+		    else
+		    {
+          aveRYT = RY(Year) ; // RY(Year-1) + RY(Year-2)+ RY(Year-3)+ RY(Year-4)+RY(Year);
+          // aveRYT = aveRYT/5;
+          futCatch(Year) = aveRYT;
+          if (futCatch(Year)>1.1*futCatch(Year-1))
+          {
+            futCatch(Year)=1.1*futCatch(Year-1);
+          }     
+          if (futCatch(Year)<0.9*futCatch(Year-1))
+          {
+            futCatch(Year)=.9*futCatch(Year-1);
+          } /* */
+		    }
+      break;
+		}
     // *** Future selectivity same as last year's ***
     // ----------------------------------------------
     for (Age=0; Age<=plus_grp; Age++)
@@ -1987,15 +2027,22 @@ void model_parameters::Do_Projections(void)
      // *** Save the catch and spawning biomass ***
     // -------------------------------------------
     out0<<
-		Year<<" ,Catch ,"         <<futCatch(Year)<<endl<<
-		Year<<" ,Depletion,"      <<Spawn(Year)/mfexp(par_B0)<<endl<<
-    Year<<" ,Depletion_1990," <<TotalB(Year)/TotalB(1990)<<endl<<
-    Year<<" ,TAC, "          <<TAC(Year)<<endl<<
-		Year<<" ,PresVal ,"       <<PV(Year)<<endl<<
-		Year<<" ,EmployT,"        <<EmployT(Year)<<endl<<
-		Year<<" ,ProfitT,"        <<ProfitT(Year)<<endl<<
-		Year<<" ,VesselF,"        <<VesselF(Year)<<endl<<
-		Year<<" ,VesselW,"        <<VesselW(Year)<<" "<<endl;
+		iscen<<" ,"<<Year<<" ,Catch ,"         <<futCatch(Year)<<endl<<
+		iscen<<" ,"<<Year<<" ,aveRYT ,"         <<aveRYT<<endl<<
+		iscen<<" ,"<<Year<<" ,RY4 ,"         <<RY(Year-4)<<endl<<
+		iscen<<" ,"<<Year<<" ,RY3 ,"         <<RY(Year-3)<<endl<<
+		iscen<<" ,"<<Year<<" ,RY2 ,"         <<RY(Year-2)<<endl<<
+		iscen<<" ,"<<Year<<" ,RY1 ,"         <<RY(Year-1)<<endl<<
+		iscen<<" ,"<<Year<<" ,RY ,"         <<RY(Year)<<endl<<
+		iscen<<" ,"<<Year<<" ,SSB,"         <<Spawn(Year)<<endl<<
+		iscen<<" ,"<<Year<<" ,Depletion,"      <<Spawn(Year)/mfexp(par_B0)<<endl<<
+    iscen<<" ,"<<Year<<" ,Depletion_1990," <<TotalB(Year)/TotalB(1990)<<endl<<
+    iscen<<" ,"<<Year<<" ,TAC, "          <<TAC(Year)<<endl<<
+		iscen<<" ,"<<Year<<" ,PresVal ,"       <<PV(Year)<<endl<<
+		iscen<<" ,"<<Year<<" ,EmployT,"        <<EmployT(Year)<<endl<<
+		iscen<<" ,"<<Year<<" ,ProfitT,"        <<ProfitT(Year)<<endl<<
+		iscen<<" ,"<<Year<<" ,VesselF,"        <<VesselF(Year)<<endl<<
+		iscen<<" ,"<<Year<<" ,VesselW,"        <<VesselW(Year)<<" "<<endl;
     out1<<Year<<" "<<futCatch(Year)<<" "<<Spawn(Year)/mfexp(par_B0)<<endl;
     out2<<Year<<" "<<futCatch(Year)<<" "<<TotalB(Year)/TotalB(1990)<<endl;
     out4<<Year<<"  "<<futCatch(Year)<<" "<<TotalB(Year)/TotalB(1990)<<" "<<Bexp(Year)<<endl;
@@ -2014,6 +2061,7 @@ void model_parameters::Do_Projections(void)
   out8<<" "<<endl;
   out9<<" "<<endl;
   
+  }
  
 }
 
@@ -2062,7 +2110,8 @@ void model_parameters::report(const dvector& gradients)
   report << "Num_parameters_Estimated "<<initial_params::nvarcalc()<<endl;
   p=initial_params::nvarcalc();
   n=countAll;
-  Akaike=(2*obj_fun+2*p*(n/(n-p-1)));
+  // Akaike=(2*obj_fun+2*p*(n/(n-p-1)));
+  Akaike=(2*obj_fun+2*p);//*(n/(n-p-1)));
   report<<"Akaike_info_crit "<<Akaike<<endl;
   report << " " << endl;
   report << "Ksp                "<<mfexp(par_B0)<<endl;

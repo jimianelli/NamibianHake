@@ -428,3 +428,20 @@ library(FishLife)
 Taxa = Search_species( Genus = "Merluccius", Species = "capensis")$match_taxonomy
 Taxa = Search_species( Genus = "Merluccius", Species = "paradoxus")$match_taxonomy
 Predict = Plot_taxa( Taxa,  mfrow=c(3,2) )
+
+#--Read in model output files-----
+#
+prj <- read_csv("mods/m0/main.out",col_names = FALSE)
+names(prj )<- c("Scenario","Year", "Var", "Value")
+plotly::ggplotly(
+prj |>  filter(Var=="SSB" |Var=="SSB" | Var=="Catch" | Var=="RY" | Var=="Depletion",
+               Scenario %in% c(1,4:5,8:10)) |> mutate(Scenario=as.factor(Scenario)) |>
+  ggplot(aes(x=Year, y=Value, color=Scenario)) + geom_line() + geom_point() +
+  facet_grid(Var ~ ., scales="free") + ylim(c(0,NA))
+)
+#unique(prj$Var )
+#unique(prj$Scenario )
+
+```
+
+
