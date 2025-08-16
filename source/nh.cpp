@@ -238,18 +238,23 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
  ad_comm::change_datafile_name(datafilename);
   Wstrt.allocate(first_yr,last_yr,-1,plus_grp,"Wstrt");
   Wmid.allocate(first_yr,last_yr,-1,plus_grp,"Wmid");
+cout<<Wmid<<endl;
   Catch.allocate(first_yr,last_yr,"Catch");
   CAA.allocate(first_yr,last_yr,-2,plus_grp,"CAA");
+cout<<Catch<<endl;
   F_N.allocate(first_yr,last_yr);
   CPUE.allocate(first_yr,last_yr,0,NCpueSeries,"CPUE");
   Survey.allocate(first_yr,last_yr,0,NSurveySeries*2,"Survey");
   SurvCAA.allocate(1,NSurveySeries,first_yr,last_yr,-2,plus_grp,"SurvCAA");
+cout<<SurvCAA<<endl;
   S_N.allocate(1,NSurveySeries,first_yr,last_yr);
   seali.allocate(first_yr,last_yr,"seali");
   sealCV.allocate(first_yr,last_yr,"sealCV");
   mat.allocate(0,plus_grp,"mat");
+cout<<mat<<endl;
   SSB.allocate(1,20);
   eof1.allocate("eof1");
+cout<<"end of file marker   "<<eof1<<endl;
  if (eof1!=12345) {cout<<"Oh crap..."<<endl;exit(1);}
 Nsim = -1;
   rndCPUE.allocate(last_yr,last_yr+NProj);

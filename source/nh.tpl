@@ -216,24 +216,24 @@ DATA_SECTION
   !! ad_comm::change_datafile_name(datafilename);
   init_matrix Wstrt(first_yr,last_yr,-1,plus_grp)          // Start-year mass-at-age
   init_matrix Wmid(first_yr,last_yr,-1,plus_grp)           // Mid-year mass-at-age
-  //!!cout<<Wmid<<endl;
+  !!cout<<Wmid<<endl;
   init_vector Catch(first_yr,last_yr)                            // Catch data (fleet aggregated)
   init_matrix CAA(first_yr,last_yr,-2,plus_grp)                  // Commercial catch-at-age data (99, 00, 03)
-  //!!cout<<Catch<<endl;
+  !!cout<<Catch<<endl;
   vector      F_N(first_yr,last_yr)                             // Sample size for fishery
   init_matrix CPUE(first_yr,last_yr,0,NCpueSeries)
   init_matrix Survey(first_yr,last_yr,0,NSurveySeries*2)
 
   init_3darray SurvCAA(1,NSurveySeries,first_yr,last_yr,-2,plus_grp)
-  //!!cout<<SurvCAA<<endl;
+  !!cout<<SurvCAA<<endl;
   matrix      S_N(1,NSurveySeries,first_yr,last_yr)  // Sample size for survey
   init_vector seali(first_yr,last_yr)        //seal scat index for one-year olds
   init_vector sealCV(first_yr,last_yr)      //CV for seal scat index
   init_vector mat(0,plus_grp)                      // Maturity at age
-  //!!cout<<mat<<endl;
+  !!cout<<mat<<endl;
   vector SSB(1,20)    // For plotting from SR curve
   init_number eof1
-  //!!cout<<"end of file marker   "<<eof1<<endl;
+  !!cout<<"end of file marker   "<<eof1<<endl;
   !! if (eof1!=12345) {cout<<"Oh crap..."<<endl;exit(1);}
 
   int Nsim                // Number of MCMC simulations
