@@ -574,7 +574,9 @@ flextable(dftmp) |>
 # print(tab)
 ```
 
-A comparison among the models for stock status and
+A comparison among the models for stock status and reference points shows that
+the 2025 update is similar to the 2024 base case, but that the alternative models
+show a range of results (@fig-stockstatus). 
 
 ```{r stockstatus}
 #| echo: false
