@@ -49,21 +49,14 @@ knitr::opts_knit$set(root.dir = here::here())
 # knitr::opts_chunk$set(warning=F, message=F, echo=F, results=F,fig.width=6, fig.height=5)
 ```
 
-
 # Assessment model runs
 
 The original base-case model was evaluated for a number of features and
 extensions. These included focus on what data components were fit well
 and how improvements in consistency can be made. For the latter part, we
 found that the fits to the index and CPUE data were particularly poor
-and could be improved. We reviewed the model from Ianelli et al. (2023)
-and decided that whilst reassuring that alternative assessment approach
-provide similar results, for consistency and due to the added features
-of the Namibian model, it was preferred to make necessary changes in
-that code base. Give the short time available for training and
-implementation, we decided to focus on the base-case model and make
-necessary changes. The following sections outline the model runs and the
-results relative to the previous assessment.
+and could be improved. This document is an update from the  base-case model presented
+in 2024. 
 
 ### Model descriptions
 
@@ -75,17 +68,17 @@ residual patterns and essentially a complete down weighting of the index
 data. We used the assumed variance terms (CVs) for the indices in all of
 the following model configurations:
 
-| Model              | Description                                                                                                                                                                                     |
-|------------------------|-----------------------------------------------|
-| Previous base case | As specified in past assessments, estimated steepness and all variance terms                                                                                                                    |
-| Base case (m0)     | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified. |
+| Model | Description |
+|-------------------------|-----------------------------------------------|
+| Pre 2024 model configuration | As specified in past assessments, estimated steepness and all variance terms |
+| Base case (m0) | Model with survey "minus group" to be ages 0, and 1 instead of 0, 1, and 2 as done in the past, steepness fixed at 0.7, q estimated, and time-varying fishery asymptotic selectivity specified. |
 | m25 | As base case but updated through 2025 . |
-| m1                 | As base case but with survey catchability fixed at 1.0                                                                                                                                          |
-| m2                 | As base case but with survey catchability fixed at 0.5                                                                                                                                          |
-| m3                 | As base case but with natural mortality estimated                                                                                                                                               |
-| m4                 | As base case but with fishery selectivity allowed to be dome-shaped                                                                                                                             |
-| m5                 | As base case but with stock-recruit steepness fixed at 0.5                                                                                                                                      |
-| m6                 | As base case but with stock-recruit steepness fixed at 0.9                                                                                                                                      |
+| m1 | As 2024 base case but with survey catchability fixed at 1.0 |
+| m2 | As 2024 base case but with survey catchability fixed at 0.5 |
+| m3 | As 2024 base case but with natural mortality estimated |
+| m4 | As 2024 base case but with fishery selectivity allowed to be dome-shaped |
+| m5 | As 2024 base case but with stock-recruit steepness fixed at 0.5 |
+| m6 | As 2024 base case but with stock-recruit steepness fixed at 0.9 |
 
 <!-- | m7            | As base case but with early indices dropped (pre 1990)              | -->
 
@@ -111,7 +104,7 @@ set_flextable_defaults(
 ```{r getmods}
 #| output: false
 mod_ref <- c("old_bc", "m25", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
-mod_dir <- c("old_bc", "2025", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
+mod_dir <- c("old_bc", "m25", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
 mod_label <- c("2023 base case", "2025 Update", "2024 base case", "Model 1", "Model 2", "Model 3", "Model 4", "Model 5", "Model 6")
 
 
@@ -139,9 +132,6 @@ for (i in 1:length(mod_ref)) {
 
 ### Fits to index data
 
-After delving into the details of the model specifications, our main
-conclusion was that the previous assessments were generally insensitive
-to the trend data (surveys and CPUE series). This was due to the fact
 that the variance terms (CVs) were estimated. A more standard approach,
 where CVs are specified based on the data (e.g., from design-based
 sampling theory), was used and this performed better (@fig-fitidx1,
@@ -154,8 +144,8 @@ Similarly, we re-evaluated the ability of this model to estimate the
 stock recruitment productivity parameter (steepness). It is extremely
 rare that sufficient data are available to freely estimate this, even
 with extensive high-quality index data. Therefore we evaluated what
-assumptions were taken elsewhere (for this and related species, e.g., South African
-hake) and ran the models with steepness fixed at 0.7.
+assumptions were taken elsewhere (for this and related species, e.g.,
+South African hake) and ran the models with steepness fixed at 0.7.
 
 ```{r fitsurv}
 #| echo: false
@@ -164,7 +154,7 @@ hake) and ran the models with steepness fixed at 0.7.
 
 
 dfidx <- rbind(
-  data.frame(Year = 1964:2023, Obs = old_bc$Obs_Survey_1, predicted = old_bc$Pre_Survey_1, Model = "Base case 2023"),
+  # data.frame(Year = 1964:2023, Obs = old_bc$Obs_Survey_1, predicted = old_bc$Pre_Survey_1, Model = "Base case 2023"),
   data.frame(Year = 1964:2024, Obs = m0$Obs_Survey_1, predicted = m0$Pre_Survey_1, Model = "Base case 2024"),
   data.frame(Year = 1964:2025, Obs = m25$Obs_Survey_1, predicted = m25$Pre_Survey_1, Model = "Base case 2025")
 )
@@ -184,8 +174,8 @@ ggsave(here("mods", "figs", "fitidx1.png"), width = 6, height = 5)
 #| label: fig-fitcpue3
 
 dfcpue <- rbind(
-  data.frame(Year = 1964:2023, Obs = old_bc$Obs_CPUE_3, predicted = old_bc$e_CPUE_3, Model = "Base case 2023"),
-  data.frame(Year = 1964:2024, Obs = m0$Obs_CPUE_3, predicted = m0$e_CPUE_3, Model = "Base case 2024")
+  data.frame(Year = 1964:2024, Obs = m0$Obs_CPUE_3, predicted = m0$e_CPUE_3, Model = "Base case 2024"),
+  data.frame(Year = 1964:2025, Obs = m25$Obs_CPUE_3, predicted = m25$e_CPUE_3, Model = "Base case 2025")
 )
 
 dfcpue |>
@@ -203,8 +193,8 @@ ggsave(here("mods", "figs", "cpue3.png"), width = 6, height = 5)
 #| fig.cap: "Base case model fits to the CPUE index 1 data compared to the previous assessment."
 #| label: fig-fitcpue1
 dfcpue <- rbind(
-  data.frame(Year = 1964:2023, Obs = old_bc$Obs_CPUE_1, predicted = old_bc$e_CPUE_1, Model = "Base case 2023"),
-  data.frame(Year = 1964:2024, Obs = m0$Obs_CPUE_1, predicted = m0$e_CPUE_1, Model = "Base case 2024")
+  data.frame(Year = 1964:2024, Obs = m0$Obs_CPUE_1, predicted = m0$e_CPUE_1, Model = "Base case 2024"),
+  data.frame(Year = 1964:2025, Obs = m25$Obs_CPUE_1, predicted = m25$e_CPUE_1, Model = "Base case 2025")
 )
 dfcpue |>
   filter(Obs > 0) |>
@@ -218,10 +208,11 @@ ggsave(here("mods", "figs", "cpue1.png"), width = 6, height = 5)
 ```
 
 ```{r fitcpue3_all}
-#| fig.cap: "Base case model fits to the CPUE index 3 data compared to models 1 and 2."
+#| fig.cap: "Base case model fits to the CPUE index 3 data compared to 2025 and also models 1 and 2."
 #| label: fig-fitcpue1_all
 dfcpue <- rbind(
   data.frame(Year = 1964:2024, Obs = m0$Obs_CPUE_3, predicted = m0$e_CPUE_3, Model = "Base"),
+  data.frame(Year = 1964:2025, Obs = m25$Obs_CPUE_3, predicted = m25$e_CPUE_3, Model = "Base updated 2025"),
   data.frame(Year = 1964:2024, Obs = modlst[[3]]$Obs_CPUE_3, predicted = modlst[[3]]$e_CPUE_3, Model = "Model 1, q=1.0"),
   data.frame(Year = 1964:2024, Obs = modlst[[4]]$Obs_CPUE_3, predicted = modlst[[4]]$e_CPUE_3, Model = "Model 2, q=0.5")
 )
@@ -242,7 +233,8 @@ ggsave(here("mods", "figs", "cpue1_all.png"), width = 6, height = 5)
 #| label: fig-fitidx1_all
 
 dfidx <- rbind(
-  data.frame(Year = 1964:2024, Obs = m0$Obs_Survey_1, predicted = m0$Pre_Survey_1, Model = "Base "),
+  data.frame(Year = 1964:2024, Obs = m0$Obs_Survey_1, predicted = m0$Pre_Survey_1, Model = "Base 24"),
+  data.frame(Year = 1964:2025, Obs = m25$Obs_Survey_1, predicted = m25$Pre_Survey_1, Model = "Base 2025 "),
   data.frame(Year = 1964:2024, Obs = m0$Obs_Survey_1, predicted = modlst[[3]]$Pre_Survey_1, Model = "Model 1, q=1.0"),
   data.frame(Year = 1964:2024, Obs = m0$Obs_Survey_1, predicted = modlst[[4]]$Pre_Survey_1, Model = "Model 2, q=0.5")
 )
@@ -267,7 +259,7 @@ to 2 (as was done previously).
 #| fig.cap: "Base case model fits to the fishery age composition data. Note that the
 #| base case model uses a 'minus group' equal to '2' for the fishery data."
 #| label: fig-agecomps1
-PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7) + ggthemes::theme_few(base_size = 10)
+PlotAgeFit(x = m25, title = "Base case 2025", type = "fishery", fage = 2, lage = 7) + ggthemes::theme_few(base_size = 10)
 ggsave(here("mods", "figs", "Age_comp_fish.png"), width = 9, height = 8)
 ```
 
@@ -275,7 +267,7 @@ ggsave(here("mods", "figs", "Age_comp_fish.png"), width = 9, height = 8)
 #| fig.cap: "Base case model fits to the survey age composition data. Note that the
 #| base case model uses a 'minus group' equal to '1' for the survey data."
 #| label: fig-agecomps2
-PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7) + ggthemes::theme_few(base_size = 10)
+PlotAgeFit(x = m25, title = "Base case 2025", type = "survey1", fage = 1, lage = 7) + ggthemes::theme_few(base_size = 10)
 ggsave(here("mods", "figs", "Age_comp_surv.png"), width = 9, height = 8)
 ```
 
@@ -283,18 +275,17 @@ ggsave(here("mods", "figs", "Age_comp_surv.png"), width = 9, height = 8)
 
 ```{r selex}
 #| echo: false
-#| fig.cap: "Selectivity estimates for the base-case model run."
+#| fig.cap: "Selectivity estimates for the updated to 2025 base-case model run."
 #| fig.width: 4
 #| fig.height: 9
 
-M <- data.frame(Year = 1964:2023, Sel = m0$S[1:60, ], Model = "h=0.7, base case")
+M <- data.frame(Year = 1964:2024, Sel = m25$S[1:61, ], Model = "h=0.7, base case")
 p1 <- plot_sel()
-p1
+# p1
 ggsave(here("mods", "figs", "selectivity.png"), width = 5, height = 9)
 ```
 
-
-### Spawning biomass trends 
+### Spawning biomass trends
 
 @fig-ssb shows the SSB estimates for the base case model compared to the
 previous assessment. The horizontal lines correspond to the Bmsy values
@@ -307,7 +298,7 @@ for the separate models.
 dftmp <- data.frame(Model = mod_label[1], Bmsy = (modlst[[1]]$Bmsy))
 dftmp <- rbind(dftmp, data.frame(Model = mod_label[2], Bmsy = (modlst[[2]]$Bmsy)))
 mods |>
-  filter(Model %in% mod_label[1:2], Year > 1960, Variable == "SSB") |>
+  filter(Model %in% mod_label[2:3], Year > 1960, Variable == "SSB") |>
   ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
   geom_ribbon(alpha = .24) +
   ggthemes::theme_few() +
@@ -331,7 +322,7 @@ alternative models.
 #| fig.cap: "Base case model showing the relative SSB estimates compared to the previous assessment."
 #| label: fig-depl
 mods |>
-  filter(Model %in% mod_label[1:2], Year > 1960, Variable == "Depletion") |>
+  filter(Model %in% mod_label[3:2], Year > 1960, Variable == "Depletion") |>
   ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
   geom_ribbon(alpha = .24) +
   ggthemes::theme_few() +
@@ -360,16 +351,17 @@ ggsave(here("mods", "figs", "depl2.png"), width = 6, height = 5)
 ### Recruitment estimates
 
 The recruitment results are consistent with those seen for the spawning
-biomass. The base case model shows a decline in recruitment estimates
-compared to the previous assessment, as shown in @fig-rec. Compared to
-the base case model, the alternative models show a range of recruitment
-estimates, as shown in @fig-recalt.
+biomass. The recent models shows a decline in recruitment in general, and that
+given the new data, the estimates for the 2024 year-class dropped from the mean
+value assumed from the 2024 assessment (@fig-rec). Compared to
+the base case model, the alternative 2024 models show a range of recruitment
+estimates (@fig-recalt).
 
 ```{r rec}
 #| fig.cap: "Alternative model results on recruitment estimates."
 #| label: fig-rec
 mods |>
-  filter(Model %in% mod_label[1:2], Year > 2010, Variable == "R") |>
+  filter(Model %in% mod_label[3:2], Year > 2010, Variable == "R") |>
   ggplot(aes(x = Year, y = value, ymin = ymin, ymax = ymax, type = Model, fill = Model)) +
   geom_errorbar(width = 0.95, position = "dodge", alpha = .3) +
   geom_bar(width = 0.95, stat = "Identity", position = "dodge") +
@@ -395,11 +387,10 @@ ggsave(here("mods", "figs", "recalt.png"), width = 6, height = 5)
 
 ### Stock recruitment relationships
 
-For each of the models there were some specified and estimated 
-differences in the stock-recruitment relationships (@fig-srrplots). 
-When overlain with the recruitment estimates, these relationships appear
-to be relatively poorly defined  (@fig-srr). 
-
+For each of the models there were some specified and estimated
+differences in the stock-recruitment relationships (@fig-srrplots). When
+overlain with the recruitment estimates, these relationships appear to
+be relatively poorly defined (@fig-srr).
 
 ```{r srrplots}
 #| fig.cap: "Stock-recruitment curves noted for the previous base-case and
@@ -412,7 +403,6 @@ p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
 p1
 ggsave(here("mods", "figs", "srr_curves.png"), width = 6, height = 5)
 ```
-
 
 ```{r srr}
 #| label: fig-srr
@@ -435,7 +425,6 @@ mods |>
 ggsave(here("mods", "figs", "srr_yrs.png"), width = 6, height = 5)
 ```
 
-
 To show the history relative to the replacement yield, we can plot the
 SSB/Bmsy and the catch/replacement yield (@fig-kobe). This shows a
 significant difference between the previous assessment and that proposed
@@ -443,11 +432,11 @@ as the base-case for this year. The alternative models show a range of
 results, as shown in @fig-kobe2.
 
 ```{r kobe}
-#| fig.cap: "Base case model showing the relative SSB estimates compared to the previous assessment."
+#| fig.cap: "Base case model showing the relative SSB estimates compared to the 2024 assessment."
 #| label: fig-kobe
 tmp <- mods |>
   select(Year, Model, Variable, value) |>
-  filter(Model %in% mod_label[1:2], Year > 1980, Variable %in% c("Catch_RY", "B_Bmsy")) |>
+  filter(Model %in% mod_label[2:3], Year > 1980, Variable %in% c("Catch_RY", "B_Bmsy")) |>
   pivot_wider(names_from = Variable, values_from = value) |>
   arrange(Model, Year) #|>
 tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color = Model, fill = Model)) +
@@ -468,7 +457,7 @@ ggsave(here("mods", "figs", "kobe1.png"), width = 6, height = 5)
 #| label: fig-kobe2
 tmp <- mods |>
   select(Year, Model, Variable, value) |>
-  filter(Model %in% mod_label[1:2], Year > 1980, Variable %in% c("Catch_RY", "Depletion")) |>
+  filter(Model %in% mod_label[2:3], Year > 1980, Variable %in% c("Catch_RY", "Depletion")) |>
   pivot_wider(names_from = Variable, values_from = value)
 tmp <- mods |>
   select(Year, Model, Variable, value) |>
@@ -487,18 +476,17 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
 ggsave(here("mods", "figs", "kobe2.png"), width = 6, height = 5)
 ```
 
-
-
 ### Stock status comparisons
 
 The @tbl-quant show the results of the base case model compared to the
 alternative models for a number of key statistics. Among these, the best
 fitting models were the base-case and Model 5. However, model 5 fits
-indicated that the basis for fitting the data was virtually identical and
-that the slight benefit based on the AIC arises from the stock-recruitment
-residuals. For advice and consistency with productivity assumptions (i.e., the
-specification of the steepness parameter fixed at 0.7 as done for South Africa) 
-we selected the base-case scenario.
+indicated that the basis for fitting the data was virtually identical
+and that the slight benefit based on the AIC arises from the
+stock-recruitment residuals. For advice and consistency with
+productivity assumptions (i.e., the specification of the steepness
+parameter fixed at 0.7 as done for South Africa) we selected the
+base-case scenario.
 
 ```{r mgt_quant, results = "asis"}
 #| echo: true
@@ -507,7 +495,7 @@ we selected the base-case scenario.
 #| tbl-cap: "Model fits to data components"
 #|
 dftmp <- NULL
-mod_scen <- c(2:8)
+mod_scen <- c(2:3,5:8)
 filler <- " "
 names(filler) <- "-ln(Likelihood)"
 for (ii in mod_scen) {
@@ -548,7 +536,7 @@ flextable(dftmp) |>
 #| label: tbl-stockstatus
 #| tbl-cap: "Namibian hake stock estimates by model alternative."
 dftmp <- NULL
-mod_scen <- c(2:8)
+mod_scen <- c(2:3)
 for (ii in mod_scen) {
   x <- modlst[[ii]]
   Ksp <- round(x$KspSTD, 0)
@@ -639,10 +627,11 @@ The process error variances $\tau_j^2$ (which may or may not vary across
 indices) are fixed effect parameters and the unobserved species combined
 population $ln(Z_{j,t} )$ is estimated as a series of random effects.
 The model is fit using maximum likelihood estimation in TMB using the R
-package “rema” (Sullivan 2022). The survey data for each species was
-used with CVs applied for observation error specifications. The values
-for $\tau_j^2$ were tested for each species and found to be similar so
-they were set to the same values.
+package “rema” (Sullivan 2022, [rema
+library](https://afsc-assessments.github.io/rema)). The survey data for
+each species was used with CVs applied for observation error
+specifications. The values for $\tau_j^2$ were tested for each species
+and found to be similar so they were set to the same values.
 
 The above analysis provides a summary of the model runs and the design
 of a control rule that accounts for the signals in the data on the
@@ -662,10 +651,16 @@ aspect of the MP is shown in @fig-adjust.
 
 ```{r relmean}
 #| echo: false
+#| fig.width: 6
+#| fig.height: 5
+#| message: false
+#| warning: false
+#| results: asis
 #| label: fig-relmean
-#| fig.cap: "Historical biomass estimates for M. paradoxus and the mean biomass over the period 1990-2024."
+#| fig.cap: "Historical biomass estimates for M. paradoxus and the mean biomass over the period 1990-2025."
 
 biom_out <- get_relative_biomass()
+# tail(biom_out$total_predicted_biomass)
 
 p1 <- biom_out$biomass_by_strata |>
   filter(strata == "paradoxus") |>
@@ -676,7 +671,7 @@ p1 <- biom_out$biomass_by_strata |>
   geom_line(aes(x = year, y = pred)) +
   ylab("Biomass (kt)") +
   ggthemes::theme_few() +
-  geom_point(alpha = .7)
+  geom_point(alpha = .7) + theme(legend.position = "none")
 mean_mp <- exp(mean(p1$data$log_pred))
 p1 + geom_hline(yintercept = mean_mp, linetype = "dashed", color = "blue")
 ggsave(here("mods", "figs", "biom_paradoxus.png"), width = 6, height = 5)
@@ -699,9 +694,10 @@ dftmp |>
   filter(Reactivity != "Index") |>
   ggplot(aes(x = Year, y = Index, color = Reactivity)) +
   geom_line() +
-  ggtitle("Historical adjustments for different reactivities to M. paradoxus biomass") +
+  geom_point() +
+  ggtitle("Historical adjustments for different reactivities to *M. paradoxus* biomass") +
   ggthemes::theme_few() +
-  ylab("TAC adjustment based on M. paradoxus biomass")
+  ylab("TAC adjustment based on *M. paradoxus* biomass")
 ggsave(here("mods", "figs", "adj_paradoxus.png"), width = 6, height = 5)
 cur_mp <- dftmp |>
   filter(Year == 2025, Reactivity == "Gamma = 0.25") |>
@@ -742,39 +738,40 @@ $TAC_y=(\delta \sum_{y}^{y-4}\frac{RY_y} 5) \min(1.0,B_y/B_{MSY})^\lambda{0.5}^{
 where the rebuilding factor ($\delta$) is set to 0.8 when the spawning
 biomass is below $B_{MSY}$ and 1.0 when above. In words, the TAC in year
 y is equal to the catch under the current control rule times the ratio
-of the spawning biomass relative to $B_{MSY}$ (or proxy) and the externally
-estimated proportion of *M. paradoxus* from survey data. The second term
-relates $B_{MSY}$ and is intended to take fast action (for
+of the spawning biomass relative to $B_{MSY}$ (or proxy) and the
+externally estimated proportion of *M. paradoxus* from survey data. The
+second term relates $B_{MSY}$ and is intended to take fast action (for
 $\lambda >1.0$) when the biomass falls below 0.5 of that value (a
 standard in many places to define "overfished"). The third term on the
 right hand side reflects the impact the *M. paradoxus* biomass projected
 from a survey smoother (described below) and adjusts the TAC advice
 downwards when the projected $\dot{p_y}$ drops below the mean value. The
-values of $\gamma, \lambda$ were evaluated and are shown in @tbl-controlrule. 
-We note that the specification of a survey linkage by the individual
-species provides an appropriate adjustment that reduces the exploitation
-rate and prevents potential for "the point of recruitment impairment"
-(PRI).
+values of $\gamma, \lambda$ were evaluated and are shown in
+@tbl-controlrule. We note that the specification of a survey linkage by
+the individual species provides an appropriate adjustment that reduces
+the exploitation rate and prevents potential for "the point of
+recruitment impairment" (PRI).
 
 For the control rule as specified, the reactivity of the TAC advice to
 changes in either B/Bmsy or the biomass of *M. paradoxus* biomass can be
 adjusted. These are shown in @fig-gamma. For the purposes of this
-analysis, we set $\gamma = .25$. For $\lambda$, most models evaluated were
-above 0.5 of $B_{MSY}$ so there was no added adjustment beyond the $R=0.8$. 
-So, following the TAC as
-specified, the base-case model was below $B_{MSY}$ so $\delta=0.8$ with
-the average replacement yield over the last 5 years is
-recommended, with the adjustment based on the relative biomass of *M.
-paradoxus* and the long-term mean biomass of the species.
+analysis, we set $\gamma = .25$. For $\lambda$, most models evaluated
+were above 0.5 of $B_{MSY}$ so there was no added adjustment beyond the
+$R=0.8$. So, following the TAC as specified, the base-case model was
+below $B_{MSY}$ so $\delta=0.8$ with the average replacement yield over
+the last 5 years is recommended, with the adjustment based on the
+relative biomass of *M. paradoxus* and the long-term mean biomass of the
+species.
 
-The TAC advice for the combined stocks is then given in @tbl-controlrule. 
+The TAC advice for the combined stocks is then given in
+@tbl-controlrule.
 
 ```{r controlrule}
 #| label: tbl-controlrule
 #| tbl-cap: "Namibian hake specification of different options for TAC considerations"
 #|
 dftmp <- NULL
-mod_scen <- c(2:8)
+mod_scen <- c(2:3)
 ii <- 2
 names(cur_mp) <- "Ratio of paradoxus to mean "
 for (ii in mod_scen) {
@@ -873,19 +870,23 @@ ggsave(here("mods", "figs", "lambda.png"), width = 6, height = 5)
 # Projections
 
 A set of simple projections were established from the base case model.
-These were based on the 2024 catch estimates (lower and higher values) for contrast relative to depletion @fig-proj.
-
+These were based on the 2024 catch estimates (lower and higher values)
+for contrast relative to depletion @fig-proj.
 
 ```{r proj }
 #| label: fig-proj
 #| echo: false
 #| warnings: false
 #| messages: false
-#| fig.cap: "40-year projections at different levels of catch related to the catch in 2024 (e.g., 0.5*C_24 is constant catch at 50% of the catch estimated for 2024). The scenario labeled 'Replacement yld' is just the catch set to the replacement yield. The cases with '10yr' represent catch scenarios where the catch is increased (and decreased) by 10% of the 2024 catch and thereafter set equal to the 2024 catch."
-
-prj <- read_csv("mods/m0/main.out", col_names = FALSE)
+#| fig.cap: "40-year projections at different levels of catch related to the catch in 2025 (e.g., 0.5*C_25 is constant catch at 50% of the catch estimated for 2025). The scenario labeled 'Replacement yld' is just the catch set to the replacement yield. The cases with '10yr' represent catch scenarios where the catch is increased (and decreased) by 10% of the 2025 catch and thereafter set equal to the 2025 catch."
+prj <- readr::read_csv(
+  "mods/m25/main.out",
+  col_names = FALSE,
+  show_col_types = FALSE,   # <-- suppress column spec
+  progress = FALSE
+)
 names(prj) <- c("Scenario", "Year", "Var", "Value")
-scen <- c("0.5*C_24", "0.75*C_24", "0.9*C_24", "C_24", "1.1*C_24", "1.5*C_24", "2.0*C_24", "10yr up 10%", "10yr down 10%", "Replacement yld")
+scen <- c("0.5*C_25", "0.75*C_25", "0.9*C_25", "C_25", "1.1*C_25", "1.5*C_25", "2.0*C_25", "10yr up 10%", "10yr down 10%", "Replacement yld")
 prj$Projection <- scen[prj$Scenario]
 # glimpse(prj)Var=="RY" | Var=="SSB" |
 plotly::ggplotly(
@@ -901,22 +902,22 @@ plotly::ggplotly(
 )
 ```
 
-# Notes
+<!-- # Notes -->
 
-Throughout the weeks, we scrutinized data inputs and found a couple of
-inconsistencies. For example, data were provided for surveys in 2019 yet
-there were no observations in that year. Similarly, the
-abundance-at-length data from the surveys failed to identify strong
-periods of persistence by cohorts.
+<!-- Throughout the weeks, we scrutinized data inputs and found a couple of -->
+<!-- inconsistencies. For example, data were provided for surveys in 2019 yet -->
+<!-- there were no observations in that year. Similarly, the -->
+<!-- abundance-at-length data from the surveys failed to identify strong -->
+<!-- periods of persistence by cohorts. -->
 
-Should a run be done where we ignore 7-vessel CPUE data set?
+<!-- Should a run be done where we ignore 7-vessel CPUE data set? -->
 
-```{{r run_nh}}
-#| echo: true
+<!-- ```{{r run_nh}} -->
+<!-- #| echo: true -->
 
-#---Run all the models----------
-for (i in 1:length(mod_dir))
-  run_nh(model = mod_dir[i])
-get_results()
+<!-- #---Run all the models---------- -->
+<!-- for (i in 1:length(mod_dir)) -->
+<!--   run_nh(model = mod_dir[i]) -->
+<!-- get_results() -->
 
-```
+<!-- ``` -->

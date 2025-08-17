@@ -255,6 +255,7 @@ INITIALIZATION_SECTION
     
 //*****************************************************************************
 PARAMETER_SECTION
+	vector pred_nansen(first_yr,last_yr);
 !!  int NselPar;
 !!  NselPar = 2*NSelPeriods;
   
@@ -1986,6 +1987,11 @@ REPORT_SECTION
     for (Age=0; Age<=plus_grp; Age++)
       report<<N(Year,Age)<<" ";
     report<<" "<<endl;
+    if (Year<=q_chngYr(1))
+		   pred_nansen(Year) = SurvBeg(Year) * qSurvPre(1);
+     else
+		   pred_nansen(Year) = SurvBeg(Year) * qSurvPost(1);
+
   }
 
 
@@ -2174,19 +2180,29 @@ FINAL_SECTION
     Rreport<<"Obs_Survey_"<<Iser<<endl;
     for (int Year=first_yr; Year<=last_yr; Year++)
       Rreport<<Survey(Year,Iser*2-1)<<" ";
-    Rreport<<endl<<"Pre_Survey_"<<Iser<<endl;
-    for (int Year=first_yr; Year<=last_yr; Year++)
+		if (Iser != 1)
 		{
-      if (SurveyIndx(Iser) == 1) BIO(Year) = Bexp(Year);
-      if (SurveyIndx(Iser) == 2) BIO(Year) = SurvMid(Year);
-      if (SurveyIndx(Iser) == 3) BIO(Year) = SurvBeg(Year);
+      Rreport<<endl<<"Pre_Survey_"<<Iser<<endl;
+      for (int Year=first_yr; Year<=last_yr; Year++)
+		  {
+        if (SurveyIndx(Iser) == 1) BIO(Year) = Bexp(Year);
+        if (SurveyIndx(Iser) == 2) BIO(Year) = SurvMid(Year);
+        if (SurveyIndx(Iser) == 3) BIO(Year) = SurvBeg(Year);
+        if (Year<=q_chngYr(Iser))
+          Rreport<<Survey(Year,Iser*2-1)<<" "<<qSurvPre(Iser)*BIO(Year)<<" ";
+        else
+          Rreport<<Survey(Year,Iser*2-1)<<" "<<qSurvPost(Iser)*BIO(Year)<<" ";
+        // if (Year<=q_chngYr(Iser))
+			    // Rreport<<qSurvPre(Iser)*BIO(Year)<<" ";
+        // else
+			    // Rreport<<qSurvPost(Iser)*BIO(Year)<<" ";
+       }
+       Rreport<<" "<<endl;
+     } else {
+       Rreport<<endl<<"Pre_Survey_1"<<endl;
+	     Rreport << pred_nansen <<endl;
+		 }
 
-      if (Year<=q_chngYr(Iser))
-			  Rreport<<qSurvPre(Iser)*BIO(Year)<<" ";
-      else
-			  Rreport<<qSurvPost(Iser)*BIO(Year)<<" ";
-     }
-     Rreport<<" "<<endl;
    }
    R_report(N);
    R_report(S);

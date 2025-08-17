@@ -283,6 +283,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
  model_data(argc,argv) , function_minimizer(sz)
 {
   initializationfunction();
+  pred_nansen.allocate(first_yr,last_yr,"pred_nansen");
+  #ifndef NO_AD_INITIALIZE
+    pred_nansen.initialize();
+  #endif
   int NselPar;
   NselPar = 2*NSelPeriods;
   par_B0.allocate(-1.0,13.0,"par_B0");
@@ -2244,6 +2248,10 @@ void model_parameters::report(const dvector& gradients)
     for (Age=0; Age<=plus_grp; Age++)
       report<<N(Year,Age)<<" ";
     report<<" "<<endl;
+    if (Year<=q_chngYr(1))
+		   pred_nansen(Year) = SurvBeg(Year) * qSurvPre(1);
+     else
+		   pred_nansen(Year) = SurvBeg(Year) * qSurvPost(1);
   }
   report << " " << endl;
   report << "Year Bsp Bexp F RecRes Catch Depletion TotalB"<<endl;
@@ -2422,18 +2430,28 @@ void model_parameters::final_calcs()
     Rreport<<"Obs_Survey_"<<Iser<<endl;
     for (int Year=first_yr; Year<=last_yr; Year++)
       Rreport<<Survey(Year,Iser*2-1)<<" ";
-    Rreport<<endl<<"Pre_Survey_"<<Iser<<endl;
-    for (int Year=first_yr; Year<=last_yr; Year++)
+		if (Iser != 1)
 		{
-      if (SurveyIndx(Iser) == 1) BIO(Year) = Bexp(Year);
-      if (SurveyIndx(Iser) == 2) BIO(Year) = SurvMid(Year);
-      if (SurveyIndx(Iser) == 3) BIO(Year) = SurvBeg(Year);
-      if (Year<=q_chngYr(Iser))
-			  Rreport<<qSurvPre(Iser)*BIO(Year)<<" ";
-      else
-			  Rreport<<qSurvPost(Iser)*BIO(Year)<<" ";
-     }
-     Rreport<<" "<<endl;
+      Rreport<<endl<<"Pre_Survey_"<<Iser<<endl;
+      for (int Year=first_yr; Year<=last_yr; Year++)
+		  {
+        if (SurveyIndx(Iser) == 1) BIO(Year) = Bexp(Year);
+        if (SurveyIndx(Iser) == 2) BIO(Year) = SurvMid(Year);
+        if (SurveyIndx(Iser) == 3) BIO(Year) = SurvBeg(Year);
+        if (Year<=q_chngYr(Iser))
+          Rreport<<Survey(Year,Iser*2-1)<<" "<<qSurvPre(Iser)*BIO(Year)<<" ";
+        else
+          Rreport<<Survey(Year,Iser*2-1)<<" "<<qSurvPost(Iser)*BIO(Year)<<" ";
+        // if (Year<=q_chngYr(Iser))
+			    // Rreport<<qSurvPre(Iser)*BIO(Year)<<" ";
+        // else
+			    // Rreport<<qSurvPost(Iser)*BIO(Year)<<" ";
+       }
+       Rreport<<" "<<endl;
+     } else {
+       Rreport<<endl<<"Pre_Survey_1"<<endl;
+	     Rreport << pred_nansen <<endl;
+		 }
    }
    R_report(N);
    R_report(S);
