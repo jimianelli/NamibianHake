@@ -495,7 +495,7 @@ base-case scenario.
 #| tbl-cap: "Model fits to data components"
 #|
 dftmp <- NULL
-mod_scen <- c(2:3,5:8)
+mod_scen <- c(2:3, 5:8)
 filler <- " "
 names(filler) <- "-ln(Likelihood)"
 for (ii in mod_scen) {
@@ -671,7 +671,8 @@ p1 <- biom_out$biomass_by_strata |>
   geom_line(aes(x = year, y = pred)) +
   ylab("Biomass (kt)") +
   ggthemes::theme_few() +
-  geom_point(alpha = .7) + theme(legend.position = "none")
+  geom_point(alpha = .7) +
+  theme(legend.position = "none")
 mean_mp <- exp(mean(p1$data$log_pred))
 p1 + geom_hline(yintercept = mean_mp, linetype = "dashed", color = "blue")
 ggsave(here("mods", "figs", "biom_paradoxus.png"), width = 6, height = 5)
@@ -882,7 +883,7 @@ for contrast relative to depletion @fig-proj.
 prj <- readr::read_csv(
   "mods/m25/main.out",
   col_names = FALSE,
-  show_col_types = FALSE,   # <-- suppress column spec
+  show_col_types = FALSE, # <-- suppress column spec
   progress = FALSE
 )
 names(prj) <- c("Scenario", "Year", "Var", "Value")
