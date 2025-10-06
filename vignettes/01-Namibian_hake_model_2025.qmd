@@ -733,10 +733,22 @@ value) was used as a semi-empirical way to develop a minimum stock size
 threshold as part of the control rule. That is, when the stock of *M.
 paradoxus* drops below 30% of the mean proportion of the combined stocks
 estimate, the TAC recommendation for the combined stock would be zero.
-So if proportion of *M. paradoxus* $(p_y)$ is greater than 30% of the
-long-term mean proportion, then
 
-$TAC_y=(\delta \sum_{y}^{y-4}\frac{RY_y} 5) \min(1.0,B_y/B_{MSY})^\lambda{0.5}^{-\lambda}  )\min(1,\dot{p_y}/\dot{\bar{p}})^\gamma$
+$$
+TAC_y = \begin{cases} 
+0 & \text{if } p_y < 0.3\bar{p} \\
+\delta \left(\frac{1}{5}\sum_{i=0}^{4} RY_{y-i}\right) \times f(B_y, \lambda) \times \min\left(1, \frac{\tilde{p}_y}{\bar{p}}\right)^\gamma & \text{otherwise}
+\end{cases}
+$$
+
+where:
+$$
+f(B_y, \lambda) = \begin{cases}
+\left(\frac{B_y/B_{MSY}}{0.5}\right)^\lambda & \text{if } B_y/B_{MSY} < 0.5 \\
+1 & \text{otherwise}
+\end{cases}
+$$
+
 
 where the rebuilding factor ($\delta$) is set to 0.8 when the spawning
 biomass is below $B_{MSY}$ and 1.0 when above. In words, the TAC in year
@@ -745,11 +757,10 @@ of the spawning biomass relative to $B_{MSY}$ (or proxy) and the
 externally estimated proportion of *M. paradoxus* from survey data. The
 second term relates $B_{MSY}$ and is intended to take fast action (for
 $\lambda >1.0$) when the biomass falls below 0.5 of that value (a
-standard in many places to define "overfished"). The third term on the
-right hand side reflects the impact the *M. paradoxus* biomass projected
-from a survey smoother (described below) and adjusts the TAC advice
-downwards when the projected $\dot{p_y}$ drops below the mean value. The
-values of $\gamma, \lambda$ were evaluated and are shown in
+standard in many places to define "overfished"). 
+The third term on the right hand side reflects the impact of the *M. paradoxus* proportion projected from a survey smoother (described below) and adjusts the TAC advice downwards when the projected $\tilde{p}_y$ drops below the mean value.
+
+The values of $\gamma, \lambda$ were evaluated and are shown in
 @tbl-controlrule. We note that the specification of a survey linkage by
 the individual species provides an appropriate adjustment that reduces
 the exploitation rate and prevents potential for "the point of
@@ -758,14 +769,8 @@ recruitment impairment" (PRI).
 For the control rule as specified, the reactivity of the TAC advice to
 changes in either B/Bmsy or the biomass of *M. paradoxus* biomass can be
 adjusted. These are shown in @fig-gamma. For the purposes of this
-analysis, we set $\gamma = .25$. For $\lambda$, most models evaluated
-were above 0.5 of $B_{MSY}$ so there was no added adjustment beyond the
-$R=0.8$. So, following the TAC as specified, the base-case model was
-below $B_{MSY}$ so $\delta=0.8$ with the average replacement yield over
-the last 5 years is recommended, with the adjustment based on the
-relative biomass of *M. paradoxus* and the long-term mean biomass of the
-species.
-
+analysis, we set $\gamma = .25$. 
+For $\lambda$, most models evaluated were above 0.5 of $B_{MSY}$ so $f(B_y, \lambda) = 1$ and there was no added adjustment beyond $\delta=0.8$. So, following the TAC as specified, the base-case model was below $B_{MSY}$ so $\delta=0.8$ with the average replacement yield over the last 5 years is recommended, with the adjustment based on the relative proportion of *M. paradoxus* and the long-term mean proportion of the species.
 The TAC advice for the combined stocks is then given in
 @tbl-controlrule.
 
