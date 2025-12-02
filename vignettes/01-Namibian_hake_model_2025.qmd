@@ -2,6 +2,7 @@
 title: "Namibian hake model update, 2025"
 author: "John Kathena, Jim Ianelli"
 date: today
+quarto: true
 prefer-html: true
 vignette: >
   %\VignetteIndexEntry{Model update}

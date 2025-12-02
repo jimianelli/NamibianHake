@@ -1,4 +1,9 @@
 url: ~
 template:
   bootstrap: 5
+articles:
+  - title: "Vignettes"
+  contents:
+    - starts_with("NamibianHake")
+    - matches(".*")
 
