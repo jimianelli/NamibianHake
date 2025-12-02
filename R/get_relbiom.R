@@ -17,11 +17,16 @@
 #'
 #' @export
 get_relative_biomass <- function(spp = "paradoxus", endyr = 2025) {
+  base_path <- getOption("NamibianHake.mods_path", Sys.getenv("NAMIBIANHAKE_MODS_PATH", here::here("mods")))
+  data_file <- file.path(base_path, "data", paste0(spp, ".csv"))
+  if (!file.exists(data_file)) {
+    stop("Biomass data file not found: ", data_file)
+  }
   data <- rema::prepare_rema_input(
     model_name = spp,
     multi_survey = 0,
     admb_re = NULL,
-    biomass_dat = read_csv(here("mods", "data", paste0(spp, ".csv"))) |>
+    biomass_dat = read_csv(data_file) |>
       mutate(strata = spp),
     cpue_dat = NULL, sum_cpue_index = FALSE,
     start_year = NULL, end_year = endyr,

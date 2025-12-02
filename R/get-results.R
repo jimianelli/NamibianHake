@@ -17,6 +17,16 @@ get_results <- function(mod_names. = mod_names,
                         do_estimation = FALSE) {
   # Build absolute paths so calls work even when the working directory
   # is not the package root (e.g., when pkgdown evaluates vignettes).
+  override_path <- getOption("NamibianHake.mods_path", NULL)
+  if (is.null(override_path)) {
+    env_override <- Sys.getenv("NAMIBIANHAKE_MODS_PATH", unset = NA)
+    if (!is.na(env_override) && nzchar(env_override)) {
+      override_path <- env_override
+    }
+  }
+  if (!is.null(override_path)) {
+    rundir_full <- override_path
+  } else {
   is_absolute_path <- function(x) grepl("^(?:[A-Za-z]:)?[\\\\/]", x)
   find_description_root <- function(start = getwd()) {
     cur <- normalizePath(start, winslash = "/", mustWork = TRUE)
@@ -37,6 +47,7 @@ get_results <- function(mod_names. = mod_names,
     root <- find_description_root()
     if (is.null(root)) root <- getwd()
     rundir_full <- file.path(root, rundir)
+  }
   }
 
   if (!run_on_mac) {

@@ -179,6 +179,10 @@ mod_ref <- c("old_bc", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
 mod_dir <- c("old_bc", "m0", "m1", "m2", "m3", "m4", "m5", "m6")
 mod_label <- c("2023 base case", "2024 base case", "Model 1", "Model 2", "Model 3", "Model 4", "Model 5", "Model 6")
 
+options(NamibianHake.mods_path = Sys.getenv("NAMIBIANHAKE_MODS_PATH", here::here("mods")))
+mods_base <- getOption("NamibianHake.mods_path")
+fig_dir <- file.path(mods_base, "figs")
+dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 
 #---Main code that extracts all the results from the model lists above------
 res <- get_results(mod_names. = mod_label, moddir = mod_dir)
@@ -238,7 +242,7 @@ dfidx |>
   ylim(0, NA) +
   geom_line(aes(y = predicted)) +
   geom_point(aes(y = predicted))
-ggsave(here("mods", "figs", "fitidx1.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "fitidx1.png"), width = 6, height = 5)
 ```
 
 ```{r fitcpue3}
@@ -259,7 +263,7 @@ dfcpue |>
   geom_point(aes(y = predicted)) +
   ggtitle("CPUE 3") +
   ylim(0, NA)
-ggsave(here("mods", "figs", "cpue3.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "cpue3.png"), width = 6, height = 5)
 ```
 
 ```{r fitcpue1}
@@ -277,7 +281,7 @@ dfcpue |>
   geom_point(aes(y = predicted)) +
   ggtitle("CPUE 1") +
   ylim(0, NA)
-ggsave(here("mods", "figs", "cpue1.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "cpue1.png"), width = 6, height = 5)
 ```
 
 ```{r fitcpue3_all}
@@ -296,7 +300,7 @@ dfcpue |>
   geom_point(aes(y = predicted)) +
   ggtitle("CPUE 1") +
   ylim(0, NA)
-ggsave(here("mods", "figs", "cpue1_all.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "cpue1_all.png"), width = 6, height = 5)
 ```
 
 ```{r fitsurv_all}
@@ -316,7 +320,7 @@ dfidx |>
   ylim(0, NA) +
   geom_line(aes(y = predicted)) +
   geom_point(aes(y = predicted))
-ggsave(here("mods", "figs", "fitidx1_all.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "fitidx1_all.png"), width = 6, height = 5)
 ```
 
 ### Age composition fits
@@ -331,7 +335,7 @@ to 2 (as was done previously).
 #| base case model uses a 'minus group' equal to '2' for the fishery data."
 #| label: fig-agecomps1
 PlotAgeFit(x = m0, title = "Base case", type = "fishery", fage = 2, lage = 7) + ggthemes::theme_few(base_size = 10)
-ggsave(here("mods", "figs", "Age_comp_fish.png"), width = 9, height = 8)
+ggsave(file.path(fig_dir, "Age_comp_fish.png"), width = 9, height = 8)
 ```
 
 ```{r agecomps2}
@@ -339,7 +343,7 @@ ggsave(here("mods", "figs", "Age_comp_fish.png"), width = 9, height = 8)
 #| base case model uses a 'minus group' equal to '1' for the survey data."
 #| label: fig-agecomps2
 PlotAgeFit(x = m0, title = "Base case", type = "survey1", fage = 1, lage = 7) + ggthemes::theme_few(base_size = 10)
-ggsave(here("mods", "figs", "Age_comp_surv.png"), width = 9, height = 8)
+ggsave(file.path(fig_dir, "Age_comp_surv.png"), width = 9, height = 8)
 ```
 
 ### Selectivity
@@ -353,7 +357,7 @@ ggsave(here("mods", "figs", "Age_comp_surv.png"), width = 9, height = 8)
 M <- data.frame(Year = 1964:2023, Sel = m0$S[1:60, ], Model = "h=0.7, base case")
 p1 <- plot_sel()
 p1
-ggsave(here("mods", "figs", "selectivity.png"), width = 5, height = 9)
+ggsave(file.path(fig_dir, "selectivity.png"), width = 5, height = 9)
 ```
 
 
@@ -381,7 +385,7 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("SSB") +
   xlab("Year")
-ggsave(here("mods", "figs", "ssb1.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "ssb1.png"), width = 6, height = 5)
 ```
 
 Another way to evaluate the relative trends in spawning biomass is to
@@ -402,7 +406,7 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("Relative SSB") +
   xlab("Year")
-ggsave(here("mods", "figs", "depl1.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "depl1.png"), width = 6, height = 5)
 ```
 
 ```{r deplalt}
@@ -417,7 +421,7 @@ mods |>
   geom_point(aes(color = Model, shape = Model), size = 1.) +
   ylab("Relative SSB") +
   xlab("Year")
-ggsave(here("mods", "figs", "depl2.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "depl2.png"), width = 6, height = 5)
 ```
 
 ### Recruitment estimates
@@ -439,7 +443,7 @@ mods |>
   ggthemes::theme_few() +
   ylab("Recruitment age 0") +
   xlab("Year")
-ggsave(here("mods", "figs", "rec.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "rec.png"), width = 6, height = 5)
 ```
 
 ```{r recalt}
@@ -453,7 +457,7 @@ mods |>
   ggthemes::theme_few() +
   ylab("Recruitment age 0") +
   xlab("Year")
-ggsave(here("mods", "figs", "recalt.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "recalt.png"), width = 6, height = 5)
 ```
 
 ### Stock recruitment relationships
@@ -473,7 +477,7 @@ p1 <- dfsrr |> ggplot(aes(x = SSB, y = R, color = Model, shape = Model)) +
   geom_line() +
   xlim(c(0, 4000))
 p1
-ggsave(here("mods", "figs", "srr_curves.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "srr_curves.png"), width = 6, height = 5)
 ```
 
 
@@ -495,7 +499,7 @@ mods |>
     data = dfsrr |> filter(Model %in% mod_label[2:9]),
     aes(y = R, x = SSB, color = Model), inherit.aes = FALSE
   )
-ggsave(here("mods", "figs", "srr_yrs.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "srr_yrs.png"), width = 6, height = 5)
 ```
 
 
@@ -522,7 +526,7 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
   geom_vline(xintercept = 1) +
   xlab("SSB/Bmsy") +
   ylab("Catch / replacement Yield")
-ggsave(here("mods", "figs", "kobe1.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "kobe1.png"), width = 6, height = 5)
 ```
 
 ```{r kobe2}
@@ -547,7 +551,7 @@ tmp |> ggplot(aes(x = B_Bmsy, label = Year, y = Catch_RY, shape = Model, color =
   geom_vline(xintercept = 1) +
   xlab("SSB/Bmsy") +
   ylab("Catch / replacement Yield")
-ggsave(here("mods", "figs", "kobe2.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "kobe2.png"), width = 6, height = 5)
 ```
 
 
@@ -671,7 +675,7 @@ mods |>
   ylab("Value") +
   xlab("") +
   facet_wrap(. ~ Variable, scales = "free")
-ggsave(here("mods", "figs", "refpoints.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "refpoints.png"), width = 6, height = 5)
 ```
 
 # Control rule application
@@ -742,7 +746,7 @@ p1 <- biom_out$biomass_by_strata |>
   geom_point(alpha = .7)
 mean_mp <- exp(mean(p1$data$log_pred))
 p1 + geom_hline(yintercept = mean_mp, linetype = "dashed", color = "blue")
-ggsave(here("mods", "figs", "biom_paradoxus.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "biom_paradoxus.png"), width = 6, height = 5)
 ```
 
 ```{r relmean}
@@ -765,7 +769,7 @@ dftmp |>
   ggtitle("Historical adjustments for different reactivities to M. paradoxus biomass") +
   ggthemes::theme_few() +
   ylab("TAC adjustment based on M. paradoxus biomass")
-ggsave(here("mods", "figs", "adj_paradoxus.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "adj_paradoxus.png"), width = 6, height = 5)
 cur_mp <- dftmp |>
   filter(Year == 2025, Reactivity == "Gamma = 0.25") |>
   pull(Index)
@@ -910,7 +914,7 @@ df01 |>
   xlab("Relative M. paradoxus biomass") +
   ylab("TAC adjustment") +
   ggthemes::theme_few() #+ ylab("TAC adjustment based on M. paradoxus biomass")```{r lam_gam}
-ggsave(here("mods", "figs", "gamma.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "gamma.png"), width = 6, height = 5)
 ```
 
 ```{r lambda}
@@ -930,7 +934,7 @@ df01 |> ggplot(aes(y = adjustment, x = relbiom, color = lambda)) +
   xlab("Spawning biomass relative Bmsy") +
   ylab("TAC adjustment") +
   ggthemes::theme_few() #+ ylab("TAC adjustment based on M. paradoxus biomass")
-ggsave(here("mods", "figs", "lambda.png"), width = 6, height = 5)
+ggsave(file.path(fig_dir, "lambda.png"), width = 6, height = 5)
 ```
 
 # Projections
@@ -946,7 +950,7 @@ These were based on the 2024 catch estimates (lower and higher values) for contr
 #| messages: false
 #| fig.cap: "40-year projections at different levels of catch related to the catch in 2024 (e.g., 0.5*C_24 is constant catch at 50% of the catch estimated for 2024). The scenario labeled 'Replacement yld' is just the catch set to the replacement yield. The cases with '10yr' represent catch scenarios where the catch is increased (and decreased) by 10% of the 2024 catch and thereafter set equal to the 2024 catch."
 
-prj <- read_csv("mods/m0/main.out", col_names = FALSE)
+prj <- read_csv(file.path(mods_base, "m0", "main.out"), col_names = FALSE)
 names(prj) <- c("Scenario", "Year", "Var", "Value")
 scen <- c("0.5*C_24", "0.75*C_24", "0.9*C_24", "C_24", "1.1*C_24", "1.5*C_24", "2.0*C_24", "10yr up 10%", "10yr down 10%", "Replacement yld")
 prj$Projection <- scen[prj$Scenario]
