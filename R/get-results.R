@@ -21,7 +21,9 @@ get_results <- function(mod_names. = mod_names,
   find_description_root <- function(start = getwd()) {
     cur <- normalizePath(start, winslash = "/", mustWork = TRUE)
     repeat {
-      if (file.exists(file.path(cur, "DESCRIPTION"))) return(cur)
+      if (file.exists(file.path(cur, "DESCRIPTION"))) {
+        return(cur)
+      }
       parent <- dirname(cur)
       if (identical(parent, cur)) break
       cur <- parent
