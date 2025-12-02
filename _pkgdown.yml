@@ -2,8 +2,8 @@ url: ~
 template:
   bootstrap: 5
 articles:
-  - title: "Vignettes"
-  contents:
-    - starts_with("NamibianHake")
-    - matches(".*")
+  NamibianHake:
+    contents:
+      - vignettes/01-Namibian_hake_model_2024.qmd
+      - vignettes/01-Namibian_hake_model_2025.qmd
 
