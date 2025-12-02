@@ -27,27 +27,27 @@ get_results <- function(mod_names. = mod_names,
   if (!is.null(override_path)) {
     rundir_full <- override_path
   } else {
-  is_absolute_path <- function(x) grepl("^(?:[A-Za-z]:)?[\\\\/]", x)
-  find_description_root <- function(start = getwd()) {
-    cur <- normalizePath(start, winslash = "/", mustWork = TRUE)
-    repeat {
-      if (file.exists(file.path(cur, "DESCRIPTION"))) {
-        return(cur)
+    is_absolute_path <- function(x) grepl("^(?:[A-Za-z]:)?[\\\\/]", x)
+    find_description_root <- function(start = getwd()) {
+      cur <- normalizePath(start, winslash = "/", mustWork = TRUE)
+      repeat {
+        if (file.exists(file.path(cur, "DESCRIPTION"))) {
+          return(cur)
+        }
+        parent <- dirname(cur)
+        if (identical(parent, cur)) break
+        cur <- parent
       }
-      parent <- dirname(cur)
-      if (identical(parent, cur)) break
-      cur <- parent
+      NULL
     }
-    NULL
-  }
 
-  if (is_absolute_path(rundir)) {
-    rundir_full <- rundir
-  } else {
-    root <- find_description_root()
-    if (is.null(root)) root <- getwd()
-    rundir_full <- file.path(root, rundir)
-  }
+    if (is_absolute_path(rundir)) {
+      rundir_full <- rundir
+    } else {
+      root <- find_description_root()
+      if (is.null(root)) root <- getwd()
+      rundir_full <- file.path(root, rundir)
+    }
   }
 
   if (!run_on_mac) {
