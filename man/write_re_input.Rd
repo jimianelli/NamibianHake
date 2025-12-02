@@ -33,7 +33,7 @@ bookkeeping (e.g., "EBS shelf flathead sole")}
 \item{yr_end}{Optional end year for predictions}
 }
 \value{
-Nothing, a data file is written as \param{file}
+Nothing, a data file is written to \code{file}
 }
 \description{
 Write an input file for the RE model

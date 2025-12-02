@@ -11,15 +11,15 @@ vignette: >
 lightbox: true
 format:
   pdf:
-        toc: true
-        toc-title: 'Contents'
+    toc: true
+    toc-title: 'Contents'
   html:
-        code-summary: "Show the code"
-        embed-resources: true
-        toc: true
-        toc-title: 'Contents'
-        number-sections: false
-        code-fold: true
+    code-summary: "Show the code"
+    embed-resources: true
+    toc: true
+    toc-title: 'Contents'
+    number-sections: false
+    code-fold: true
 editor: 
   markdown: 
     wrap: 72

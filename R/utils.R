@@ -54,7 +54,7 @@ read_re_output <- function(file = "rwout.rep", skip_data = FALSE,
 #' @param yr_start Optional start year for predictions
 #' @param yr_end Optional end year for predictions
 #'
-#' @return Nothing, a data file is written as \param{file}
+#' @return Nothing, a data file is written to \code{file}
 #'
 #' @seealso read_re_output
 write_re_input <- function(file, years, biomass, CV, tag = NULL,

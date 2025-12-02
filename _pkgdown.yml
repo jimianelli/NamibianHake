@@ -3,7 +3,7 @@ template:
   bootstrap: 5
 articles:
   NamibianHake:
+    title: "Namibian hake models"
     contents:
-      - vignettes/01-Namibian_hake_model_2024.qmd
-      - vignettes/01-Namibian_hake_model_2025.qmd
-
+      - matches("^00-Namibian_hake_model_2024$")
+      - matches("^01-Namibian_hake_model_2025$")

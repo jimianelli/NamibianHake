@@ -3,7 +3,7 @@ title: "Namibian hake model update, 2024"
 author: "John Kathena, Jim Ianelli"
 date: today
 quarto: true
-  prefer-html: true
+prefer-html: true
 vignette: >
   %\VignetteIndexEntry{Model update}
   %\VignetteEncoding{UTF-8}
@@ -11,15 +11,15 @@ vignette: >
 lightbox: true
 format:
   pdf:
-        toc: true
-        toc-title: 'Contents'
+    toc: true
+    toc-title: 'Contents'
   html:
-        code-summary: "Show the code"
-        embed-resources: true
-        toc: true
-        toc-title: 'Contents'
-        number-sections: false
-        code-fold: true
+    code-summary: "Show the code"
+    embed-resources: true
+    toc: true
+    toc-title: 'Contents'
+    number-sections: false
+    code-fold: true
 editor: 
   markdown: 
     wrap: 72

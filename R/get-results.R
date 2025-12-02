@@ -15,31 +15,81 @@ get_results <- function(mod_names. = mod_names,
                         moddir = mod_dir,
                         run_on_mac = TRUE,
                         do_estimation = FALSE) {
-  if (run_on_mac) {
-    fn <- paste0(rundir, "/", moddir, "/nh_R.rep")
+  # Build absolute paths so calls work even when the working directory
+  # is not the package root (e.g., when pkgdown evaluates vignettes).
+  is_absolute_path <- function(x) grepl("^(?:[A-Za-z]:)?[\\\\/]", x)
+  find_description_root <- function(start = getwd()) {
+    cur <- normalizePath(start, winslash = "/", mustWork = TRUE)
+    repeat {
+      if (file.exists(file.path(cur, "DESCRIPTION"))) return(cur)
+      parent <- dirname(cur)
+      if (identical(parent, cur)) break
+      cur <- parent
+    }
+    NULL
+  }
+
+  if (is_absolute_path(rundir)) {
+    rundir_full <- rundir
   } else {
-    # run on windows
-    fn <- paste0(rundir, "\\", moddir, "\\nh_R.rep") # rundir is "C:\\GitProjects\\EBSpollock\\2023_runs\\"
+    root <- find_description_root()
+    if (is.null(root)) root <- getwd()
+    rundir_full <- file.path(root, rundir)
+  }
+
+  if (!run_on_mac) {
+    # Normalize Windows-style paths while still allowing \\\\ separators
+    rundir_full <- normalizePath(rundir_full, winslash = "\\\\", mustWork = FALSE)
+  }
+  fn <- file.path(rundir_full, moddir, "nh_R.rep")
+  missing_rep <- fn[!file.exists(fn)]
+  if (length(missing_rep)) {
+    stop("Model output not found. Expected files: ", paste(missing_rep, collapse = ", "))
   }
   nmods <- length(mod_names.)
-  num_cores <- parallel::detectCores() - 2
-  cl <- parallel::makeCluster(num_cores)
-  on.exit(parallel::stopCluster(cl)) # Ensure the cluster stops after function execution
+
+  num_cores <- parallel::detectCores()
+  if (is.na(num_cores)) num_cores <- 1
+  num_cores <- max(1, min(num_cores - 2, nmods))
+  cl <- NULL
+  if (num_cores > 1) {
+    cl <- parallel::makeCluster(num_cores)
+  }
+  on.exit({
+    if (!is.null(cl)) parallel::stopCluster(cl)
+  })
 
   # Export necessary functions and objects to the cluster
-  # source("R/read-admb2.R")
-  parallel::clusterExport(cl, c("read_fit", "read_admb", "read_rep", "run_nh"),
-    envir = environment()
-  )
+  if (!is.null(cl)) {
+    parallel::clusterExport(cl, c("read_fit", "read_admb", "read_rep", "run_nh"),
+      envir = environment()
+    )
+  }
+
+  run_parallel <- function(x, fun) {
+    if (!is.null(cl)) {
+      tryCatch(
+        parallel::parLapply(cl = cl, X = x, fun = fun),
+        error = function(e) {
+          warning("Parallel execution failed (", conditionMessage(e), "); falling back to sequential.")
+          parallel::stopCluster(cl)
+          cl <<- NULL
+          lapply(x, fun)
+        }
+      )
+    } else {
+      lapply(x, fun)
+    }
+  }
 
   # Run model parallel
   if (do_estimation) {
-    system.time(modlst <- parallel::parLapply(cl = cl, X = fn, fun = run_nh))
+    system.time(modlst <- run_parallel(fn, run_nh))
   }
   # Fetch model results in parallel
-  system.time(modlst <- parallel::parLapply(cl = cl, X = fn, fun = read_rep))
-  fn <- paste0("mods/", moddir, "/nh_out.csv")
-  system.time(moddiag <- parallel::parLapply(cl = cl, X = fn, fun = readr::read_csv))
+  system.time(modlst <- run_parallel(fn, read_rep))
+  fn <- file.path(rundir_full, moddir, "nh_out.csv")
+  system.time(moddiag <- run_parallel(fn, readr::read_csv))
   names(modlst) <- mod_names.
   names(moddiag) <- mod_names.
   res <- list(modlst, moddiag)
