@@ -1,9 +1,31 @@
-url: ~
+url: https://jimianelli.github.io/NamibianHake/
 template:
   bootstrap: 5
+  bslib:
+    primary: "#0B5D6B"
+home:
+  title: "Namibian hake stock assessments"
+  description: >
+    Annual assessment documents, model inputs, diagnostics, and reproducible
+    workflows for Namibian hake.
+navbar:
+  structure:
+    left: [home, assessments, reference, news]
+    right: [search, github]
+  components:
+    assessments:
+      text: "Assessment documents"
+      menu:
+        - text: "2026 assessment update"
+          href: articles/02-Namibian_hake_model_2026.html
+        - text: "2025 assessment (previous year)"
+          href: articles/01-Namibian_hake_model_2025.html
+        - text: "2024 assessment"
+          href: articles/00-Namibian_hake_model_2024.html
 articles:
-  NamibianHake:
-    title: "Namibian hake models"
+  annual-assessments:
+    title: "Annual assessment documents"
     contents:
-      - matches("^00-Namibian_hake_model_2024$")
-      - matches("^01-Namibian_hake_model_2025$")
+      - 02-Namibian_hake_model_2026
+      - 01-Namibian_hake_model_2025
+      - 00-Namibian_hake_model_2024

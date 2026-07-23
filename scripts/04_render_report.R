@@ -14,9 +14,17 @@ report <- file.path(
   "vignettes",
   "02-Namibian_hake_model_2026.qmd"
 )
-for (format in c("html", "pdf")) {
+formats <- list(
+  html = c("render", report, "--to", "html"),
+  pdf = c(
+    "render", report, "--to", "pdf",
+    "--metadata", "toc:true",
+    "--metadata", "keep-tex:true"
+  )
+)
+for (format in names(formats)) {
   message("Rendering ", format)
-  status <- system2(quarto, c("render", report, "--to", format))
+  status <- system2(quarto, formats[[format]])
   if (status != 0L) {
     stop("Failed to render the ", format, " report.")
   }

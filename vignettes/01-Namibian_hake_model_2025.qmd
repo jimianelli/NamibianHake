@@ -10,9 +10,6 @@ vignette: >
   %\VignetteEngine{quarto::html}
 lightbox: true
 format:
-  pdf:
-    toc: true
-    toc-title: 'Contents'
   html:
     code-summary: "Show the code"
     embed-resources: true

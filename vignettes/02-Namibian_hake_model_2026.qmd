@@ -7,9 +7,6 @@ format:
     embed-resources: true
     toc: true
     code-fold: true
-  pdf:
-    toc: true
-    keep-tex: true
 execute:
   echo: false
   warning: false

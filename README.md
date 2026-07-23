@@ -1,38 +1,40 @@
-
-README
-================
-John Kathena
-Jim Ianelli
-2024-07-19
+# Namibian hake stock assessments
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of NamibianHake is to setup a package for the Namibian hake assessment.
+This repository contains the annual Namibian hake stock assessment, its data
+and control files, model diagnostics, and the code needed to reproduce the
+results.
 
-## Installation
+## Assessment documents
 
-You can install the development version of NamibianHake from [GitHub](https://github.com/) with:
+| Assessment | What it represents | Read online | Files |
+|:--|:--|:--|:--|
+| **2026 update** | Current assessment using data through 2026 | [2026 report](articles/02-Namibian_hake_model_2026.html) | [PDF](https://github.com/jimianelli/NamibianHake/raw/main/vignettes/02-Namibian_hake_model_2026.pdf) · [source](https://github.com/jimianelli/NamibianHake/blob/main/vignettes/02-Namibian_hake_model_2026.qmd) |
+| **2025 assessment** | Previous-year baseline used for the bridge comparison | [2025 report](articles/01-Namibian_hake_model_2025.html) | [source](https://github.com/jimianelli/NamibianHake/blob/main/vignettes/01-Namibian_hake_model_2025.qmd) |
+| **2024 assessment** | Historical assessment | [2024 report](articles/00-Namibian_hake_model_2024.html) | [PDF](https://github.com/jimianelli/NamibianHake/raw/main/vignettes/00-Namibian_hake_model_2024.pdf) · [source](https://github.com/jimianelli/NamibianHake/blob/main/vignettes/00-Namibian_hake_model_2024.qmd) |
 
-``` r
-# install.packages("devtools")
-devtools::install_github("jimianelli/NamibianHake")
-```
+The [2025-to-2026 input-difference
+report](https://github.com/jimianelli/NamibianHake/blob/main/reports/input_changes_2025_to_2026.md)
+identifies every intended input change. Model diagnostics and key results are
+available in the [`reports`
+directory](https://github.com/jimianelli/NamibianHake/tree/main/reports).
 
-## Reproducing the 2026 update
+## Reproduce the 2026 assessment
 
-Run the annual workflow from the repository root in this order:
+From the repository root, run the four numbered workflow scripts in order:
 
-```sh
+``` sh
 Rscript scripts/01_validate_inputs.R
 Rscript scripts/02_run_assessment.R
 Rscript scripts/03_check_models.R
 Rscript scripts/04_render_report.R
 ```
 
-The stages validate and compare the annual inputs, compile and run the ADMB
+These stages validate and compare the annual inputs, compile and run the ADMB
 models, classify convergence, write compact CSV summaries, and render the HTML
-and PDF reports. Review these colleague-facing outputs:
+and PDF reports. The main machine-readable outputs are:
 
 - `reports/input_changes_2025_to_2026.html`
 - `reports/model_diagnostics_2026.csv`
@@ -44,43 +46,6 @@ The dome-shaped selectivity and steepness 0.5 sensitivities currently fail the
 declared diagnostic criteria. Their estimates are retained for troubleshooting
 but excluded from inference.
 
-## Example model runs
-
-Below are examples which show how models can be run based on the directory location.
-
-``` r
-library(NamibianHake)
-## basic example code
-library(here)
-library(tidyverse)
-library(ggridges)
-theme_set(ggthemes::theme_few())
-
-bc <- run_nh("bc")
-m1 <- run_nh("m1",runit=FALSE)
-m2 <- run_nh("m2",runit=FALSE)
-m3 <- run_nh("m3",runit=FALSE)
-mods <-  rbind(
-    read_csv(here("mods", "bc", "nh_out.csv")) |> mutate(Model = "Base Case"),
-    read_csv(here("mods", "m1", "nh_out.csv")) |> mutate(Model = "Model 1"),
-    read_csv(here("mods", "m2", "nh_out.csv")) |> mutate(Model = "Model 2"),
-    read_csv(here("mods", "m3", "nh_out.csv")) |> mutate(Model = "Model 3")
-    )
-  
-
-df <- rbind(
-    data.frame(SSB = bc$SSB, R = bc$Pred_Rec, Model = "Base Case"),
-    data.frame(SSB = m1$SSB, R = m1$Pred_Rec, Model = "Model 1"),
-    data.frame(SSB = m2$SSB, R = m2$Pred_Rec, Model = "Model 2"),
-    data.frame(SSB = m3$SSB, R = m3$Pred_Rec, Model = "Model 3") 
-  ) 
-
-p1 <- df %>% ggplot(aes(x = SSB, y = R, color = Model, shape=Model)) +
-  geom_point() +
-  geom_line();p1
-PlotAgeFit(x=bc, title="Base case",type="fishery",fage=2,lage=7)
-PlotAgeFit(x=bc, title="Base case",type="survey1",fage=1,lage=7)
-M<- data.frame(Year = 1964:2023,Sel = bc$S[1:60,], Model = "h=0.7, base case")
-plot_sel()
-
-```
+For the exact 2025 reference state, use the immutable
+[`baseline-2025`](https://github.com/jimianelli/NamibianHake/releases/tag/baseline-2025)
+tag.
