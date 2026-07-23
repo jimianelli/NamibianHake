@@ -22,8 +22,3 @@ navbar:
           href: articles/01-Namibian_hake_model_2025.html
         - text: "2024 assessment (PDF)"
           href: articles/00-Namibian_hake_model_2024.pdf
-articles:
-  annual-assessments:
-    title: "Annual assessment documents"
-    contents:
-      - 02-Namibian_hake_model_2026

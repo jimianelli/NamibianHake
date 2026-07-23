@@ -45,8 +45,10 @@ jobs:
 
       - name: Add archived assessment documents
         run: |
+          mkdir -p docs/articles
           cp vignettes/00-Namibian_hake_model_2024.pdf docs/articles/
           cp vignettes/01-Namibian_hake_model_2025.html docs/articles/
+          cp vignettes/02-Namibian_hake_model_2026.html docs/articles/
           cp vignettes/02-Namibian_hake_model_2026.pdf docs/articles/
 
       - name: Deploy to GitHub pages 🚀

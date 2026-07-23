@@ -11,7 +11,7 @@ results.
 
 | Assessment | What it represents | Read online | Files |
 |:--|:--|:--|:--|
-| **2026 update** | Current assessment using data through 2026 | [2026 report](articles/02-Namibian_hake_model_2026.html) | [PDF](https://github.com/jimianelli/NamibianHake/raw/main/vignettes/02-Namibian_hake_model_2026.pdf) · [source](https://github.com/jimianelli/NamibianHake/blob/main/vignettes/02-Namibian_hake_model_2026.qmd) |
+| **2026 update** | Current assessment using data through 2026 | [2026 report](articles/02-Namibian_hake_model_2026.html) | [PDF](articles/02-Namibian_hake_model_2026.pdf) · [source](https://github.com/jimianelli/NamibianHake/blob/main/reports/02-Namibian_hake_model_2026.qmd) |
 | **2025 assessment** | Previous-year baseline used for the bridge comparison | [2025 report](articles/01-Namibian_hake_model_2025.html) | [archived source](https://github.com/jimianelli/NamibianHake/blob/main/reports/archive/01-Namibian_hake_model_2025.qmd) |
 | **2024 assessment** | Historical assessment | — | [PDF](articles/00-Namibian_hake_model_2024.pdf) · [archived source](https://github.com/jimianelli/NamibianHake/blob/main/reports/archive/00-Namibian_hake_model_2024.qmd) |
 
