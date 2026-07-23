@@ -1,0 +1,398 @@
+---
+title: "Namibian hake model update, 2026"
+author: "John Kathena, Jim Ianelli"
+date: today
+format:
+  html:
+    embed-resources: true
+    toc: true
+    code-fold: true
+  pdf:
+    toc: true
+    keep-tex: true
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+
+assessment_year <- 2026L
+previous_year <- assessment_year - 1L
+gradient_tolerance <- 0.001
+
+source(here::here("R", "read-admb2.R"))
+source(here::here("R", "assessment-validation.R"))
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(readr)
+library(tidyr)
+
+theme_set(ggthemes::theme_few())
+
+model_spec <- tibble::tribble(
+  ~directory, ~model, ~configuration,
+  "m25", "2025 baseline", "Accepted base configuration through 2025",
+  "m26", "2026 update", "Unchanged base configuration with data through 2026",
+  "m26_survey_q_1", "q = 1.0", "Survey catchability fixed at 1.0",
+  "m26_survey_q_0_5", "q = 0.5", "Survey catchability fixed at 0.5",
+  "m26_estimated_natural_mortality", "Estimated M", "Natural mortality estimated",
+  "m26_dome_selectivity", "Dome selectivity", "Dome-shaped fishery selectivity",
+  "m26_steepness_0_5", "h = 0.5", "Stock-recruit steepness fixed at 0.5",
+  "m26_steepness_0_9", "h = 0.9", "Stock-recruit steepness fixed at 0.9"
+)
+
+read_model_csv <- function(directory) {
+  read_csv(
+    here::here("mods", directory, "nh_out.csv"),
+    show_col_types = FALSE
+  )
+}
+
+model_output <- setNames(
+  lapply(model_spec$directory, read_model_csv),
+  model_spec$directory
+)
+
+diagnostics <- lapply(model_spec$directory, function(directory) {
+  path <- here::here("mods", directory)
+  tryCatch(
+    {
+      x <- read_admb_convergence(path)
+      tibble(
+        directory = directory,
+        objective = x$objective,
+        max_gradient = x$max_gradient,
+        minimum_hessian_eigenvalue = x$minimum_hessian_eigenvalue,
+        positive_definite_hessian = x$positive_definite_hessian,
+        hessian_source = x$hessian_source
+      )
+    },
+    error = function(e) {
+      header <- readLines(file.path(path, "nh.par"), n = 1L)
+      tibble(
+        directory = directory,
+        objective = as.numeric(sub(
+          ".*Objective function value = ([^ ]+).*", "\\1", header
+        )),
+        max_gradient = as.numeric(sub(
+          ".*Maximum gradient component = ([^ ]+).*", "\\1", header
+        )),
+        minimum_hessian_eigenvalue = NA_real_,
+        positive_definite_hessian = FALSE,
+        hessian_source = "Unavailable or failed"
+      )
+    }
+  )
+}) |>
+  bind_rows() |>
+  left_join(model_spec, by = "directory") |>
+  mutate(
+    converged = is.finite(objective) &
+      max_gradient <= gradient_tolerance &
+      positive_definite_hessian,
+    status = if_else(converged, "Converged", "Failed diagnostic criteria")
+  )
+
+terminal_value <- function(directory, variable, year) {
+  model_output[[directory]] |>
+    filter(Variable == variable, Year == year) |>
+    pull(value)
+}
+```
+
+# Executive summary
+
+## Summary of changes in assessment inputs
+
+The accepted 2025 model configuration was extended through
+`r assessment_year` without changing the base-model assumptions. The update
+adds the `r assessment_year` catch, CPUE, survey biomass, and composition rows
+provided in `namhakdata26.dat`. The species-specific survey series in
+`CapeHakes.csv` was extended through `r assessment_year` for *Merluccius
+paradoxus* and *M. capensis*.
+
+Automated checks confirmed continuous annual ADMB matrices from 1964 through
+`r assessment_year`, the expected dimensions of all weight, catch,
+composition, CPUE, and survey blocks, agreement among all terminal-year
+controls, and valid `54321` and `12345` end-of-file sentinels.
+
+## Summary of results
+
+The `r assessment_year` base model converged with an objective function of
+`r round(diagnostics$objective[diagnostics$directory == "m26"], 3)`, a maximum
+gradient of
+`r format(diagnostics$max_gradient[diagnostics$directory == "m26"], scientific = TRUE, digits = 3)`,
+and a positive-definite Hessian. Estimated terminal spawning biomass was
+`r round(terminal_value("m26", "SSB", assessment_year))` and terminal spawning
+biomass relative to BMSY was
+`r round(terminal_value("m26", "B_Bmsy", assessment_year), 3)`.
+
+Four of six sensitivity configurations met the same convergence criteria as
+the base model. The dome-shaped selectivity case had parameters on their lower
+bounds and a singular Hessian. The model with steepness fixed at 0.5 had a
+maximum gradient above 0.001 after an extended optimization. Results from
+those two configurations are not used for inference.
+
+No TAC, ABC, or OFL recommendation is made in this document. Those quantities
+require the agreed Namibian management procedure and management inputs.
+
+```{r}
+#| label: tbl-summary
+#| tbl-cap: "Comparison of 2025 values from the previous assessment with 2026 values from the updated assessment."
+
+bridge_variables <- c("SSB", "Depletion", "B_Bmsy", "Catch", "RY", "Catch_RY")
+
+bridge_table <- bind_rows(
+  model_output$m25 |>
+    filter(Year == previous_year, Variable %in% bridge_variables) |>
+    mutate(Model = "Previous assessment (2025 value)"),
+  model_output$m26 |>
+    filter(Year == assessment_year, Variable %in% bridge_variables) |>
+    mutate(Model = "Updated assessment (2026 value)")
+) |>
+  select(Model, Variable, value) |>
+  pivot_wider(names_from = Model, values_from = value) |>
+  mutate(
+    `Change (2026 minus 2025)` =
+      `Updated assessment (2026 value)` -
+      `Previous assessment (2025 value)`
+  ) |>
+  rename(Quantity = Variable)
+
+kable(bridge_table, digits = 3)
+```
+
+# Introduction
+
+This operational update applies the 2025 base-model structure to information
+available through `r assessment_year`. Stable model methods are not repeated
+in full; the emphasis is on new inputs, bridge results, model diagnostics, and
+sensitivity to the principal structural assumptions considered in the
+previous assessment.
+
+# Fishery and management history
+
+The assessment input contains annual catches from 1964 through
+`r assessment_year`. Management-history text and the final
+`r assessment_year` management decision should be inserted following review
+by MFMR.
+
+`TODO: add the final 2026 TAC decision and any in-season management changes.`
+
+# Data
+
+```{r}
+#| label: tbl-input-validation
+#| tbl-cap: "Automated validation of the 2026 model inputs."
+
+input_check <- validate_nh_inputs(here::here("mods", "m26", "nh.dat"))
+input_summary <- tibble(
+  Check = c(
+    "Annual model years",
+    "Weight-at-age dimensions",
+    "Fishery composition dimensions",
+    "CPUE dimensions",
+    "Survey dimensions",
+    "Control EOF sentinel",
+    "Data EOF sentinel"
+  ),
+  Result = c(
+    paste(range(input_check$data$years), collapse = "–"),
+    paste(dim(input_check$data$weight_start), collapse = " × "),
+    paste(dim(input_check$data$fishery_caa), collapse = " × "),
+    paste(dim(input_check$data$cpue), collapse = " × "),
+    paste(dim(input_check$data$survey), collapse = " × "),
+    input_check$control$eof,
+    input_check$data$eof
+  )
+)
+kable(input_summary)
+```
+
+## Survey data
+
+```{r}
+#| label: fig-species-survey
+#| fig-cap: "Species-specific survey biomass observations through 2026."
+
+cape_hakes <- read_csv(
+  here::here("mods", "data", "CapeHakes.csv"),
+  show_col_types = FALSE
+)
+
+ggplot(cape_hakes, aes(year, biomass, colour = strata)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(
+    aes(
+      ymin = biomass / exp(sqrt(log1p(cv^2))),
+      ymax = biomass * exp(sqrt(log1p(cv^2)))
+    ),
+    width = 0.15,
+    alpha = 0.35
+  ) +
+  labs(x = "Year", y = "Survey biomass", colour = "Species")
+```
+
+## Other data
+
+No additional external data series were introduced in this update. Missing
+survey observations remain represented as missing or zero according to the
+existing model input convention; no values were imputed to create artificial
+annual continuity.
+
+# Analytic approach
+
+The age-structured ADMB model and 2025 base assumptions were retained. The
+control file specifies the terminal year in four locations: the model terminal
+year, final selectivity period, final recruitment-estimation year, and final
+Ksp period. All four are set to `r assessment_year`.
+
+The bridge comparison changes only the data and terminal year. Sensitivities
+fix survey catchability at 1.0 and 0.5, estimate natural mortality, allow
+dome-shaped fishery selectivity, and fix stock-recruit steepness at 0.5 and
+0.9. Convergence requires a finite objective, maximum gradient no greater
+than `r gradient_tolerance`, and a positive-definite ADMB Hessian.
+
+# Results
+
+## Bridge comparison
+
+```{r}
+#| label: fig-bridge-ssb
+#| fig-cap: "Spawning biomass from the unchanged 2025 model and the 2026 data update."
+
+bridge_series <- bind_rows(
+  model_output$m25 |> mutate(Model = "2025 baseline"),
+  model_output$m26 |> mutate(Model = "2026 update")
+) |>
+  filter(Variable == "SSB")
+
+ggplot(bridge_series, aes(Year, value, colour = Model, fill = Model)) +
+  geom_ribbon(aes(ymin = ymin, ymax = ymax), alpha = 0.15, colour = NA) +
+  geom_line() +
+  labs(x = "Year", y = "Spawning biomass")
+```
+
+```{r}
+#| label: fig-bridge-depletion
+#| fig-cap: "Estimated depletion from the 2025 baseline and 2026 update."
+
+bridge_series |>
+  select(-Variable) |>
+  bind_rows(
+    model_output$m25 |>
+      filter(Variable == "Depletion") |>
+      mutate(Model = "2025 baseline"),
+    model_output$m26 |>
+      filter(Variable == "Depletion") |>
+      mutate(Model = "2026 update")
+  ) |>
+  filter(Year >= 1990, !is.na(Variable)) |>
+  ggplot(aes(Year, value, colour = Model, fill = Model)) +
+  geom_ribbon(aes(ymin = ymin, ymax = ymax), alpha = 0.15, colour = NA) +
+  geom_line() +
+  labs(x = "Year", y = "Spawning biomass / unfished spawning biomass")
+```
+
+{{< pagebreak >}}
+
+## Model diagnostics and sensitivities
+
+```{r}
+#| label: tbl-convergence
+#| tbl-cap: "Convergence diagnostics for the bridge and sensitivity models."
+#| tbl-pos: H
+
+diagnostics |>
+  select(
+    Model = model,
+    Objective = objective,
+    `Maximum gradient` = max_gradient,
+    Status = status
+  ) |>
+  kable(digits = 5)
+```
+
+```{r}
+#| label: fig-sensitivity
+#| fig-cap: "Terminal spawning biomass for the converged 2026 models."
+
+converged_directories <- diagnostics |>
+  filter(converged, directory != "m25") |>
+  pull(directory)
+
+sensitivity_terminal <- lapply(converged_directories, function(directory) {
+  model_output[[directory]] |>
+    filter(Year == assessment_year, Variable == "SSB") |>
+    mutate(directory = directory)
+}) |>
+  bind_rows() |>
+  left_join(model_spec, by = "directory")
+
+ggplot(
+  sensitivity_terminal,
+  aes(reorder(model, value), value, ymin = ymin, ymax = ymax)
+) +
+  geom_errorbar(width = 0.2) +
+  geom_point(size = 2) +
+  coord_flip() +
+  labs(x = NULL, y = "Terminal spawning biomass")
+```
+
+# Projections and harvest recommendations
+
+The ADMB model produced replacement-yield and long-term reference-point
+outputs for each converged configuration. A management recommendation is not
+presented because the final control-rule inputs and decision framework were
+not supplied as part of this update.
+
+`TODO: insert the agreed harvest-control-rule calculation and resulting TAC
+advice after management review.`
+
+# Risk table and recommendation
+
+The 2026 base model passed the declared numerical diagnostics. Structural
+uncertainty remains material: estimated natural mortality and fixed survey
+catchability change the inferred scale of the stock, while the dome-shaped
+selectivity case is not estimable under the current parameterization. The
+non-converged `h = 0.5` and dome-selectivity results should not be assigned
+inferential weight.
+
+# Status determination
+
+The base-model estimate of spawning biomass relative to BMSY is reported in
+@tbl-summary. Formal legal or management status terminology should be supplied
+by MFMR using the applicable Namibian framework.
+
+# Ecosystem considerations
+
+No new ecosystem covariates were incorporated in the assessment likelihood.
+The species-specific survey series is retained for evaluating the relative
+signals for *M. paradoxus* and *M. capensis*.
+
+# Data gaps and research priorities
+
+1. Resolve the non-identifiability of dome-shaped selectivity before using
+   that alternative for management inference.
+2. Profile or otherwise investigate the `h = 0.5` optimization surface.
+3. Document the provenance and preprocessing of each annual input block.
+4. Add retrospective analyses and likelihood profiles to the operational
+   workflow.
+5. Archive the final management-procedure inputs alongside the accepted
+   assessment.
+
+# Acknowledgements
+
+The assessment update was prepared by John Kathena and Jim Ianelli with data
+provided by the Namibian Ministry of Fisheries and Marine Resources.
+
+# Auxiliary files
+
+The assessment source, annual controls, automated validation tests, ADMB
+template, and model outputs are maintained in the `NamibianHake` repository.

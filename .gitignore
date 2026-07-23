@@ -1,5 +1,8 @@
 *~
 *swp
+*.swo
+*.tmp
+~$*
 *.obj
 *.htp
 rem
@@ -34,6 +37,8 @@ auto/
 .Rhistory
 *.Rmd.bak
 Rplots.pdf
+NamibianHake_*.tar.gz
+*.Rcheck/
 
 # ADMB build files
 src/lib/*.obj
@@ -74,6 +79,22 @@ unbounded.csv
 init.pin
 variance
 sims
+run.stdout
+run.stderr
+
+# Generated reports and historical working copies
+/docs/articles/*.html
+/docs/articles/*.pdf
+/docs/articles/*_files/
+/vignettes/*_files/
+/vignettes/*.tex
+/srcold/
+/mods/m0_old/
+/mods/*/mcmc/
+/mods/*/nh1.dat
+/mods/data/CapeHakesold.csv
+/mods/figs/*_all.png
+/mods/m26*/ReplacYield.dat
 
 /.luarc.json
 inst/doc
