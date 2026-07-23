@@ -12,8 +12,8 @@ results.
 | Assessment | What it represents | Read online | Files |
 |:--|:--|:--|:--|
 | **2026 update** | Current assessment using data through 2026 | [2026 report](articles/02-Namibian_hake_model_2026.html) | [PDF](https://github.com/jimianelli/NamibianHake/raw/main/vignettes/02-Namibian_hake_model_2026.pdf) · [source](https://github.com/jimianelli/NamibianHake/blob/main/vignettes/02-Namibian_hake_model_2026.qmd) |
-| **2025 assessment** | Previous-year baseline used for the bridge comparison | [2025 report](articles/01-Namibian_hake_model_2025.html) | [source](https://github.com/jimianelli/NamibianHake/blob/main/vignettes/01-Namibian_hake_model_2025.qmd) |
-| **2024 assessment** | Historical assessment | [2024 report](articles/00-Namibian_hake_model_2024.html) | [PDF](https://github.com/jimianelli/NamibianHake/raw/main/vignettes/00-Namibian_hake_model_2024.pdf) · [source](https://github.com/jimianelli/NamibianHake/blob/main/vignettes/00-Namibian_hake_model_2024.qmd) |
+| **2025 assessment** | Previous-year baseline used for the bridge comparison | [2025 report](articles/01-Namibian_hake_model_2025.html) | [archived source](https://github.com/jimianelli/NamibianHake/blob/main/reports/archive/01-Namibian_hake_model_2025.qmd) |
+| **2024 assessment** | Historical assessment | — | [PDF](articles/00-Namibian_hake_model_2024.pdf) · [archived source](https://github.com/jimianelli/NamibianHake/blob/main/reports/archive/00-Namibian_hake_model_2024.qmd) |
 
 The [2025-to-2026 input-difference
 report](https://github.com/jimianelli/NamibianHake/blob/main/reports/input_changes_2025_to_2026.md)

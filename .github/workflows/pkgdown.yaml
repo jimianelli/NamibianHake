@@ -43,6 +43,12 @@ jobs:
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, quiet = FALSE)
         shell: Rscript {0}
 
+      - name: Add archived assessment documents
+        run: |
+          cp vignettes/00-Namibian_hake_model_2024.pdf docs/articles/
+          cp vignettes/01-Namibian_hake_model_2025.html docs/articles/
+          cp vignettes/02-Namibian_hake_model_2026.pdf docs/articles/
+
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.5.0
