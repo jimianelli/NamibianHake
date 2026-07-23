@@ -1,7 +1,8 @@
 create_annual_sensitivity_controls <- function(
-    base_control,
-    output_root = dirname(dirname(base_control)),
-    assessment_year = 2026L) {
+  base_control,
+  output_root = dirname(dirname(base_control)),
+  assessment_year = 2026L
+) {
   base <- readLines(base_control, warn = FALSE)
   stopifnot(
     basename(base_control) == "nh.dat",
@@ -61,8 +62,10 @@ create_annual_sensitivity_controls <- function(
 }
 
 run_assessment_model <- function(control_file, executable,
-                                 arguments = c("-nox", "-iprint", "150",
-                                               "-hbf", "1")) {
+                                 arguments = c(
+                                   "-nox", "-iprint", "150",
+                                   "-hbf", "1"
+                                 )) {
   run_directory <- dirname(control_file)
   executable <- normalizePath(executable, mustWork = TRUE)
   old_directory <- getwd()

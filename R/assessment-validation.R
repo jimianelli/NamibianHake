@@ -134,7 +134,7 @@ validate_nh_inputs <- function(control_file, gradient_tolerance = 0.001) {
     )
   }
   if (control$selectivity_years[nrow(control$selectivity_years), 2L] !=
-      control$last_year) {
+    control$last_year) {
     stop("Final selectivity period does not end in the terminal year.")
   }
   if (control$recruitment_years[[2L]] != control$last_year) {
@@ -235,7 +235,7 @@ validate_nh_outputs <- function(run_directory, terminal_year,
     stop("The objective function is not finite.")
   }
   if (!is.finite(convergence$max_gradient) ||
-      convergence$max_gradient > gradient_tolerance) {
+    convergence$max_gradient > gradient_tolerance) {
     stop("The maximum gradient exceeds the convergence tolerance.")
   }
   if (!convergence$positive_definite_hessian) {

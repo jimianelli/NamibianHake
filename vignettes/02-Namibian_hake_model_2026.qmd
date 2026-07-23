@@ -160,7 +160,7 @@ bridge_table <- bind_rows(
   mutate(
     `Change (2026 minus 2025)` =
       `Updated assessment (2026 value)` -
-      `Previous assessment (2025 value)`
+        `Previous assessment (2025 value)`
   ) |>
   rename(Quantity = Variable)
 

@@ -21,8 +21,10 @@ test_that("2026 sensitivity controls preserve valid terminal years", {
   for (path in paths) {
     control <- read_nh_control(path)
     expect_equal(control$last_year, 2026)
-    expect_equal(control$selectivity_years[nrow(control$selectivity_years), 2L],
-                 2026)
+    expect_equal(
+      control$selectivity_years[nrow(control$selectivity_years), 2L],
+      2026
+    )
     expect_equal(control$recruitment_years[[2L]], 2026)
     expect_equal(control$ksp_years[nrow(control$ksp_years), 2L], 2026)
     expect_equal(control$eof, 54321)

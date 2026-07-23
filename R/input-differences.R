@@ -124,8 +124,7 @@ write_input_difference_report <- function(comparison, previous_cape_file,
     is.na(cape$biomass_previous) |
       is.na(cape$biomass_updated) |
       cape$biomass_previous != cape$biomass_updated |
-      cape$cv_previous != cape$cv_updated,
-    ,
+      cape$cv_previous != cape$cv_updated, ,
     drop = FALSE
   ]
 
