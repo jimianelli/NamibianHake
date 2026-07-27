@@ -320,6 +320,8 @@ diagnostics |>
 ```{r}
 #| label: fig-sensitivity
 #| fig-cap: "Terminal spawning biomass for the converged 2026 models."
+#| fig-height: 4
+#| fig-pos: H
 
 converged_directories <- diagnostics |>
   filter(converged, directory != "m25") |>

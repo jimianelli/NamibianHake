@@ -1,11 +1,12 @@
 //*****************************************************************************
 // ASPM for the Namibian Hake Resource
-// includes fluctuations about the stock 
+// includes fluctuations about the stock
 // recruit relationship.
 // coded by Rebecca Rademeyer
 // Last modified by Jim:
 //13 March 2005
 //13 July 2024
+//27 July 2026
 //
 
 //*****************************************************************************
@@ -38,9 +39,9 @@ DATA_SECTION
  END_CALCS
 
   // Read in text descriptor for run, then read in the name of the file where the data is used
-  !! *(ad_comm::global_datafile) >>  model_number; 
+  !! *(ad_comm::global_datafile) >>  model_number;
   !! *(ad_comm::global_datafile) >>  model_name;      //e.g. q08
-  !! *(ad_comm::global_datafile) >>  datafilename;    //e.g. namhakdata.dat 
+  !! *(ad_comm::global_datafile) >>  datafilename;    //e.g. namhakdata.dat
   init_int NProj  //20                       // Years of projection
   init_int first_yr              //1964      // First year to consider
   init_int last_yr               //2007      // Final year to consider
@@ -51,12 +52,12 @@ DATA_SECTION
   init_int est_Minf              //-6        //Phase for estimating Minf
   init_int use_multinomial       //-1        // Flag to use multinomial likelihood (negative means use CVs as estimated)
   init_int est_add_seal_sigma    //-5        // Phase for estimation of added seal variance (-1 implies fix)
-  init_int est_prop                          // Phase for estimating Proportion of Ksp increase 
+  init_int est_prop                          // Phase for estimating Proportion of Ksp increase
   init_int est_Steep             // -5
-  init_number steep_in           //0.7      
+  init_number steep_in           //0.7
   init_number steep_cv           //0.1     if a prior should be specified...
   init_number Ksp_fraction                   // Fraction of Ksp in the initial study year
-  init_int NSelPeriods           //3         // Number of periods of selectivity 
+  init_int NSelPeriods           //3         // Number of periods of selectivity
   init_imatrix SelYrs(1,NSelPeriods,1,2)     //1964, .....     // For each period which years
   init_int est_Sel              //3          // Which phase for selectivity estimation
   init_int est_cSel             //3          // commercial selectivity
@@ -68,7 +69,7 @@ DATA_SECTION
   init_number SigmaRec   //0.5               // Sigma for recruitment residuals
   init_number RecYr1     //1965              // Begin year for period with recruitment fluctuations
   init_number RecYr2     //2002              // End year for period with recruitment fluctuations
-  
+
 
   init_int CAAMinus           // Minus group (2)
   init_int CAAPlus            //Plus group for commercial CAA (7)
@@ -77,7 +78,7 @@ DATA_SECTION
   init_vector  CPUE_Sigma(1,NCpueSeries)// Specification of input sigmas (negative means estimate internally)
   init_ivector CpueIndx(1,NCpueSeries)  // Which biomass is being indexed
   init_vector CpueWght(1,NCpueSeries)   // Weighting for CPUE data
-   
+
   init_int NSurveySeries                    // How many survey(2)
   init_ivector UseSurvey(1,NSurveySeries)   // Which series to use (1 1)
   init_ivector SurveyIndx(1,NSurveySeries)  // Which biomass in being indexed (3 2)
@@ -88,18 +89,18 @@ DATA_SECTION
   init_int est_addvar                       // Should additional variance be estimated? minus means not estimated.
   init_ivector CAASMinus(1,NSurveySeries)   // Minus group for the surveys (2 2)
   init_ivector CAASPlus(1,NSurveySeries)    //Plus group for the survey CAA data (7 7)
-  
+
   // ** For projections **
   // ---------------------
   init_number FutSurCV      //0.125
   init_number FutBiasCV     //0.032
   init_number ExtraCV       //0.153
   init_number FutSurBias    //1.105
-  
+
   init_int NKspPeriods                                  // Number of periods of different Ksp
   init_imatrix KspYrs(1,NKspPeriods,1,2)                // Years corresponding to each selectivity period
-  !!  if (KspYrs(1,1) != first_yr) cout << "Warning: first Ksp year must be " << first_yr << endl;  
-  !!  if (KspYrs(NKspPeriods,2) != last_yr) cout << "Warning: last Ksp year must be " << last_yr << endl;  
+  !!  if (KspYrs(1,1) != first_yr) cout << "Warning: first Ksp year must be " << first_yr << endl;
+  !!  if (KspYrs(NKspPeriods,2) != last_yr) cout << "Warning: last Ksp year must be " << last_yr << endl;
   //!! cout<<" Ksp "<<KspYrs<<endl;
   init_number weight
   init_number select
@@ -155,7 +156,7 @@ DATA_SECTION
   log_input(SigmaRec);
   log_input(RecYr1);
   log_input(RecYr2);
-  
+
 
   log_input(CAAMinus);
   log_input(CAAPlus);
@@ -164,7 +165,7 @@ DATA_SECTION
   log_input( CPUE_Sigma);
   log_input( CpueIndx);
   log_input(CpueWght);
-   
+
   log_input(NSurveySeries);
   log_input( UseSurvey);
   log_input( SurveyIndx);
@@ -175,14 +176,14 @@ DATA_SECTION
   log_input(est_addvar);
   log_input( CAASMinus);
   log_input( CAASPlus);
-  
+
   // ** For projections **
   // ---------------------
   log_input(FutSurCV);
   log_input(FutBiasCV);
   log_input(ExtraCV);
   log_input(FutSurBias);
-  
+
   log_input(NKspPeriods);
   log_input(KspYrs);
   log_input(weight);
@@ -209,9 +210,9 @@ DATA_SECTION
   log_input(ApW);
   log_input(eof);
  END_CALCS
-  
+
   !! if (eof!=54321) {cout<<"Oh shit..."<<endl;exit(1);}
-   
+
  // Open the file that contains the "constant" data
   !! ad_comm::change_datafile_name(datafilename);
   init_matrix Wstrt(first_yr,last_yr,-1,plus_grp)          // Start-year mass-at-age
@@ -251,30 +252,30 @@ INITIALIZATION_SECTION
 		 SurvA50 0.95
      Prop 1.
      // SelSlopeS 0.1
-     Steep steep_in 
-    
+     Steep steep_in
+
 //*****************************************************************************
 PARAMETER_SECTION
 	vector pred_nansen(first_yr,last_yr);
 !!  int NselPar;
 !!  NselPar = 2*NSelPeriods;
-  
+
   //**estimable parameters**
   //---------------------------------------------
   init_bounded_number par_B0(-1.0,13.0);                // Virgin biomass
   init_bounded_number M1(0.1,2.0,est_M);               // Constant M
   init_bounded_number Minf(0.1,0.5,est_Minf)    //Age-dependent M
   init_bounded_vector Sage(1,NselPar,0.5,10.0,est_cSel); // Selectivity parameters
-  init_bounded_vector SelSlope(1,NSelPeriods+1,0.0,1.0,est_Sel_slope)   // Selectivity slope
+  init_bounded_vector SelSlope(1,NSelPeriods,0.0,1.0,est_Sel_slope)   // Selectivity slope
   init_bounded_number SurvA50(0.0,plus_grp,est_Sel)     // Survey Age-at-50%-selectivity
   init_bounded_number SurvAd(0.001,100.0,est_Sel)       // Survey difference between age at 50 and 95% selectivity
   init_bounded_number Addvar(0.0,1.0,est_addvar)      // Additional variability
   init_bounded_number sig_seal_added(0.0,1.0,est_add_seal_sigma)      // Additional variability
   init_vector RecPar(RecYr1,RecYr2,Rec_est)    // Recruitment residuals
-  init_bounded_number Prop(0.2,2.0,est_prop)  
+  init_bounded_number Prop(0.2,2.0,est_prop)
   init_bounded_number Steep(0.21,0.99,est_Steep)
   init_bounded_number SelSlopeS(0.0,1.0,est_Sel_slopeS)
-  
+
 
   //**Derived parameters**
   //-----------------------------------------
@@ -282,7 +283,7 @@ PARAMETER_SECTION
   matrix NM(first_yr,last_yr+NProj+1,0,plus_grp)        // Numbers-at-age
   matrix S(first_yr,last_yr+NProj,0,plus_grp)          // Selectivity-at-age
   vector Sfut(0,plus_grp)       // future selectivity used for projections
-  vector SurvS(0,plus_grp) 
+  vector SurvS(0,plus_grp)
   vector F(first_yr,last_yr+NProj)                     // Fishing mortality
   vector M(0,plus_grp)                           // Natural mortality-at-age
   vector Nvirg(0,plus_grp)                       // Virgin age-structure
@@ -292,7 +293,7 @@ PARAMETER_SECTION
   3darray SAPred(1,NSurveySeries,first_yr,last_yr+NProj,0,plus_grp)                       // Temporary storage
   matrix CAPred(first_yr,last_yr+NProj,0,plus_grp)     // Predicted catch-at-age
   matrix CAPred2(first_yr,last_yr+NProj,0,plus_grp)     // Predicted catch-at-age with first_yr selectivity
-  
+
 
   // *** Stock-recruitment ***
   // -------------------------
@@ -300,8 +301,8 @@ PARAMETER_SECTION
   number SigR_out         // Output sigma of recruitment residuals
   vector Alpha(first_yr,last_yr)                                    //Beverton-Holt S-R parameters
   vector Beta(first_yr,last_yr)
-   
-  
+
+
   // *** Biomasses ***
   // -----------------
   vector Spawn(first_yr,last_yr+NProj+1)               // Spawner biomass
@@ -316,14 +317,14 @@ PARAMETER_SECTION
   matrix Mbio(first_yr,last_yr+NProj+1,0,plus_grp)    //biomass by age died due to M
   vector Recruits(first_yr,last_yr+NProj+1)                      //Recruits
   vector futCatch(last_yr-1,last_yr+NProj+1)
-  
+
 
   // **** Economics stuff*****
-  vector TAC(first_yr,last_yr+NProj+1) 
+  vector TAC(first_yr,last_yr+NProj+1)
   vector CPUEfut(last_yr,last_yr+NProj+1)
   vector TACF(last_yr,last_yr+NProj+1)
   vector TACW(last_yr,last_yr+NProj+1)
-  vector VesselF(last_yr,last_yr+NProj+1) 
+  vector VesselF(last_yr,last_yr+NProj+1)
   vector VesselW(last_yr,last_yr+NProj+1)
   vector CostF(last_yr,last_yr+NProj+1)
   vector CostW(last_yr,last_yr+NProj+1)
@@ -344,10 +345,10 @@ PARAMETER_SECTION
   vector TempF(last_yr,last_yr+NProj+1)
   vector TempW(last_yr,last_yr+NProj+1)
   number PresValue
-        
-  
+
+
   // *** Likelihoods **
-  // ------------------  
+  // ------------------
   number CPUE_Like;                            // Likelihood for CPUE data
   number Survey_Like;                           // Likelihood for survey data
   number CAA_Likelihood;                        // Likelihood for the CAA data
@@ -368,9 +369,9 @@ PARAMETER_SECTION
   sdreport_number KspSTD      // Ksp
   sdreport_vector Pred_Rec(1,20)    // For plotting from SR curve
   number hSTD
-  sdreport_number Cur_90   // Terminal year total biomass over 1990 value 
-  sdreport_number Cur_B0   // Terminal year spawning biomass over Bzero value 
-  sdreport_number Cur_Bmsy // Terminal year spawning biomass over Bmsy value 
+  sdreport_number Cur_90   // Terminal year total biomass over 1990 value
+  sdreport_number Cur_B0   // Terminal year spawning biomass over Bzero value
+  sdreport_number Cur_Bmsy // Terminal year spawning biomass over Bmsy value
   sdreport_number aveRY_90      // average RY since 1990
   sdreport_number aveRY_last5   // average RY over last 5 years
   number KexpSTD      // Kexp
@@ -398,7 +399,7 @@ PARAMETER_SECTION
   vector SigCPU(1,NCpueSeries)         // Commercial sigmas
   number SigCAA_com      // Commercial CAA sigma
   vector SigCAA_surv(1,NSurveySeries)  // Survey CAA sigmas
-  number SigSeal_Index  // Seal diet data on 1-yr olds 
+  number SigSeal_Index  // Seal diet data on 1-yr olds
 
 
   number AddvarSTD
@@ -410,42 +411,42 @@ PARAMETER_SECTION
   number MSYL_K          // MSYL/K (total)
   number RanNum
   number r
-  
-  vector DepSTD(first_yr,last_yr)  
-  
+
+  vector DepSTD(first_yr,last_yr)
+
   number negpen               // Penalty (no biomass below zero, no F greater than 1, etc..)
   number prior                // Prior for some poor performing selex params
   number sel_pen              // Prior for some poor performing selex params
-  number neg2          
+  number neg2
 
   sdreport_vector Bstd(first_yr,last_yr)
   sdreport_vector Rstd(first_yr,last_yr)
   sdreport_vector Fstd(first_yr,last_yr)
- 
 
-  
- 
-      
-      
+
+
+
+
+
 //*****************************************************************************
 PRELIMINARY_CALCS_SECTION
   int Age,Year,Iser,AMinus,APlus;
   double Temp;
-  
+
   //**Clean up commercial CAA data**
   //---------------------------------
   for (Year=first_yr;Year<=last_yr;Year++)
   {
-     //** Total the catch-at-age and store the total**      
+     //** Total the catch-at-age and store the total**
      //---------------------------------------------
      Temp = 0;
      for (Age=0;Age<=plus_grp;Age++)
       Temp += CAA(Year,Age);
-     CAA(Year,-1) = Temp; 
+     CAA(Year,-1) = Temp;
 
      if (Temp > 0)
       {
-              
+
        // Implement the minus group
        //-------------------------------
        for (Age=0;Age<CAAMinus;Age++)
@@ -453,7 +454,7 @@ PRELIMINARY_CALCS_SECTION
           CAA(Year,CAAMinus) += CAA(Year,Age);
           CAA(Year,Age) = 0;
         }
-      
+
       //** Implement the plus group**
       //-------------------------------
        for (Age=plus_grp;Age>CAAPlus;Age--)
@@ -467,7 +468,7 @@ PRELIMINARY_CALCS_SECTION
          CAA(Year,Age) = CAA(Year,Age) / Temp;
       }
     }
-   
+
 //*********Clean up Survey Data************
    //-----------------------------------------
 
@@ -476,12 +477,12 @@ PRELIMINARY_CALCS_SECTION
      {
        //** Total the catch-at-age and store the total**
       //--------------------------------------------
-      
+
       Temp = 0;
       for (Age=0;Age<=plus_grp;Age++)
         Temp += SurvCAA(Iser,Year,Age);
       SurvCAA(Iser,Year,-1) = Temp;
-      //cout<<Year<<" "<<SurvCAA(Iser,Year,-1)<<endl; 
+      //cout<<Year<<" "<<SurvCAA(Iser,Year,-1)<<endl;
 
       if (Temp>0)
        {
@@ -493,7 +494,7 @@ PRELIMINARY_CALCS_SECTION
            SurvCAA(Iser,Year,AMinus) +=SurvCAA(Iser,Year,Age);
            SurvCAA(Iser,Year,Age) = 0;
          }
-        
+
         // **Implement the minus group**
         //------------------------------
         APlus = CAASPlus(Iser);
@@ -502,7 +503,7 @@ PRELIMINARY_CALCS_SECTION
            SurvCAA(Iser,Year,APlus) += SurvCAA(Iser,Year,Age);
            SurvCAA(Iser,Year,Age) = 0;
          }
-     
+
         //** Renormalise the CAA data**
         //-------------------------
         if (Temp > 0)
@@ -511,7 +512,7 @@ PRELIMINARY_CALCS_SECTION
        }
     }
 
-     
+
 //*****************************************************************************
 PROCEDURE_SECTION
   SAPred.initialize();
@@ -534,7 +535,7 @@ PROCEDURE_SECTION
 
   Project_forward();
      //cout<<"Project forward ok"<<endl;
-  
+
   Calc_CPUE_Like();
      //cout<<"CPUE likelihood ok"<<endl;
 
@@ -544,7 +545,7 @@ PROCEDURE_SECTION
   Calc_CAA_Likelihood();
      //cout<<"CAA likelihood ok"<<endl;
 
-  Calc_CAAS_Likelihood();  
+  Calc_CAAS_Likelihood();
      //cout<<"Survey CAA likelihood ok"<<endl;
 
   Calc_RecRes_Likelihood();
@@ -557,7 +558,7 @@ PROCEDURE_SECTION
 
   Get_stdev();
 
-  if (sd_phase()) 
+  if (sd_phase())
   {
     Get_MSY();
   }
@@ -572,17 +573,17 @@ PROCEDURE_SECTION
   sel_pen = 12.5*norm2(log(S(Year)-log(S(Year+1))));
   }
 
-  obj_fun = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood + 
+  obj_fun = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood +
   weight*Oneyearold_Likelihood + negpen + sel_pen  + prior;
 
   //f = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood + negpen;
-  
+
    Get_MSY();
-   
+
   if (mceval_phase())
   {
      Do_Projections();
-    ofstream out6("CurDep1990.out",ios::app); 
+    ofstream out6("CurDep1990.out",ios::app);
     for (Year=1990; Year<=last_yr; Year++)
       out6<<TotalB(last_yr)/TotalB(1990)<< " ";
     out6<<" "<<endl;
@@ -614,16 +615,16 @@ FUNCTION Specify_Select
       if (S(Year,Age) > Smax) Smax = S(Year,Age);
       Rage = Rage + 1;
     }
-//    S(Year,0) = 0; 
+//    S(Year,0) = 0;
     for (Age=0;Age<=plus_grp;Age++)
       S(Year,Age) = S(Year,Age) / Smax;
-    
+
     // Copy to the rest of the period
     for (Year=SelYrs(SelPeriod,1)+1; Year<=SelYrs(SelPeriod,2); Year++)
      for (Age=0;Age<=plus_grp;Age++)
       S(Year,Age) = S(SelYrs(SelPeriod,1),Age);
   }
-   
+
   for (SelPeriod=1;SelPeriod<=NSelPeriods-1;SelPeriod++)
   {
     for (Age=0;Age<=plus_grp;Age++)
@@ -643,7 +644,7 @@ FUNCTION Specify_Select
       for (Age=0;Age<=plus_grp;Age++)
        S(Year,Age) = S(Year,Age) / Smax;
     }
-  } 
+  }
 
 
   //Set up the selectivity for future projections
@@ -672,15 +673,15 @@ FUNCTION Specify_Select
     for (Age=0; Age<=plus_grp; Age++)
     {
       SurvS(Age) = 1.0/(1+mfexp(-1*TempS*(RageS-SurvA50)));
-      if (Age >= Age_Sel_slopeS) 
+      if (Age >= Age_Sel_slopeS)
         SurvS(Age) = SurvS(Age) * mfexp(-SelSlopeS*(Age-Age_Sel_slopeS));
-      if (SurvS(Age) > SmaxS) 
+      if (SurvS(Age) > SmaxS)
         SmaxS = SurvS(Age);
       RageS = RageS + 1;
    }
   }
   for (Age=0;Age<=plus_grp;Age++)
-    SurvS(Age) = SurvS(Age) / SmaxS; 
+    SurvS(Age) = SurvS(Age) / SmaxS;
 
 //-------------------------------------------------------------------
 FUNCTION Specify_M
@@ -712,23 +713,23 @@ FUNCTION Set_Recruitment_Residuals
 
   for (Year=RecYr2+1; Year<=last_yr+1; Year++)
     Recruit_Res(Year).initialize() ;
- 
+
 
 //-------------------------------------------------------------------
 FUNCTION Calculate_Initial_Age_Structure
   int Age, year, strt1,end1,strt2,end2,strt3,end3;
   dvariable SPR0,R0;
   dvariable slope, intc,Ni;
-  
 
-  
+
+
   // **First get the VIRGIN age-structure**
   //-----------------------------------
   Nvirg(0) = 1;
   for (Age=1; Age<=plus_grp; Age++)
     Nvirg(Age) = Nvirg(Age-1)*mfexp(-M(Age-1));
   Nvirg(plus_grp) = Nvirg(plus_grp) / (1.0 - mfexp(-M(plus_grp)));
-  
+
   // **Find the virgin spawner biomass-per-recruit and hence R0**
   //-----------------------------------------------------------
     //model two Ksp -periods
@@ -739,7 +740,7 @@ FUNCTION Calculate_Initial_Age_Structure
   end2  = KspYrs(NKspPeriods,2);
   strt3 = (KspYrs((NKspPeriods-1),2))+1;
   end3  = (KspYrs(NKspPeriods,1))-1;
-   
+
   for (year=strt1;year<=end1;year++)
   {
     SPR0 = 0;
@@ -749,7 +750,7 @@ FUNCTION Calculate_Initial_Age_Structure
     Alpha(year) = (4.0 * Steep * R0)/(5 * Steep - 1.0);
     Beta(year)  = (mfexp(par_B0))*(1.0 - Steep)/ (5 * Steep - 1.0);
   }
-   
+
   for (year=strt2;year<=end2;year++)
   {
     SPR0 = 0;
@@ -759,10 +760,10 @@ FUNCTION Calculate_Initial_Age_Structure
     Alpha(year) = (4.0 * Steep * R0)/(5 * Steep - 1.0);
     Beta(year)  = (mfexp(par_B0))*Prop*(1.0 - Steep)/ (5 * Steep - 1.0);
   }
-      
+
   // ** Interpolate linearly between different Ksp Periods **
   // i.e. for years in between set Ksp periods, set the alpha and beta by linear interpolation
-  //------------------------------------------------------------- 
+  //-------------------------------------------------------------
   for (year=strt3;year<=end3;year++)
   {
     slope       = 0;
@@ -776,11 +777,11 @@ FUNCTION Calculate_Initial_Age_Structure
     intc        = Beta(KspYrs(NKspPeriods-1,2)) - slope * KspYrs(NKspPeriods-1,2);
     Beta(year)  = intc + slope * year;
   }
-     
-  
+
+
 // ** Scale into the age-structure at the start of year 1 **
-  //-----------------------------------------------------------  
-  Spawn(first_yr)  = 0.; 
+  //-----------------------------------------------------------
+  Spawn(first_yr)  = 0.;
   TotalB(first_yr) = 0.;
   BMid(first_yr)   = 0.;
   for (Age=0;Age<=plus_grp; Age++)
@@ -791,18 +792,18 @@ FUNCTION Calculate_Initial_Age_Structure
     TotalB(first_yr) += (N(first_yr,Age)*Wstrt(first_yr,Age));
     BMid(first_yr)   += N(first_yr,Age)*Wmid(first_yr,Age)*mfexp(-M(Age)/2);
   }
-  
-  
+
+
   // ** Set the spawner biomass at the start of year 1 **
   //-------------------------------------------------------------
   Spawn(first_yr)    = Ksp_fraction*mfexp(par_B0);
   Recruits(first_yr) = N(first_yr,0)*Wstrt(first_yr,0)*(1-mat(0));
 
-//------------------------------------------------------------------- 
+//-------------------------------------------------------------------
 FUNCTION Project_forward
   int Year, Age, II;
   dvariable Fish,Fish2,Temp;
-  
+
   // **DO for each year of the projection period**
   //---------------------------------------------------
   for (Year=first_yr; Year<=last_yr; Year++)
@@ -817,16 +818,20 @@ FUNCTION Project_forward
       SurvBeg(Year) = SurvBeg(Year) + SurvS(Age)*Temp;
       TotalB(Year)  = TotalB(Year)+Temp;
     }
-    
-   
+
+
     // ** Make sure pop do not go negative **
     // --------------------------------------
     BBeg(Year)    = posfun(BBeg(Year),0.10,negpen);
     SurvBeg(Year) = posfun(SurvBeg(Year),0.10,negpen);
 
     // Mild penalty to tame Sage
-		prior  = 2*norm2(Sage - 2.);
+		prior  = 2.*norm2(Sage - 2.);
 		// prior += 12.5*norm2(SelSlope - 1.);
+		// prior += 0.125 * norm2(SelSlope - 0.5);
+		// prior += 0.5 * norm2(SelSlope - 0.5);
+		// prior += 0.5 * norm2(SelSlope - 0.5);
+		prior += 12.5*norm2(SelSlope - 0.5);
 		// prior += square(SurvA50 - 4.);
 
 
@@ -837,26 +842,26 @@ FUNCTION Project_forward
       Mtemp(Age) = N(Year,Age)*(1-mfexp(-M(Age)/2.0));   //Number of fish that died due to Natural mortality by midyear
       Ntemp(Age) = N(Year,Age)*mfexp(-M(Age)/2.0);
     }
-     
+
     //** Exploitable biomass and fishing mortality**
     //----------------------------------------------
     Bexp(Year) = 0;
-    
+
     for (Age=0; Age<=plus_grp; Age++)
     {
        Bexp(Year) = Bexp(Year) + Wmid(Year,Age)*S(Year,Age)*Ntemp(Age);
     }
     Fish = Catch(Year)/Bexp(Year);
-    
+
     if (Fish>0.95)
     {
        //cout<<"!!! Fishing mortality greater than 0.95 in year "<<Year<<endl;
        negpen += square(Fish - 0.95)*100.;
        Fish    = 0.95;
     }
-    
+
     F(Year) = Fish;
-     
+
     //** Remove the catch and compute survey selected biomass**
     //---------------------------------------------------------
     SurvMid(Year) = 0;
@@ -867,18 +872,18 @@ FUNCTION Project_forward
          CAPred2(Year,Age) = Ntemp(Age)*S(Year,Age)*Fish2;
        else
          CAPred2(Year,Age) = Ntemp(Age)*S(1988,Age)*Fish2;
-       
+
        SurvMid(Year) = SurvMid(Year) + SurvS(Age)*Wmid(Year,Age)*Ntemp(Age)*(1.0-S(Year,Age)*Fish/2.0);
        Ntemp(Age)    = Ntemp(Age) - CAPred(Year,Age);
        Ntemp2(Age)   = Ntemp(Age) - CAPred2(Year,Age);
      }
-     
+
     //** Adjust Bexp to the middle of the year**
     //------------------------------------------
     Bexp(Year)   = Bexp(Year) * (1.0 - Fish/2.0);
     Bexp(Year)   = posfun(Bexp(Year),0.10,negpen);
     TotalB(Year) = posfun(TotalB(Year),0.10,negpen);
-      
+
 
     // **Remove the rest of natural mortality**
     //------------------------------------------
@@ -887,7 +892,7 @@ FUNCTION Project_forward
       Ntemp(Age) = Ntemp(Age)*mfexp(-M(Age)/2.0);
       Mtemp(Age) = Mtemp(Age) + Ntemp(Age)*(1-mfexp(-M(Age)/2.0));
      }
-      
+
 
     // **Update the age-structure**
     //--------------------------------
@@ -899,10 +904,10 @@ FUNCTION Project_forward
        N(Year+1,Age)  = Ntemp(Age-1);
        NM(Year+1,Age) = Mtemp(Age-1);
      }
-    
+
     // **Find the biomass by age that died due to M for J-P**
     //------------------------------------------------
-     
+
    for (Age=0; Age<=plus_grp; Age++)
     {
      Mbio(Year,Age) = Wstrt(Year,Age)*NM(Year,Age);
@@ -915,13 +920,13 @@ FUNCTION Project_forward
     for (Age=1; Age<=plus_grp; Age++)
      Spawn(Year+1) = Spawn(Year+1) + mat(Age)*Wstrt(Year,Age)*N(Year+1,Age);
      Spawn(Year+1) = posfun(Spawn(Year+1),0.10,negpen);
- 
+
 
     //** Generate the recruitment**
     //---------------------------------------
-  
+
      N(Year+1,0) = ((Alpha(Year)*Spawn(Year+1))/(Beta(Year) + Spawn(Year+1)))*mfexp(Recruit_Res(Year));
-     
+
   }
    //cout<<" here1  "<<endl;
 //-------------------------------------------------------------------
@@ -933,11 +938,11 @@ FUNCTION Calc_Oneyearold_Likelihood
   dvariable SSQ;
   dvariable Error;
   dvariable CVSeal;
-  
+
   // This estimates recruitment from the sealscat data
      Oneyearold_Likelihood = 0;
-     qtot1 = 0; nobs = 0; 
-  
+     qtot1 = 0; nobs = 0;
+
      for (Year=first_yr; Year<=last_yr-2; Year++)
      {
         seali_pred(Year) = N(Year,0) ;
@@ -948,7 +953,7 @@ FUNCTION Calc_Oneyearold_Likelihood
         }
       }
       qtot1 = mfexp(qtot1/nobs);
-    
+
      // Now find the likelihood
      //-------------------------
      ss.initialize();
@@ -967,7 +972,7 @@ FUNCTION Calc_Oneyearold_Likelihood
       qSeal = qtot1;
       SigSeal_Index = sqrt(SSQ/nobs);
       Oneyearold_Likelihood = ss;
- 
+
 //-------------------------------------------------------------------
 FUNCTION Calc_CPUE_Like
   int Year,Iser;
@@ -977,7 +982,7 @@ FUNCTION Calc_CPUE_Like
   dvariable Error;
   dvariable Sigma;
   dvariable Temp;
-  
+
   // Initialise CPUE likelihood
   CPUE_Like.initialize() ;
   count1=0;
@@ -992,7 +997,7 @@ FUNCTION Calc_CPUE_Like
     {
       if (CPUE(Year,Iser) > 0)
       {
-        nobs++; 
+        nobs++;
         if (CpueIndx(Iser) == 1) BIO(Year) = Bexp(Year);
         if (CpueIndx(Iser) == 2) BIO(Year) = SurvMid(Year);
         if (CpueIndx(Iser) == 3) BIO(Year) = SurvBeg(Year);
@@ -1000,7 +1005,7 @@ FUNCTION Calc_CPUE_Like
       }
     }
     qtot = mfexp(qtot/nobs);
-    
+
       // Now find the sum of squares bit
     ss.initialize();
     for (Year=first_yr; Year<=last_yr; Year++)
@@ -1010,11 +1015,11 @@ FUNCTION Calc_CPUE_Like
         Error = log(CPUE(Year,Iser)) - log(qtot*BIO(Year));
         ss   += Error*Error;
       }
-    } 
-    
+    }
+
     // Find the likelihood component
     Sigma = sqrt(ss/nobs);
-    if (UseCPUE(Iser) > 0) 
+    if (UseCPUE(Iser) > 0)
     {
       if (sigma_temp>0)
         Temp =  0.5 * ss /sigmasq_temp + nobs*log(sigma_temp); // Use assumed sigmas input
@@ -1023,12 +1028,12 @@ FUNCTION Calc_CPUE_Like
 
       // Account for CPUE weighting
       CPUE_Like += CpueWght(Iser)*Temp;
-    } 
+    }
     // Store variables for output
     qCPU(Iser) = qtot;
     SigCPU(Iser) = Sigma;
     count1=nobs;
-  }  
+  }
 
 
 
@@ -1047,7 +1052,7 @@ FUNCTION Calc_Survey_Like
   dvariable ss;
   dvariable Error;
   dvariable CVSurv2;
-  
+
   // Initialise Survey likelihood
   Survey_Like = 0;
   count2=0;
@@ -1074,7 +1079,7 @@ FUNCTION Calc_Survey_Like
            qtot1 = qtot1 + log(Survey(Year,Iser*2-1)/BIO(Year))/CVSurv2;
            den1  = den1 + 1.0/CVSurv2;
          }
-         else  
+         else
          {
            qtot2 = qtot2 + log(Survey(Year,Iser*2-1)/BIO(Year))/CVSurv2;
            den2  = den2 + 1.0/CVSurv2;
@@ -1091,8 +1096,8 @@ FUNCTION Calc_Survey_Like
        temp2 = den1*qtot2 - dez2*qtot1;
        qtot1 = mfexp(temp1/temp);
        qtot2 = mfexp(temp2/temp);
-     } 
-     
+     }
+
      // Now find the sum of squares bit
      ss = 0;
      for (Year=first_yr; Year<=last_yr; Year++)
@@ -1103,7 +1108,7 @@ FUNCTION Calc_Survey_Like
         if (SurveyIndx(Iser) == 2) BIO(Year) = SurvMid(Year);
         if (SurveyIndx(Iser) == 3) BIO(Year) = SurvBeg(Year);
         CVSurv2 = Addvar+pow(Survey(Year,Iser*2),2.0);
-        if (Year <= q_chngYr(Iser)) 
+        if (Year <= q_chngYr(Iser))
           Error = log(Survey(Year,Iser*2-1)) - log(qtot1*BIO(Year));
         else
           Error = log(Survey(Year,Iser*2-1)) - log(qtot2*BIO(Year));
@@ -1111,13 +1116,13 @@ FUNCTION Calc_Survey_Like
      }
      qSurvPre(Iser)  = qtot1;
      qSurvPost(Iser) = qtot2;
-     
+
      if (UseSurvey(Iser) > 0)
      {
        Survey_Like = Survey_Like + ss;
        Error = log(qtot1) - q_mean(Iser) - log(qtot2);
        Survey_Like += 0.5*Error*Error/(q_CV*q_CV);
-       
+
   //   cout << Survey_Like << endl;
      }
    }
@@ -1134,7 +1139,7 @@ FUNCTION Calc_CAA_Likelihood
   dvariable Residual;
   // Initial CAA Likelihood
   CAA_Likelihood = 0;
-  
+
   Sum1 = 0; Sum2 = 0; Sum3 = 0;Sum4.initialize();
   count3=0;
   for (Year=first_yr;Year<=last_yr;Year++)
@@ -1159,18 +1164,18 @@ FUNCTION Calc_CAA_Likelihood
 
       // for (Age=CAAMinus;Age<=CAAPlus;Age++)
       // Total += CAPred(Year,Age);
-     
+
      //**Renormalize the CAA data**
       CAPred(Year)(CAAMinus,CAAPlus) /= sum(CAPred(Year)(CAAMinus,CAAPlus)) ;
      //-----------------------------
      // for (Age=CAAMinus;Age<=CAAPlus;Age++)
       // CAPred(Year,Age) /= Total;
-      
+
      // **Now accumulate the total variables (Sum1 is a counter)**
      //----------------------------------------------------------
      for (Age=CAAMinus;Age<=CAAPlus;Age++)
       {
-        if (CAPred(Year,Age) >0) 
+        if (CAPred(Year,Age) >0)
          if (CAA(Year,Age) > 0)
           {
             Sum1++;
@@ -1192,7 +1197,7 @@ FUNCTION Calc_CAA_Likelihood
    if (use_multinomial>0)
      CAA_Likelihood = Sum4;
    else
-     CAA_Likelihood = Sum1*log(Sigma) - 0.5*Sum2 + Sum1/2.0; 
+     CAA_Likelihood = Sum1*log(Sigma) - 0.5*Sum2 + Sum1/2.0;
 
    SigCAA_com = Sigma;
 
@@ -1207,11 +1212,11 @@ FUNCTION Calc_CAAS_Likelihood
   dvariable Total;
   dvariable Residual;
   dvariable ZZ;
-  
+
   // **Initial Survey CAA Likelihood**
   //----------------------------------
   CAAS_Likelihood = 0;
-  
+
   for (Iser=1;Iser<=NSurveySeries;Iser++)
    {
     Sum1 = 0; Sum2 = 0; Sum3 = 0;Sum4.initialize();
@@ -1230,7 +1235,7 @@ FUNCTION Calc_CAAS_Likelihood
          if (SurveyIndx(Iser) == 2) SAPred(Iser,Year,Age) = SurvS(Age)*N(Year,Age)*ZZ;
          if (SurveyIndx(Iser) == 3) SAPred(Iser,Year,Age) = SurvS(Age)*N(Year,Age);
         }
-        
+
        //** Now incorporate the survey "minus group" **
        //---------------------------------------
        AMinus = CAASMinus(Iser);
@@ -1239,7 +1244,7 @@ FUNCTION Calc_CAAS_Likelihood
          SAPred(Iser,Year,AMinus) += SAPred(Iser,Year,Age);
          // SAPred(Iser,Year,Age) = 0; // Strictly speaking, this isn't allowed
        }
-       
+
        //** Now incorporate the survey "plus group" **
        //---------------------------------------
        APlus = CAASPlus(Iser);
@@ -1248,14 +1253,14 @@ FUNCTION Calc_CAAS_Likelihood
          SAPred(Iser,Year,APlus) += SAPred(Iser,Year,Age);
          // SAPred(Iser,Year,Age) = 0; // Strictly speaking, this isn't allowed
        }
-        
+
 
       //**Rescale**
       //----------------
        // for (Age=AMinus;Age<=APlus;Age++)
-        // SAPred(Iser,Year,Age) /= Total;  
+        // SAPred(Iser,Year,Age) /= Total;
       SAPred(Iser,Year)(AMinus,APlus) /= sum(SAPred(Iser,Year)(AMinus,APlus)) ;
-     
+
        //** Now accumulate the total variables**
        //---------------------------------------
        for (Age=AMinus;Age<=APlus;Age++)
@@ -1271,12 +1276,12 @@ FUNCTION Calc_CAAS_Likelihood
             Sum4 -= SurvCAA(Iser,Year,-2)*SurvCAA(Iser,Year,Age)*log(SAPred(Iser,Year,Age) +1e-4);
           }
          }
-      } 
+      }
     if (Sum3/Sum1 <=0)
      Sigma = 0;
     else
     Sigma = sqrt(Sum3/Sum1);
-    Total = Sum1*log(Sigma) - 0.5*Sum2 + Sum1/2.0; 
+    Total = Sum1*log(Sigma) - 0.5*Sum2 + Sum1/2.0;
 
     if (use_multinomial>0)
       CAAS_Likelihood = Sum4;
@@ -1285,15 +1290,15 @@ FUNCTION Calc_CAAS_Likelihood
       //cout<<" CAAS_Likelihood "<<CAAS_Likelihood<<endl;
 
     SigCAA_surv(Iser) = Sigma;
-   }   
- 
+   }
+
 
 
 //-------------------------------------------------------------------
 FUNCTION Calc_RecRes_Likelihood
   int Year;
   int nyear_RecRes;
- 
+
   RecRes_Likelihood = 0.;
   count5 = 0;
   for (Year=first_yr; Year<=last_yr; Year++)
@@ -1312,7 +1317,7 @@ FUNCTION Calc_RecRes_Likelihood
     nyear_RecRes += 1;
     SigR_out += square(Recruit_Res(Year));
    }
-  
+
   if (SigR_out == 0)
    SigR_out = 99999;
   else
@@ -1330,12 +1335,12 @@ FUNCTION Get_SRCurve
     Pred_Rec(i) = (SSB(i)*Alpha(last_yr))/(Beta(last_yr) + SSB(i)) *mfexp(-(SigmaRec*SigmaRec)/2.0);
   }
 
- 
+
 //------------------------------------------------------------------------
 FUNCTION Get_MSY
  /*Function calculates used in calculating MSY and MSYL for a designated component of the
-  population, given values for stock recruitment and selectivity...  Fmsy is the trial 
-  value of MSY example of the use of "funnel" to reduce the amount of storage for 
+  population, given values for stock recruitment and selectivity...  Fmsy is the trial
+  value of MSY example of the use of "funnel" to reduce the amount of storage for
   derivative calculations */
   dvariable Fdmsy;
   dvariable Stmp;
@@ -1386,13 +1391,13 @@ FUNCTION Get_MSY
 
 //----------------------------------------------------------------
 FUNCTION dvariable yield(dvariable& Ftmp, dvariable& Stmp,dvariable& Bexptmp,dvariable& Btmp)
- 
+
   int Age, Year;
   dvariable Rtmp;
   dvariable ZZtmp;
   dvariable yield;
   dvar_vector Natmp(0,plus_grp);
-  
+
 
   //Compute the equilibrium N
   Natmp(0) = 1.;
@@ -1402,7 +1407,7 @@ FUNCTION dvariable yield(dvariable& Ftmp, dvariable& Stmp,dvariable& Bexptmp,dva
     Natmp(Age) = Natmp(Age-1)*ZZtmp;
     //cout<<" S "<<Sfut<<endl;
    }
-  
+
   ZZtmp = mfexp(-M(plus_grp))*(1.0-Ftmp*Sfut(plus_grp));
   Natmp(plus_grp) = Natmp(plus_grp)/(1.0 - ZZtmp);
   //cout<<"OK 2"<<endl;
@@ -1422,12 +1427,12 @@ FUNCTION dvariable yield(dvariable& Ftmp, dvariable& Stmp,dvariable& Bexptmp,dva
     Bexptmp += Wmid(last_yr,Age)*Sfut(Age)*Natmp(Age)*ZZtmp;
     Btmp += Wmid(last_yr,Age)*Natmp(Age);
    }
-  
+
   //Compute the recruitement
   Rtmp = (Alpha(last_yr)*Stmp-Beta(last_yr))/Stmp;
   //cout<<"Yield "<<yield<<" Rtmp "<<Rtmp<<" Stmp "<<Stmp<<" Alpha "<<Alpha(last_yr)<<" Beta "<<Beta(last_yr)<<endl;
 
-  //Adjust by recruitment 
+  //Adjust by recruitment
   yield *=  Rtmp;
   Stmp *=  Rtmp;
   Bexptmp *=  Rtmp;
@@ -1455,7 +1460,7 @@ FUNCTION dvariable RY(int Year)
   for (II = 1; II<=30; II++)
    {
     FF = (Fmin + Fmax)/2.0;
- 
+
     // Project one year ahead and calculate the spawner biomass
     Cpred = 0.;
     for (Age = 0; Age<=plus_grp; Age++)
@@ -1483,18 +1488,18 @@ FUNCTION dvariable RY(int Year)
     if (Spawno>Spawn(Year))
      {
       Fmin = FF;
-     } 
+     }
     else
      {
       Fmax = FF;
      }
   }
-  
-  if (test == 1) 
+
+  if (test == 1)
    RYtmp = RYtest;
   else
    RYtmp = Cpred;
-  
+
   return RYtmp;
 //-------------------------------------------------------------------------------------------------
 FUNCTION Get_stdev
@@ -1504,28 +1509,28 @@ FUNCTION Get_stdev
   KspSTD = mfexp(par_B0);
   KexpSTD = Bexp(first_yr);
   hSTD = Steep;
-  Bspcur = Spawn(last_yr);      
-  Bexpcur = Bexp(last_yr);      
+  Bspcur = Spawn(last_yr);
+  Bexpcur = Bexp(last_yr);
   DepspSTD = Spawn(last_yr)/Spawn(first_yr);
   DepexSTD = Bexp(last_yr)/Bexp(first_yr);
   for (Age=0; Age<=plus_grp; Age++)
   {
     MSTD(Age) = M(Age);
-    Spre1(Age) = S(1964,Age);    
-    Spre2(Age) = S(1989,Age);    
-    Spost(Age) = S(last_yr,Age);    
-    Ss(Age)    = SurvS(Age);  
+    Spre1(Age) = S(1964,Age);
+    Spre2(Age) = S(1989,Age);
+    Spost(Age) = S(last_yr,Age);
+    Ss(Age)    = SurvS(Age);
   }
-	// Terminal year total biomass over 1990 value 
+	// Terminal year total biomass over 1990 value
   Cur_90   = TotalB(last_yr)/TotalB(1990);
 
-	// Terminal year spawning biomass over Bzero value 
+	// Terminal year spawning biomass over Bzero value
   Cur_B0   = Spawn(last_yr)/mfexp(par_B0);
 
-	// Terminal year spawning biomass over Bmsy value 
+	// Terminal year spawning biomass over Bmsy value
   Cur_Bmsy = Spawn(last_yr)/Spmsy;
 
-  int no = 0; 
+  int no = 0;
 	aveRY_90.initialize();
   for (Year=1990;Year<=last_yr;Year++) {
     aveRY_90 += RY(Year);
@@ -1545,19 +1550,19 @@ FUNCTION Get_stdev
     DepSTD(Year) = Spawn(Year)/Spawn(first_yr);
     Bstd(Year)=Spawn(Year);
     Rstd(Year) = N(Year,0);
-    Fstd(Year) = F(Year); 
+    Fstd(Year) = F(Year);
   }
 
   AddvarSTD = sqrt(Addvar);
 
 
 //------------------------------------------------------------------------
-FUNCTION Do_Projections    
+FUNCTION Do_Projections
   int Year, Age, II, ii, noT;
   dvariable Fish,Temp,Tmp1,error, aveRYT;
   dvariable FutBias, TheCV2, FCHF, FCHW;
-  
-  
+
+
     ofstream out0("main.out");//,ios::app);
     ofstream out1("Depletion.out");//,ios::app);
     ofstream out2("Dep1990.out");//,ios::app);
@@ -1571,7 +1576,7 @@ FUNCTION Do_Projections
 
   int u=0;
   PresValue=0;
-  
+
   for (int iscen=1; iscen<=10; iscen++)
 	{
   // *** DO for each year of the projection period ***
@@ -1580,40 +1585,40 @@ FUNCTION Do_Projections
   {
     switch (iscen)
     {
-      case 1: 
+      case 1:
         futCatch(Year) = 0.5*Catch(last_yr);
         break;
-      case 2: 
+      case 2:
         futCatch(Year) = .75*Catch(last_yr);
         break;
-      case 3: 
+      case 3:
         futCatch(Year) = 0.9*  Catch(last_yr);
         break;
-      case 4: 
+      case 4:
         futCatch(Year) = Catch(last_yr);
         break;
-      case 5: 
+      case 5:
         futCatch(Year) = 1.1 *  Catch(last_yr);
         break;
-      case 6: 
+      case 6:
         futCatch(Year) = 1.5 *  Catch(last_yr);
         break;
-      case 7: 
+      case 7:
         futCatch(Year) = 2. *  Catch(last_yr);
         break;
-      case 8: 
+      case 8:
 			  if(Year<=last_yr+10)
           futCatch(Year) = .95 *  Catch(last_yr);
 				else
           futCatch(Year) = 1.05 *  Catch(last_yr);
         break;
-      case 9: 
+      case 9:
 			  if(Year<=last_yr+10)
           futCatch(Year) = 1.05 *  Catch(last_yr);
 				else
           futCatch(Year) = 0.95 *  Catch(last_yr);
         break;
-      case 10: 
+      case 10:
         futCatch(Year) = Catch(last_yr);
       if (Year==last_yr){
         aveRYT = aveRY_last5 ;
@@ -1627,7 +1632,7 @@ FUNCTION Do_Projections
           if (futCatch(Year)>1.1*futCatch(Year-1))
           {
             futCatch(Year)=1.1*futCatch(Year-1);
-          }     
+          }
           if (futCatch(Year)<0.9*futCatch(Year-1))
           {
             futCatch(Year)=.9*futCatch(Year-1);
@@ -1645,14 +1650,14 @@ FUNCTION Do_Projections
         // *** Exploitable biomass and fishing mortality ***
     // -------------------------------------------------
     Bexp(Year) = 0;
-    
+
     for (Age=0; Age<=plus_grp; Age++)
     {
       Bexp(Year) += Wmid(last_yr,Age)*S(Year,Age)*N(Year,Age)*mfexp(-M(Age)/2.0);
-       
+
     }
     Fish = futCatch(Year)/Bexp(Year);
-     
+
     // ** Make sure fishing mortality is less than 1 **
     // ------------------------------------------------
     if (Fish>0.95)
@@ -1661,30 +1666,30 @@ FUNCTION Do_Projections
        Fish = 0.95;
     }
     F(Year) = Fish;
-     
-    
+
+
     // *** Remove the catch and compute survey selected biomass ***
     // ------------------------------------------------------------
     SurvMid(Year) = 0;
-   
+
     for (Age=0; Age<=plus_grp; Age++)
     {
       CAPred(Year,Age) = N(Year,Age)*mfexp(-M(Age)/2.0)*S(Year,Age)*Fish;
-      SurvBeg(Year) += SurvS(Age)*Wstrt(last_yr,Age)*Ntemp(Age)*(1.0-S(Year,Age)*Fish/2.0);    
+      SurvBeg(Year) += SurvS(Age)*Wstrt(last_yr,Age)*Ntemp(Age)*(1.0-S(Year,Age)*Fish/2.0);
       Ntemp(Age) = N(Year,Age)*mfexp(-M(Age)/2.0) - CAPred(Year,Age);
     }
 
-    
+
     // *** Adjust Bexp to the middle of the year ***
     // ---------------------------------------------
     Bexp(Year) *= (1.0 - Fish/2.0);
-    
+
     // *** Remove the rest of natural mortality ***
     // --------------------------------------------
     for (Age=0; Age<=plus_grp; Age++)
       Ntemp(Age) = Ntemp(Age)*mfexp(-M(Age)/2.0);
 
-    
+
     // *** Update the age-structure ***
     // --------------------------------
     N(Year+1,plus_grp) = Ntemp(plus_grp)+Ntemp(plus_grp-1);
@@ -1696,30 +1701,30 @@ FUNCTION Do_Projections
     // --------------------------------
     Spawn(Year+1) = 0;
     TotalB(Year+1) =0;
-    
+
     for (Age=1; Age<=plus_grp; Age++)
     {
       TotalB(Year+1) += Wstrt(last_yr,Age)*N(Year+1,Age);
-      Spawn(Year+1) += mat(Age)* Wstrt(last_yr,Age)*N(Year+1,Age);  
-      
+      Spawn(Year+1) += mat(Age)* Wstrt(last_yr,Age)*N(Year+1,Age);
+
     }
 
-    
+
     // *** Generate the recruitment ***
     // --------------------------------
     N(Year+1,0) = ((Spawn(Year+1)*Alpha(last_yr))/(Beta(last_yr) + Spawn(Year+1)))*mfexp(Recruit_Res(Year+1));
-             
+
     //*****Calculate Economic stuff*****
     //-------------------------------------------------------------------------------------------------
-    
+
 
     TAC(Year)=futCatch(Year)*1000;                   //projected TAC
-    
+
     CPUEfut(Year)=(Bexp(Year)*qCPU(3))/1000;   //projected CPUE
-    
-    
+
+
     //cout<<Year<<" "<<CPUEfut(Year)<< "   "<<TAC(Year)<<endl;
-    
+
     TACF(Year)=TAC(Year)*propF;           //TAC allocated to Freezer
     TACW(Year)=TAC(Year)*propW;           //TAC allocated to wetfish
     TempF(Year)=TACF(Year)/(CPUEfut(Year)*1.4);                     //number of hours allocated to freezers (1.29*CPUE)
@@ -1728,27 +1733,27 @@ FUNCTION Do_Projections
     //cout<<Year<<" "<<TempW(Year)<<" "<<TempF(Year)<<" "<<TACW(Year)<<endl;
    //****number of vessels needed ****
 
-    VesselF(Year) =TempF(Year)/fishTimF/TrwdayF; 
+    VesselF(Year) =TempF(Year)/fishTimF/TrwdayF;
     VesselW(Year) =TempW(Year)/fishTimW/TrwdayW;
 
      //cout<<Year<<" "<<VesselF(Year)<<" "<<VesselW(Year)<<" "<<fishTimF<<" "<<fishTimW<<" "<<TrwdayW<<endl;
    //****Cost, revenue and profit***********
 
-    
+
     FCHF=AocF/fishTimF/TrwdayF*1000000;   ///Fishing cost per hour for freezer
     FCHW=AocW/fishTimW/TrwdayF*1000000;   //fihing cost per hour for wetfish
-  
+
     CostF(Year)=((TempF(Year)*FCHF)+(TACF(Year)*AocFFF))/1000000;
     CostW(Year)= ((TempW(Year)*FCHW)+(TACW(Year)*AocFFW))/1000000;
     CostT(Year)=CostF(Year) + CostW(Year);
-    
+
      //cout<<AocF<<" "<<fishTimF<< " "<<TrwdayF<<" "<<FCHF<<endl;
 
     RevF(Year)=TACF(Year)*ApF/1000000;
     RevW(Year)=TACW(Year)*ApW/1000000;
     RevT(Year)=RevF(Year)+RevW(Year);
 
-    
+
     ProfitF(Year) =RevF(Year)-CostF(Year);
     ProfitW(Year) =RevW(Year)-CostW(Year);
     ProfitT(Year) =ProfitF(Year)+ ProfitW(Year);
@@ -1767,11 +1772,11 @@ FUNCTION Do_Projections
     ProfitT(Year)=ProfitT(Year)*pow((1 + Pri),u);
     //cout<<Year<<" "<<ProfitT(Year)<<endl;
     PV(Year)=PV(Year)+ProfitT(Year)/pow((1+dr),u);
-    
+
     u=u+1;
      //cout<<Year<<" "<<RevT(Year)<<" "<<CostT(Year)<<" "<<ProfitT(Year)<< " "<<PV(Year)<<endl;
      PresValue = PresValue + PV(Year);
-     
+
      // *** Save the catch and spawning biomass ***
     // -------------------------------------------
     out0<<
@@ -1812,9 +1817,9 @@ FUNCTION Do_Projections
   out7<<" "<<endl;
   out8<<" "<<endl;
   out9<<" "<<endl;
-  
+
   }
- 
+
 //*****************************************************************************
 REPORT_SECTION
   save_gradients(gradients);
@@ -1823,7 +1828,7 @@ REPORT_SECTION
   dvariable aveRY, n;
   countAll =count1 + count2 +count3 + count4 + count5;
   aveRY = 0;
-  no = 0; 
+  no = 0;
   for (Year=1990;Year<=last_yr;Year++)
   {
     aveRY = aveRY + RY(Year);
@@ -1835,9 +1840,9 @@ REPORT_SECTION
   report <<"Datafile_used: "<<datafilename<<endl;
   report <<"SigmaR_input SigmaR_output MSY Bsp/K"<<endl;
   report <<SigmaRec<<" "<<SigR_out<<" "<<MSY<<" "<<Spawn(last_yr)/mfexp(par_B0)<<endl;
-  report <<" "<<endl; 
+  report <<" "<<endl;
   report <<"Alpha_first "<<Alpha(first_yr)<<" Beta_first "<<Beta(first_yr)<<" Alpha_last "<<Alpha(last_yr)<<" Beta_last "<<Beta(last_yr)<<" h "<<Steep<<endl;
-  
+
   // ==+==+==+== Summary statistics ==+==+==+==
   report <<"'ln(Likelihoods) "<<endl;
   report << "overall      "<<obj_fun<< endl;
@@ -1876,7 +1881,7 @@ REPORT_SECTION
   report << "MSY                "<<MSY<<endl;
   report << "Bsp("<<last_yr<<")/Ksp        "<<Spawn(last_yr)/mfexp(par_B0)<<endl;
   report << "Bexp("<<last_yr<<")/Kexp      "<<Bexp(last_yr)/Bexp(first_yr)<<endl;
-  
+
   report << "         "<<endl;
   report << "TotalB(last_yr)/TotalB(1990)      "<<TotalB(last_yr)/TotalB(1990)<<endl;
   // cout<<"Total B "<<TotalB(last_yr)<<endl;
@@ -1907,10 +1912,10 @@ REPORT_SECTION
   report << "qCPUE_GLM       " << qCPU(3) << endl;
   report << "qCPUE_7Vessel   " << qCPU(6) << endl;
   report << "qSeal_index      "<<qSeal<< endl;
-  report << " " << endl;  
+  report << " " << endl;
   report << "sigmaSpanWint   " << SigCPU(4) << endl;
   report << "sigmaSpanSum    " << SigCPU(5) << endl;
-  report << " " << endl; 
+  report << " " << endl;
   report << "SpanSurveyqWin  " << qCPU(4) << endl;
   report << "SpanSurveyqSum  " << qCPU(5) << endl;
   report << "Addvariance    "<<Addvar<<endl;
@@ -1918,7 +1923,7 @@ REPORT_SECTION
   report << "NanSurveyqSum   " << qSurvPre(1) <<" "<< qSurvPost(1) << " "<<mean(qSurvPre(1)*SurvS(3,6))<<" "<<mean(qSurvPost(1)*SurvS(3,6))<<endl;
   report << "NanSurveyqWin   " << qSurvPre(2) <<" "<< qSurvPost(2) << " "<<mean(qSurvPre(2)*SurvS(3,6))<<" "<<mean(qSurvPost(2)*SurvS(3,6))<<endl;
   // cout << "NanSurveyqSum   " << qSurvPre(1) <<" "<< qSurvPost(1) << endl;
-  
+
   // cout << "NanSurveyqWin   " << qSurvPre(2) <<" "<< qSurvPost(2) <<endl;
   report << " " << endl;
   report << "sigCAA_com      " << SigCAA_com << endl;
@@ -1928,15 +1933,15 @@ REPORT_SECTION
   report << "Added_Sigma_Seal    "<<sig_seal_added<<" prop "<< Prop <<endl;
   report << " "<<endl;
   report << " " << endl;
-  
+
   //
   // ---------- Natural Mortality ----------
   report<<"Natural mortality by age "<<endl;
   for (Age=0; Age<=plus_grp; Age++)
    report << "M("<<Age<<")       "<<M(Age)<<endl;
-  
+
   report <<"Minf  "<<Minf<<"  Minfage "<< Minfage <<endl;
- 
+
   //
   //
   // ==+==+==+== Fit to abundance data ==+==+==+==
@@ -1976,12 +1981,12 @@ REPORT_SECTION
    }
   report << " " << endl;
   //
-  // 
+  //
   // ==+==+==+== Some more values ==+==+==+==
   report << "Virgin Age Structure" << endl << Nvirg << endl;
   report << " " << endl;
   report << "Numbers at Age" <<endl;
-  for (Year=first_yr;Year<=last_yr;Year++) 
+  for (Year=first_yr;Year<=last_yr;Year++)
   {
     report<<Year<<" ";
     for (Age=0; Age<=plus_grp; Age++)
@@ -2003,9 +2008,9 @@ REPORT_SECTION
   }
   report<<" "<<endl;
   //
-  // 
+  //
   report<<"Commercial selectivity"<<endl;
-  for (Year=first_yr;Year<=last_yr;Year++) 
+  for (Year=first_yr;Year<=last_yr;Year++)
   {
     report<<Year<<" ";
     for (Age=0; Age<=plus_grp; Age++)
@@ -2014,7 +2019,7 @@ REPORT_SECTION
   }
   report<<" "<<endl;
   for (Year=first_yr;Year<=last_yr;Year++)
-  { 
+  {
      if (sum(CAA(Year)(0,8))>0)
      {
         report<<Year<<"  "<<CAA(Year)(0,8) <<" ";
@@ -2042,10 +2047,10 @@ REPORT_SECTION
           report<< " 0  ";
         report<<endl;
           // report<<Year<<" "<<SurvCAA(Iser,Year)(0,8)<<" "<<SAPred(Iser,Year)(0,8)             <<endl;
-      }     
+      }
     }
     //report<<" "<<endl;
-  }  
+  }
 
   ofstream RYout("ReplacYield.dat");
    RYout<<"Replacement Yield by year"<<endl;
@@ -2054,9 +2059,9 @@ REPORT_SECTION
    for (Year=first_yr;Year<=last_yr;Year++)
      RYout<<Year<<" "<<RY(Year)<<" "<<Spawn(Year)<<endl;
    RYout.close();
- 
+
   report<<"Replacement Yield by year"<<endl;
-  report<<"Year ReplacYield Bsp Catch"<<endl; 
+  report<<"Year ReplacYield Bsp Catch"<<endl;
   for (Year=first_yr;Year<=last_yr;Year++)
      report<<Year<<" "<<RY(Year)<<" "<<Spawn(Year)<<" "<<Catch(Year)<<endl;
 
@@ -2066,39 +2071,39 @@ REPORT_SECTION
 // ==+==+==+== Fit to Catch-at-Age ==+==+==+==
   report<<"'----------Catch-at-Age----------"<<endl;
   report<<"'----------CommercialCAA----------"<<endl;
-  
+
   for (Year=first_yr;Year<=last_yr;Year++)
-  { 
+  {
     for (Age=CAAMinus; Age<=CAAPlus; Age++)
       if (CAA(Year,Age)>0)
         if (CAPred(Year,Age)>0)
        {
         report<<Year<<"  "<<Age<<" "<<CAA(Year,Age)<<" "<<CAPred(Year,Age)<<" "<<(log(CAA(Year,Age))-log(CAPred(Year,Age)))/(SigCAA_com/sqrt(CAPred(Year,Age)))<<" "<<endl;
         //cout<<Year<<"  "<<Age<<" "<<CAA(Year,Age)<<" "<<CAPred(Year,Age)<<" "<<(log(CAA(Year,Age))-log(CAPred(Year,Age)))/(SigCAA_com/sqrt(CAPred(Year,Age)))<<" "<<endl;
-        
+
       }
   }
-  
+
   //report<<" "<<endl;
   for (Iser=1;Iser<=NSurveySeries;Iser++)
   {
     report<<"'----------Survey"<<Iser<<"'----------"<<endl;
-    
+
     for (Year=first_yr;Year<=last_yr;Year++)
     {
       int s = CAASMinus(Iser);
       int t = CAASPlus(Iser);
-      for (Age=s; Age<=t; Age++) 
+      for (Age=s; Age<=t; Age++)
       if (SurvCAA(Iser,Year,Age)>0)
         if (SAPred(Iser,Year,Age)>0)
         {
           report<<Year<<" "<<Age<<" "<<SurvCAA(Iser,Year,Age)<<" "<<SAPred(Iser,Year,Age)<<" "<<(log(SurvCAA(Iser,Year,Age))-log(SAPred(Iser,Year,Age)))/(SigCAA_surv(Iser)/sqrt(SAPred(Iser,Year,Age)))<<" "<<endl;
           //cout<<Year<<" "<<Age<<" "<<SurvCAA(Iser,Year,Age)<<endl;
-        }     
+        }
      }
     //report<<" "<<endl;
-  }  
-  
+  }
+
   report<<" "<<endl;
   report<<" "<<endl;
 
@@ -2124,7 +2129,7 @@ REPORT_SECTION
 
   report<<"   " <<endl;
   report<<"----- The End -----"<<endl;
-  
+
 //****************************************************************************
 
 FINAL_SECTION
@@ -2264,48 +2269,48 @@ FINAL_SECTION
       int s = CAASMinus(Iser);
       int t = CAASPlus(Iser);
       Rreport<< Year <<" ";
-      for (int Age=s; Age<=t; Age++) 
+      for (int Age=s; Age<=t; Age++)
       {
         Rreport<< SAPred(Iser,Year,Age)<<" ";
-      }     
+      }
 			Rreport<<endl;
-    }     
+    }
 	  Rreport <<"survey"<<Iser<<"_Pobs"<<endl;
     for (int Year=first_yr;Year<=last_yr;Year++) {
       int s = CAASMinus(Iser);
       int t = CAASPlus(Iser);
       Rreport<< Year <<" ";
-      for (int Age=s; Age<=t; Age++) 
+      for (int Age=s; Age<=t; Age++)
       {
         Rreport<< SurvCAA(Iser,Year,Age)<<" ";
-      }     
+      }
 			Rreport<<endl;
-    }     
+    }
 	  Rreport <<"fishery_Pobs"<<endl;
     for (int Year=first_yr;Year<=last_yr;Year++) {
       int s = CAAMinus;
       int t = CAAPlus;
       Rreport<< Year <<" ";
-      for (int Age=s; Age<=t; Age++) 
+      for (int Age=s; Age<=t; Age++)
       {
         Rreport<< CAA(Year,Age)<<" ";
-      }     
+      }
 			Rreport<<endl;
-    }     
+    }
 	  Rreport <<"fishery_Phat"<<endl;
     for (int Year=first_yr;Year<=last_yr;Year++) {
       int s = CAAMinus;
       int t = CAAPlus;
       Rreport<< Year <<" ";
-      for (int Age=s; Age<=t; Age++) 
+      for (int Age=s; Age<=t; Age++)
       {
         Rreport<< CAPred(Year,Age)<<" ";
-      }     
+      }
 			Rreport<<endl;
-    }     
+    }
 
-  }     
-	
+  }
+
 
 GLOBALS_SECTION
   #include <admodel.h>

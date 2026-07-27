@@ -293,7 +293,7 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   M1.allocate(0.1,2.0,est_M,"M1");
   Minf.allocate(0.1,0.5,est_Minf,"Minf");
   Sage.allocate(1,NselPar,0.5,10.0,est_cSel,"Sage");
-  SelSlope.allocate(1,NSelPeriods+1,0.0,1.0,est_Sel_slope,"SelSlope");
+  SelSlope.allocate(1,NSelPeriods,0.0,1.0,est_Sel_slope,"SelSlope");
   SurvA50.allocate(0.0,plus_grp,est_Sel,"SurvA50");
   SurvAd.allocate(0.001,100.0,est_Sel,"SurvAd");
   Addvar.allocate(0.0,1.0,est_addvar,"Addvar");
@@ -1126,8 +1126,12 @@ void model_parameters::Project_forward(void)
     BBeg(Year)    = posfun(BBeg(Year),0.10,negpen);
     SurvBeg(Year) = posfun(SurvBeg(Year),0.10,negpen);
     // Mild penalty to tame Sage
-		prior  = 2*norm2(Sage - 2.);
+		prior  = 2.*norm2(Sage - 2.);
 		// prior += 12.5*norm2(SelSlope - 1.);
+		// prior += 0.125 * norm2(SelSlope - 0.5);
+		// prior += 0.5 * norm2(SelSlope - 0.5);
+		// prior += 0.5 * norm2(SelSlope - 0.5);
+		prior += 12.5*norm2(SelSlope - 0.5);
 		// prior += square(SurvA50 - 4.);
     // **First remove half of natural mortality**
     //--------------------------------------------
