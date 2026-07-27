@@ -237,58 +237,6 @@ ggplot(cape_hakes, aes(year, biomass, colour = strata)) +
   labs(x = "Year", y = "Survey biomass", colour = "Species")
 ```
 
-Figure @fig-paradoxus-biomass updates Figure 18 from the 2025 assessment with
-the 2026 *M. paradoxus* survey observation. The dashed line is the geometric
-mean of the REMA-predicted biomass from 1990 through 2026.
-
-```{r}
-#| label: fig-paradoxus-biomass
-#| fig-cap: "REMA-smoothed survey biomass estimates for M. paradoxus through 2026. The dashed line is the geometric mean of predicted biomass over 1990–2026."
-#| fig-width: 6
-#| fig-height: 5
-
-invisible(capture.output(
-  paradoxus_biomass <- get_relative_biomass(
-    spp = "paradoxus",
-    endyr = assessment_year
-  )
-))
-
-paradoxus_series <- paradoxus_biomass$biomass_by_strata |>
-  filter(strata == "paradoxus")
-
-mean_paradoxus <- exp(mean(paradoxus_series$log_pred))
-
-ggplot(
-  paradoxus_series,
-  aes(
-    x = year,
-    y = obs,
-    ymin = pred_lci,
-    ymax = pred_uci
-  )
-) +
-  geom_ribbon(fill = "#2C7FB8", alpha = 0.3) +
-  geom_errorbar(
-    aes(ymin = obs_lci, ymax = obs_uci),
-    width = 0.2,
-    alpha = 0.4
-  ) +
-  geom_line(aes(y = pred), colour = "#045A8D") +
-  geom_point(colour = "#045A8D", alpha = 0.8) +
-  geom_hline(
-    yintercept = mean_paradoxus,
-    linetype = "dashed",
-    colour = "#D95F0E"
-  ) +
-  scale_y_continuous(
-    labels = scales::comma,
-    expand = expansion(mult = c(0, 0.05)),
-    limits = c(0, NA)
-  ) +
-  labs(x = "Year", y = "Survey biomass (kt)")
-```
-
 ## Other data
 
 No additional external data series were introduced in this update. Missing
@@ -395,15 +343,323 @@ ggplot(
   labs(x = NULL, y = "Terminal spawning biomass")
 ```
 
+# Control rule application
+
+## Modeling Namibian hake survey data by species
+
+Fisheries stock assessments require data that are reliably collected and
+compiled. Assessment models should also be configured to match the assumptions
+associated with the observed data. To account for survey trends between the
+two hake species, the estimated observation errors were applied in a
+state-space random-walk model. The observation model applies the
+observation-error variances $\sigma_{j,t}^2$ for species $j$ in year $t$.
+The observed indices $Z_{j,t}$ are fit to latent population trends
+$\hat{Z}_{j,t}$:
+
+$$
+\log Z_{j,t} = \log \hat{Z}_{j,t} + \epsilon_{j,t},
+\qquad \epsilon_{j,t} \sim N(0,\sigma_{j,t}^2).
+$$
+
+The state equation and associated process-error variance $\tau_j^2$ is:
+
+$$
+\log \hat{Z}_{j,t+1} = \log \hat{Z}_{j,t} + \eta_{j,t},
+\qquad \eta_{j,t} \sim N(0,\tau_j^2).
+$$
+
+The process-error variances may be shared or allowed to vary among indices,
+and the unobserved species population is estimated as a series of random
+effects. The model is fit by maximum likelihood in TMB using the
+[REMA package](https://afsc-assessments.github.io/rema/). Species-specific
+survey observations through `r assessment_year` were fit using their supplied
+CVs as observation-error inputs.
+
+## Application to the Namibian hake stocks
+
+The control rule was first applied using survey data and the relative
+proportions of the two hake species. A more robust formulation responds
+directly to the *M. paradoxus* biomass signal, independently of *M. capensis*.
+For this purpose, the survey smoother was fit to *M. paradoxus* alone. The
+long-term reference level is the geometric mean of predicted biomass from
+1990 through `r assessment_year`.
+
+@fig-paradoxus-biomass updates Figure 18 from the 2025 assessment with
+the 2026 *M. paradoxus* survey observation.
+
+```{r}
+#| label: fig-paradoxus-biomass
+#| fig-cap: "Historical REMA-smoothed biomass estimates for M. paradoxus and the geometric mean over 1990–2026."
+#| fig-width: 6
+#| fig-height: 5
+
+invisible(capture.output(
+  paradoxus_biomass <- get_relative_biomass(
+    spp = "paradoxus",
+    endyr = assessment_year
+  )
+))
+
+paradoxus_series <- paradoxus_biomass$biomass_by_strata |>
+  filter(strata == "paradoxus")
+
+mean_paradoxus <- exp(mean(paradoxus_series$log_pred))
+current_paradoxus_ratio <- paradoxus_series |>
+  filter(year == assessment_year) |>
+  summarise(value = pred / mean_paradoxus) |>
+  pull(value)
+
+ggplot(
+  paradoxus_series,
+  aes(
+    x = year,
+    y = obs,
+    ymin = pred_lci,
+    ymax = pred_uci
+  )
+) +
+  geom_ribbon(fill = "#2C7FB8", alpha = 0.3) +
+  geom_errorbar(
+    aes(ymin = obs_lci, ymax = obs_uci),
+    width = 0.2,
+    alpha = 0.4
+  ) +
+  geom_line(aes(y = pred), colour = "#045A8D") +
+  geom_point(colour = "#045A8D", alpha = 0.8) +
+  geom_hline(
+    yintercept = mean_paradoxus,
+    linetype = "dashed",
+    colour = "#D95F0E"
+  ) +
+  scale_y_continuous(
+    labels = scales::comma,
+    expand = expansion(mult = c(0, 0.05)),
+    limits = c(0, NA)
+  ) +
+  labs(x = "Year", y = "Survey biomass (kt)")
+```
+
+The historical adjustments for three values of the species reactivity
+parameter $\gamma$ are shown in @fig-paradoxus-adjustment. Values above the
+long-term mean are capped at one, so this component only reduces the combined
+stock advice.
+
+```{r}
+#| label: fig-paradoxus-adjustment
+#| fig-cap: "Historical TAC adjustment factors for alternative reactivities to M. paradoxus biomass."
+
+paradoxus_adjustments <- paradoxus_series |>
+  transmute(
+    Year = year,
+    Relative_biomass = pmin(pred / mean_paradoxus, 1),
+    `Gamma = 0.1` = Relative_biomass^0.1,
+    `Gamma = 0.25` = Relative_biomass^0.25,
+    `Gamma = 0.5` = Relative_biomass^0.5
+  ) |>
+  pivot_longer(
+    starts_with("Gamma"),
+    names_to = "Reactivity",
+    values_to = "Adjustment"
+  )
+
+ggplot(
+  paradoxus_adjustments,
+  aes(Year, Adjustment, colour = Reactivity)
+) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "Year",
+    y = "TAC adjustment based on M. paradoxus biomass"
+  )
+```
+
+## Control rule developments
+
+The two-species control rule combines the overall biomass trend from the
+assessment with the species-specific survey signal. Its purpose is to reduce
+the exploitation rate when either combined spawning biomass or
+*M. paradoxus* biomass is low. The specification evaluated in the 2025 report
+is retained:
+
+$$
+TAC_y =
+\begin{cases}
+0, & p_y < 0.3\bar{p}, \\
+\delta
+\left(\frac{1}{5}\sum_{i=0}^{4}RY_{y-i}\right)
+f(B_y,\lambda)
+\min\left(1,\frac{\tilde{p}_y}{\bar{p}}\right)^\gamma,
+& p_y \geq 0.3\bar{p},
+\end{cases}
+$$
+
+where:
+
+$$
+f(B_y,\lambda) =
+\begin{cases}
+\left(\dfrac{B_y/B_{MSY}}{0.5}\right)^\lambda,
+& B_y/B_{MSY} < 0.5, \\
+1, & B_y/B_{MSY} \geq 0.5.
+\end{cases}
+$$
+
+The rebuilding factor $\delta$ is 0.8 when spawning biomass is below
+$B_{MSY}$ and 1.0 otherwise. The $\lambda$ term responds when spawning
+biomass falls below $0.5B_{MSY}$, while $\gamma$ controls the response to
+the *M. paradoxus* biomass ratio.
+
+@tbl-control-rule applies the same four $\lambda$-$\gamma$ options
+shown in the 2025 report to the unchanged 2025 model and the 2026 update.
+
+```{r}
+#| label: tbl-control-rule
+#| tbl-cap: "Namibian hake control-rule calculations under the options evaluated in the 2025 report."
+
+summary_value <- function(directory, variable) {
+  model_output[[directory]] |>
+    filter(Variable == variable, is.na(Year)) |>
+    pull(value)
+}
+
+control_options <- tibble::tribble(
+  ~Option, ~lambda, ~gamma,
+  "Option 1", 1.5, 0.25,
+  "Option 2", 2.0, 0.25,
+  "Option 3", 2.0, 0.10,
+  "Option 4", 2.0, 1.00
+)
+
+control_models <- tibble::tribble(
+  ~directory, ~Model,
+  "m25", "2025 baseline",
+  "m26", "2026 update"
+)
+
+control_rule_results <- lapply(
+  seq_len(nrow(control_models)),
+  function(index) {
+    directory <- control_models$directory[[index]]
+    b_bmsy <- summary_value(directory, "Cur_Bmsy")
+    recent_ry <- summary_value(directory, "aveRY_last5")
+    delta <- if (b_bmsy < 1) 0.8 else 1
+
+    control_options |>
+      mutate(
+        Model = control_models$Model[[index]],
+        `Recent 5-year average replacement yield` = recent_ry,
+        `Current spawning biomass / BMSY` = b_bmsy,
+        `2026 M. paradoxus biomass / long-term mean` =
+          current_paradoxus_ratio,
+        Biomass_adjustment = if (b_bmsy < 0.5) {
+          (b_bmsy / 0.5)^lambda
+        } else {
+          1
+        },
+        Species_adjustment =
+          pmin(current_paradoxus_ratio, 1)^gamma,
+        `Calculated TAC` =
+          delta * recent_ry * Biomass_adjustment * Species_adjustment
+      )
+  }
+) |>
+  bind_rows()
+
+control_rule_table <- bind_rows(
+  control_rule_results |>
+    distinct(
+      Model,
+      `Recent 5-year average replacement yield`,
+      `Current spawning biomass / BMSY`,
+      `2026 M. paradoxus biomass / long-term mean`
+    ) |>
+    pivot_longer(
+      -Model,
+      names_to = "Statistic",
+      values_to = "Value"
+    ),
+  control_rule_results |>
+    transmute(
+      Model,
+      Statistic = paste0(
+        Option,
+        ": lambda = ",
+        lambda,
+        ", gamma = ",
+        gamma
+      ),
+      Value = `Calculated TAC`
+    )
+) |>
+  pivot_wider(names_from = Model, values_from = Value)
+
+kable(control_rule_table, digits = 3)
+```
+
+The response curves retained from the 2025 report are shown in
+@fig-gamma-response and @fig-lambda-response. For the 2026 update,
+*M. paradoxus* predicted biomass is
+`r round(current_paradoxus_ratio, 3)` of its 1990–2026 geometric mean, and the
+base-model spawning biomass is
+`r round(summary_value("m26", "Cur_Bmsy"), 3)` of $B_{MSY}$.
+
+```{r}
+#| label: fig-gamma-response
+#| fig-cap: "TAC adjustment for alternative values of gamma and relative M. paradoxus biomass."
+
+gamma_response <- tidyr::crossing(
+  Relative_biomass = seq(0.05, 1, by = 0.05),
+  Gamma = factor(c(0.1, 0.25, 0.5))
+) |>
+  mutate(Adjustment = Relative_biomass^as.numeric(as.character(Gamma)))
+
+ggplot(
+  gamma_response,
+  aes(Relative_biomass, Adjustment, colour = Gamma)
+) +
+  geom_line() +
+  labs(
+    x = "Relative M. paradoxus biomass",
+    y = "TAC adjustment"
+  )
+```
+
+```{r}
+#| label: fig-lambda-response
+#| fig-cap: "TAC adjustment for alternative values of lambda and spawning biomass relative to BMSY."
+
+lambda_response <- tidyr::crossing(
+  Relative_biomass = seq(0.01, 1, by = 0.01),
+  Lambda = factor(c(0.5, 1, 1.5, 2))
+) |>
+  mutate(
+    Adjustment = if_else(
+      Relative_biomass < 0.5,
+      (Relative_biomass / 0.5)^as.numeric(as.character(Lambda)),
+      1
+    )
+  )
+
+ggplot(
+  lambda_response,
+  aes(Relative_biomass, Adjustment, colour = Lambda)
+) +
+  geom_line() +
+  labs(
+    x = "Spawning biomass relative to BMSY",
+    y = "TAC adjustment"
+  )
+```
+
 # Projections and harvest recommendations
 
 The ADMB model produced replacement-yield and long-term reference-point
 outputs for each converged configuration. A management recommendation is not
-presented because the final control-rule inputs and decision framework were
-not supplied as part of this update.
-
-`TODO: insert the agreed harvest-control-rule calculation and resulting TAC
-advice after management review.`
+presented because the final choice among control-rule options and other
+management inputs was not supplied as part of this update. The calculations
+in @tbl-control-rule reproduce the options evaluated previously and should not
+be interpreted as adopted TAC advice.
 
 # Risk table and recommendation
 
