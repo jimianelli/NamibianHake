@@ -22,6 +22,7 @@ gradient_tolerance <- 0.001
 
 source(here::here("R", "read-admb2.R"))
 source(here::here("R", "assessment-validation.R"))
+source(here::here("R", "get_relbiom.R"))
 
 library(dplyr)
 library(ggplot2)
@@ -234,6 +235,58 @@ ggplot(cape_hakes, aes(year, biomass, colour = strata)) +
     alpha = 0.35
   ) +
   labs(x = "Year", y = "Survey biomass", colour = "Species")
+```
+
+Figure @fig-paradoxus-biomass updates Figure 18 from the 2025 assessment with
+the 2026 *M. paradoxus* survey observation. The dashed line is the geometric
+mean of the REMA-predicted biomass from 1990 through 2026.
+
+```{r}
+#| label: fig-paradoxus-biomass
+#| fig-cap: "REMA-smoothed survey biomass estimates for M. paradoxus through 2026. The dashed line is the geometric mean of predicted biomass over 1990–2026."
+#| fig-width: 6
+#| fig-height: 5
+
+invisible(capture.output(
+  paradoxus_biomass <- get_relative_biomass(
+    spp = "paradoxus",
+    endyr = assessment_year
+  )
+))
+
+paradoxus_series <- paradoxus_biomass$biomass_by_strata |>
+  filter(strata == "paradoxus")
+
+mean_paradoxus <- exp(mean(paradoxus_series$log_pred))
+
+ggplot(
+  paradoxus_series,
+  aes(
+    x = year,
+    y = obs,
+    ymin = pred_lci,
+    ymax = pred_uci
+  )
+) +
+  geom_ribbon(fill = "#2C7FB8", alpha = 0.3) +
+  geom_errorbar(
+    aes(ymin = obs_lci, ymax = obs_uci),
+    width = 0.2,
+    alpha = 0.4
+  ) +
+  geom_line(aes(y = pred), colour = "#045A8D") +
+  geom_point(colour = "#045A8D", alpha = 0.8) +
+  geom_hline(
+    yintercept = mean_paradoxus,
+    linetype = "dashed",
+    colour = "#D95F0E"
+  ) +
+  scale_y_continuous(
+    labels = scales::comma,
+    expand = expansion(mult = c(0, 0.05)),
+    limits = c(0, NA)
+  ) +
+  labs(x = "Year", y = "Survey biomass (kt)")
 ```
 
 ## Other data
