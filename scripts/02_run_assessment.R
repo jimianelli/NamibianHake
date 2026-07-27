@@ -32,19 +32,66 @@ controls <- c(
   m26 = file.path("mods", "m26", "nh.dat"),
   sensitivity_controls
 )
+restart_models <- c("m26_dome_selectivity", "m26_steepness_0_5")
 
 statuses <- lapply(names(controls), function(model) {
   message("Running ", model)
   tryCatch(
     {
-      run_assessment_model(
-        controls[[model]],
-        executable,
-        arguments = c(
-          "-nox", "-iprint", "250", "-maxfn", "5000", "-hbf", "1"
-        )
+      first_pass_error <- tryCatch(
+        {
+          run_assessment_model(
+            controls[[model]],
+            executable,
+            arguments = c(
+              "-nox", "-iprint", "250", "-maxfn", "5000", "-hbf", "1"
+            )
+          )
+          NULL
+        },
+        error = identity
       )
-      data.frame(Model = model, Exit_status = 0L, Message = "Completed")
+
+      if (model %in% restart_models) {
+        run_directory <- dirname(controls[[model]])
+        file.copy(
+          file.path(run_directory, "run.stdout"),
+          file.path(run_directory, "first-pass.stdout"),
+          overwrite = TRUE
+        )
+        file.copy(
+          file.path(run_directory, "run.stderr"),
+          file.path(run_directory, "first-pass.stderr"),
+          overwrite = TRUE
+        )
+        run_assessment_model(
+          controls[[model]],
+          executable,
+          arguments = c("-binp", "nh.bar", "-phase", "22")
+        )
+        file.copy(
+          file.path(run_directory, "run.stdout"),
+          file.path(run_directory, "second-pass.stdout"),
+          overwrite = TRUE
+        )
+        file.copy(
+          file.path(run_directory, "run.stderr"),
+          file.path(run_directory, "second-pass.stderr"),
+          overwrite = TRUE
+        )
+      } else if (inherits(first_pass_error, "error")) {
+        stop(first_pass_error)
+      }
+
+      data.frame(
+        Model = model,
+        Exit_status = 0L,
+        Message = if (model %in% restart_models) {
+          "Completed with nh.bar restart"
+        } else {
+          "Completed"
+        }
+      )
     },
     error = function(e) {
       data.frame(

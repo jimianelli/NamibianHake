@@ -130,11 +130,12 @@ and a positive-definite Hessian. Estimated terminal spawning biomass was
 biomass relative to BMSY was
 `r round(terminal_value("m26", "B_Bmsy", assessment_year), 3)`.
 
-Four of six sensitivity configurations met the same convergence criteria as
-the base model. The dome-shaped selectivity case had parameters on their lower
-bounds and a singular Hessian. The model with steepness fixed at 0.5 had a
-maximum gradient above 0.001 after an extended optimization. Results from
-those two configurations are not used for inference.
+Five of six sensitivity configurations met the same convergence criteria as
+the base model after the dome-selectivity and steepness-0.5 cases were
+restarted from their first-pass `nh.bar` files. The restart reduced both
+maximum gradients below 0.001, and the steepness-0.5 model converged. The
+dome-shaped selectivity case retained a non-positive-definite Hessian and is
+not used for inference.
 
 No TAC, ABC, or OFL recommendation is made in this document. Those quantities
 require the agreed Namibian management procedure and management inputs.
@@ -726,9 +727,8 @@ be interpreted as adopted TAC advice.
 The 2026 base model passed the declared numerical diagnostics. Structural
 uncertainty remains material: estimated natural mortality and fixed survey
 catchability change the inferred scale of the stock, while the dome-shaped
-selectivity case is not estimable under the current parameterization. The
-non-converged `h = 0.5` and dome-selectivity results should not be assigned
-inferential weight.
+selectivity case retains a non-positive-definite Hessian. The non-converged
+dome-selectivity result should not be assigned inferential weight.
 
 # Status determination
 
@@ -746,9 +746,8 @@ signals for *M. paradoxus* and *M. capensis*.
 
 1. Resolve the non-identifiability of dome-shaped selectivity before using
    that alternative for management inference.
-2. Profile or otherwise investigate the `h = 0.5` optimization surface.
-3. Document the provenance and preprocessing of each annual input block.
-4. Add retrospective analyses and likelihood profiles to the operational
+2. Document the provenance and preprocessing of each annual input block.
+3. Add retrospective analyses and likelihood profiles to the operational
    workflow.
 5. Archive the final management-procedure inputs alongside the accepted
    assessment.
