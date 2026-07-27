@@ -652,7 +652,65 @@ ggplot(
   )
 ```
 
-# Projections and harvest recommendations
+# Projections
+
+A set of simple 40-year projections was produced from the 2026 base-case
+model. The scenarios hold catch at 50%, 100%, or 110% of the 2026 catch;
+increase or decrease catch by 10% for 10 years before returning to the 2026
+catch; or set catch to the model-estimated replacement yield. Their effects on
+catch and depletion are compared in @fig-projections.
+
+```{r}
+#| label: fig-projections
+#| fig-cap: "Forty-year projections under catch scenarios based on the 2026 catch. C_26 is the 2026 catch; the 10-year scenarios alter catch by 10% before returning to C_26; replacement yield sets catch to the model-estimated replacement yield."
+#| fig-width: 8
+#| fig-height: 7
+#| fig-pos: H
+
+projection_labels <- c(
+  "0.5*C_26",
+  "0.75*C_26",
+  "0.9*C_26",
+  "C_26",
+  "1.1*C_26",
+  "1.5*C_26",
+  "2.0*C_26",
+  "10yr up 10%",
+  "10yr down 10%",
+  "Replacement yield"
+)
+
+projection_data <- read_csv(
+  here::here("mods", "m26", "main.out"),
+  col_names = c("Scenario", "Year", "Variable", "Value"),
+  show_col_types = FALSE,
+  trim_ws = TRUE
+) |>
+  filter(
+    Variable %in% c("Catch", "Depletion"),
+    Scenario %in% c(1, 4, 5, 8, 9, 10),
+    Year >= assessment_year
+  ) |>
+  mutate(
+    Projection = factor(
+      projection_labels[Scenario],
+      levels = projection_labels[c(1, 5, 9, 8, 4, 10)]
+    ),
+    Variable = factor(Variable, levels = c("Catch", "Depletion"))
+  )
+
+ggplot(
+  projection_data,
+  aes(Year, Value, colour = Projection)
+) +
+  geom_line() +
+  geom_point(size = 1.2) +
+  facet_grid(Variable ~ ., scales = "free_y") +
+  labs(x = "Year", y = "Value", colour = "Projection") +
+  theme(legend.position = "right")
+```
+
+# Harvest recommendations
 
 The ADMB model produced replacement-yield and long-term reference-point
 outputs for each converged configuration. A management recommendation is not
