@@ -353,6 +353,51 @@ from the pollock model to compare time-varying fishery selectivity from the
 converged 2026 base model with the dome-shaped sensitivity. The same colour
 scale is used in both figures.
 
+For the dome-shaped sensitivity, the descending-limb slope in selectivity
+period \(p\) was reparameterized as
+
+$$
+d_p = \exp(\eta_p),
+$$
+
+where $\eta_p$ is the estimated `log_SelSlope` and $d_p$ is the positive
+descending slope used by the model. For ages at or above the specified onset
+age $a_d$, the ascending logistic selectivity $L_p(a)$ is modified as
+
+$$
+\widetilde S_p(a) =
+L_p(a)\exp\{-d_p(a-a_d)\}, \qquad a \geq a_d,
+$$
+
+and the complete age-specific curve is subsequently normalized to have a
+maximum of one. Estimating $\eta_p$, rather than directly estimating a
+bounded $d_p$, guarantees a positive descending slope and removes numerical
+behavior associated with a slope estimate approaching a boundary.
+
+Two penalties stabilize the period-specific estimates. The existing
+shrinkage penalty controls their overall magnitude,
+
+$$
+P_{\mathrm{level}} =
+12.5\sum_{p=1}^{P}(d_p-0.5)^2,
+$$
+
+while a first-difference penalty on the log slopes discourages abrupt changes
+between adjacent selectivity periods,
+
+$$
+P_{\mathrm{smooth}} =
+\frac{1}{2}\sum_{p=2}^{P}
+\left(\frac{\eta_p-\eta_{p-1}}{0.15}\right)^2.
+$$
+
+These modifications retain time variation and permit dome-shaped curves, but
+reduce confounding among poorly informed period-specific slopes and the other
+parameters controlling the location and width of selectivity. In the final
+run, the regularized dome-shaped model had a maximum gradient of
+`r format(diagnostics$max_gradient[diagnostics$directory == "m26_dome_selectivity"], scientific = TRUE, digits = 3)`
+and a positive-definite Hessian.
+
 \clearpage
 
 ```{r}

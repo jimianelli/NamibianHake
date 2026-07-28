@@ -2588,6 +2588,28 @@ Figure 3: Estimated depletion from the 2025 baseline and 2026 update.
 <section id="time-varying-fishery-selectivity" class="level2">
 <h2 class="anchored" data-anchor-id="time-varying-fishery-selectivity">Time-varying fishery selectivity</h2>
 <p>The following figures use the year-normalized gradient ridge-plot presentation from the pollock model to compare time-varying fishery selectivity from the converged 2026 base model with the dome-shaped sensitivity. The same colour scale is used in both figures.</p>
+<p>For the dome-shaped sensitivity, the descending-limb slope in selectivity period (p) was reparameterized as</p>
+<p><span class="math display">\[
+d_p = \exp(\eta_p),
+\]</span></p>
+<p>where <span class="math inline">\(\eta_p\)</span> is the estimated <code>log_SelSlope</code> and <span class="math inline">\(d_p\)</span> is the positive descending slope used by the model. For ages at or above the specified onset age <span class="math inline">\(a_d\)</span>, the ascending logistic selectivity <span class="math inline">\(L_p(a)\)</span> is modified as</p>
+<p><span class="math display">\[
+\widetilde S_p(a) =
+L_p(a)\exp\{-d_p(a-a_d)\}, \qquad a \geq a_d,
+\]</span></p>
+<p>and the complete age-specific curve is subsequently normalized to have a maximum of one. Estimating <span class="math inline">\(\eta_p\)</span>, rather than directly estimating a bounded <span class="math inline">\(d_p\)</span>, guarantees a positive descending slope and removes numerical behavior associated with a slope estimate approaching a boundary.</p>
+<p>Two penalties stabilize the period-specific estimates. The existing shrinkage penalty controls their overall magnitude,</p>
+<p><span class="math display">\[
+P_{\mathrm{level}} =
+12.5\sum_{p=1}^{P}(d_p-0.5)^2,
+\]</span></p>
+<p>while a first-difference penalty on the log slopes discourages abrupt changes between adjacent selectivity periods,</p>
+<p><span class="math display">\[
+P_{\mathrm{smooth}} =
+\frac{1}{2}\sum_{p=2}^{P}
+\left(\frac{\eta_p-\eta_{p-1}}{0.15}\right)^2.
+\]</span></p>
+<p>These modifications retain time variation and permit dome-shaped curves, but reduce confounding among poorly informed period-specific slopes and the other parameters controlling the location and width of selectivity. In the final run, the regularized dome-shaped model had a maximum gradient of 3.39e-05 and a positive-definite Hessian.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-selectivity-base" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
