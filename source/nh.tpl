@@ -45,6 +45,8 @@ DATA_SECTION
   init_int NProj  //20                       // Years of projection
   init_int first_yr              //1964      // First year to consider
   init_int last_yr               //2007      // Final year to consider
+	number sigma_log_slope;
+  !!sigma_log_slope = 0.15;
   //!!cout<<last_yr<<endl;
   init_int plus_grp              //8         // age to plus at
   init_int Minfage               //2         // age at which M levels out
@@ -266,7 +268,9 @@ PARAMETER_SECTION
   init_bounded_number M1(0.1,2.0,est_M);               // Constant M
   init_bounded_number Minf(0.1,0.5,est_Minf)    //Age-dependent M
   init_bounded_vector Sage(1,NselPar,0.5,10.0,est_cSel); // Selectivity parameters
-  init_bounded_vector SelSlope(1,NSelPeriods,0.0,1.0,est_Sel_slope)   // Selectivity slope
+   //init_bounded_vector SelSlope(1,NSelPeriods,0.0,1.0,est_Sel_slope)   // Selectivity slope
+  init_vector log_SelSlope(1,NSelPeriods,est_Sel_slope);
+  vector SelSlope(1,NSelPeriods);
   init_bounded_number SurvA50(0.0,plus_grp,est_Sel)     // Survey Age-at-50%-selectivity
   init_bounded_number SurvAd(0.001,100.0,est_Sel)       // Survey difference between age at 50 and 95% selectivity
   init_bounded_number Addvar(0.0,1.0,est_addvar)      // Additional variability
@@ -597,6 +601,10 @@ PROCEDURE_SECTION
 FUNCTION Specify_Select
   int Year,Age,Yr1,Yr2, SelPeriod;
   dvariable Temp, Rage, slope, intc, Smax, RageS, SmaxS, TempS;
+
+  // Later
+  for (int p = 1; p <= NSelPeriods; p++)
+    SelSlope(p) = mfexp(log_SelSlope(p));
   // ==+==+==+== COMMERCIAL SELECTIVITY ==+==+==+==
   // Work through each selectivity period, first set up the selectivity
   // vector for the first year of the period, then copy it to all years
@@ -832,6 +840,8 @@ FUNCTION Project_forward
 		// prior += 0.5 * norm2(SelSlope - 0.5);
 		// prior += 0.5 * norm2(SelSlope - 0.5);
 		prior += 12.5*norm2(SelSlope - 0.5);
+    for (int p = 2; p <= NSelPeriods; p++)
+        prior += 0.5 * square((log_SelSlope(p)-log_SelSlope(p-1))/sigma_log_slope);
 		// prior += square(SurvA50 - 4.);
 
 

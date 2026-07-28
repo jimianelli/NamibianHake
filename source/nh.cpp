@@ -76,12 +76,13 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
     }
   }
   */
- *(ad_comm::global_datafile) >>  model_number; 
+ *(ad_comm::global_datafile) >>  model_number;
  *(ad_comm::global_datafile) >>  model_name;      //e.g. q08
- *(ad_comm::global_datafile) >>  datafilename;    //e.g. namhakdata.dat 
+ *(ad_comm::global_datafile) >>  datafilename;    //e.g. namhakdata.dat
   NProj.allocate("NProj");
   first_yr.allocate("first_yr");
   last_yr.allocate("last_yr");
+sigma_log_slope = 0.15;
   plus_grp.allocate("plus_grp");
   Minfage.allocate("Minfage");
   est_M.allocate("est_M");
@@ -128,8 +129,8 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   FutSurBias.allocate("FutSurBias");
   NKspPeriods.allocate("NKspPeriods");
   KspYrs.allocate(1,NKspPeriods,1,2,"KspYrs");
-  if (KspYrs(1,1) != first_yr) cout << "Warning: first Ksp year must be " << first_yr << endl;  
-  if (KspYrs(NKspPeriods,2) != last_yr) cout << "Warning: last Ksp year must be " << last_yr << endl;  
+  if (KspYrs(1,1) != first_yr) cout << "Warning: first Ksp year must be " << first_yr << endl;
+  if (KspYrs(NKspPeriods,2) != last_yr) cout << "Warning: last Ksp year must be " << last_yr << endl;
   weight.allocate("weight");
   select.allocate("select");
   propF.allocate("propF");
@@ -182,7 +183,6 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   log_input(SigmaRec);
   log_input(RecYr1);
   log_input(RecYr2);
-  
   log_input(CAAMinus);
   log_input(CAAPlus);
   log_input(NCpueSeries);
@@ -190,7 +190,6 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   log_input( CPUE_Sigma);
   log_input( CpueIndx);
   log_input(CpueWght);
-   
   log_input(NSurveySeries);
   log_input( UseSurvey);
   log_input( SurveyIndx);
@@ -201,14 +200,12 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   log_input(est_addvar);
   log_input( CAASMinus);
   log_input( CAASPlus);
-  
   // ** For projections **
   // ---------------------
   log_input(FutSurCV);
   log_input(FutBiasCV);
   log_input(ExtraCV);
   log_input(FutSurBias);
-  
   log_input(NKspPeriods);
   log_input(KspYrs);
   log_input(weight);
@@ -293,7 +290,11 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   M1.allocate(0.1,2.0,est_M,"M1");
   Minf.allocate(0.1,0.5,est_Minf,"Minf");
   Sage.allocate(1,NselPar,0.5,10.0,est_cSel,"Sage");
-  SelSlope.allocate(1,NSelPeriods,0.0,1.0,est_Sel_slope,"SelSlope");
+  log_SelSlope.allocate(1,NSelPeriods,est_Sel_slope,"log_SelSlope");
+  SelSlope.allocate(1,NSelPeriods,"SelSlope");
+  #ifndef NO_AD_INITIALIZE
+    SelSlope.initialize();
+  #endif
   SurvA50.allocate(0.0,plus_grp,est_Sel,"SurvA50");
   SurvAd.allocate(0.001,100.0,est_Sel,"SurvAd");
   Addvar.allocate(0.0,1.0,est_addvar,"Addvar");
@@ -755,20 +756,18 @@ void model_parameters::preliminary_calculations(void)
 #endif
   int Age,Year,Iser,AMinus,APlus;
   double Temp;
-  
   //**Clean up commercial CAA data**
   //---------------------------------
   for (Year=first_yr;Year<=last_yr;Year++)
   {
-     //** Total the catch-at-age and store the total**      
+     //** Total the catch-at-age and store the total**
      //---------------------------------------------
      Temp = 0;
      for (Age=0;Age<=plus_grp;Age++)
       Temp += CAA(Year,Age);
-     CAA(Year,-1) = Temp; 
+     CAA(Year,-1) = Temp;
      if (Temp > 0)
       {
-              
        // Implement the minus group
        //-------------------------------
        for (Age=0;Age<CAAMinus;Age++)
@@ -776,7 +775,6 @@ void model_parameters::preliminary_calculations(void)
           CAA(Year,CAAMinus) += CAA(Year,Age);
           CAA(Year,Age) = 0;
         }
-      
       //** Implement the plus group**
       //-------------------------------
        for (Age=plus_grp;Age>CAAPlus;Age--)
@@ -790,19 +788,17 @@ void model_parameters::preliminary_calculations(void)
          CAA(Year,Age) = CAA(Year,Age) / Temp;
       }
     }
-   
    //-----------------------------------------
    for (Iser=1; Iser<=NSurveySeries;Iser++)
     for (Year=first_yr;Year<=last_yr;Year++)
      {
        //** Total the catch-at-age and store the total**
       //--------------------------------------------
-      
       Temp = 0;
       for (Age=0;Age<=plus_grp;Age++)
         Temp += SurvCAA(Iser,Year,Age);
       SurvCAA(Iser,Year,-1) = Temp;
-      //cout<<Year<<" "<<SurvCAA(Iser,Year,-1)<<endl; 
+      //cout<<Year<<" "<<SurvCAA(Iser,Year,-1)<<endl;
       if (Temp>0)
        {
         //** Implement the minus group**
@@ -813,7 +809,6 @@ void model_parameters::preliminary_calculations(void)
            SurvCAA(Iser,Year,AMinus) +=SurvCAA(Iser,Year,Age);
            SurvCAA(Iser,Year,Age) = 0;
          }
-        
         // **Implement the minus group**
         //------------------------------
         APlus = CAASPlus(Iser);
@@ -822,7 +817,6 @@ void model_parameters::preliminary_calculations(void)
            SurvCAA(Iser,Year,APlus) += SurvCAA(Iser,Year,Age);
            SurvCAA(Iser,Year,Age) = 0;
          }
-     
         //** Renormalise the CAA data**
         //-------------------------
         if (Temp > 0)
@@ -830,7 +824,6 @@ void model_parameters::preliminary_calculations(void)
           SurvCAA(Iser,Year,Age) = SurvCAA(Iser,Year,Age) / Temp;
        }
     }
-     
 }
 
 void model_parameters::userfunction(void)
@@ -851,14 +844,13 @@ void model_parameters::userfunction(void)
      //cout<<"Calculate initial age-structure ok"<<endl;
   Project_forward();
      //cout<<"Project forward ok"<<endl;
-  
   Calc_CPUE_Like();
      //cout<<"CPUE likelihood ok"<<endl;
   Calc_Survey_Like();
      //cout<<"Survey likelihood ok"<<endl;
   Calc_CAA_Likelihood();
      //cout<<"CAA likelihood ok"<<endl;
-  Calc_CAAS_Likelihood();  
+  Calc_CAAS_Likelihood();
      //cout<<"Survey CAA likelihood ok"<<endl;
   Calc_RecRes_Likelihood();
      //cout<<"Recruitment residual likelihood"<<endl;
@@ -866,7 +858,7 @@ void model_parameters::userfunction(void)
     //cout<<"Oneyearold_Likelihood"<<endl;
   Get_SRCurve();
   Get_stdev();
-  if (sd_phase()) 
+  if (sd_phase())
   {
     Get_MSY();
   }
@@ -878,16 +870,14 @@ void model_parameters::userfunction(void)
     int Year = SelYrs(SelPeriod,1);
   sel_pen = 12.5*norm2(log(S(Year)-log(S(Year+1))));
   }
-  obj_fun = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood + 
+  obj_fun = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood +
   weight*Oneyearold_Likelihood + negpen + sel_pen  + prior;
   //f = CPUE_Like + Survey_Like + CAA_Likelihood + CAAS_Likelihood + RecRes_Likelihood + negpen;
-  
    Get_MSY();
-   
   if (mceval_phase())
   {
      Do_Projections();
-    ofstream out6("CurDep1990.out",ios::app); 
+    ofstream out6("CurDep1990.out",ios::app);
     for (Year=1990; Year<=last_yr; Year++)
       out6<<TotalB(last_yr)/TotalB(1990)<< " ";
     out6<<" "<<endl;
@@ -907,6 +897,9 @@ void model_parameters::Specify_Select(void)
 {
   int Year,Age,Yr1,Yr2, SelPeriod;
   dvariable Temp, Rage, slope, intc, Smax, RageS, SmaxS, TempS;
+  // Later
+  for (int p = 1; p <= NSelPeriods; p++)
+    SelSlope(p) = mfexp(log_SelSlope(p));
   // ==+==+==+== COMMERCIAL SELECTIVITY ==+==+==+==
   // Work through each selectivity period, first set up the selectivity
   // vector for the first year of the period, then copy it to all years
@@ -927,13 +920,11 @@ void model_parameters::Specify_Select(void)
     }
     for (Age=0;Age<=plus_grp;Age++)
       S(Year,Age) = S(Year,Age) / Smax;
-    
     // Copy to the rest of the period
     for (Year=SelYrs(SelPeriod,1)+1; Year<=SelYrs(SelPeriod,2); Year++)
      for (Age=0;Age<=plus_grp;Age++)
       S(Year,Age) = S(SelYrs(SelPeriod,1),Age);
   }
-   
   for (SelPeriod=1;SelPeriod<=NSelPeriods-1;SelPeriod++)
   {
     for (Age=0;Age<=plus_grp;Age++)
@@ -953,7 +944,7 @@ void model_parameters::Specify_Select(void)
       for (Age=0;Age<=plus_grp;Age++)
        S(Year,Age) = S(Year,Age) / Smax;
     }
-  } 
+  }
   //Set up the selectivity for future projections
   for (Age=0; Age<= plus_grp; Age++)
    Sfut(Age) = S(last_yr,Age);
@@ -975,15 +966,15 @@ void model_parameters::Specify_Select(void)
     for (Age=0; Age<=plus_grp; Age++)
     {
       SurvS(Age) = 1.0/(1+mfexp(-1*TempS*(RageS-SurvA50)));
-      if (Age >= Age_Sel_slopeS) 
+      if (Age >= Age_Sel_slopeS)
         SurvS(Age) = SurvS(Age) * mfexp(-SelSlopeS*(Age-Age_Sel_slopeS));
-      if (SurvS(Age) > SmaxS) 
+      if (SurvS(Age) > SmaxS)
         SmaxS = SurvS(Age);
       RageS = RageS + 1;
    }
   }
   for (Age=0;Age<=plus_grp;Age++)
-    SurvS(Age) = SurvS(Age) / SmaxS; 
+    SurvS(Age) = SurvS(Age) / SmaxS;
 }
 
 void model_parameters::Specify_M(void)
@@ -1014,7 +1005,6 @@ void model_parameters::Set_Recruitment_Residuals(void)
   }
   for (Year=RecYr2+1; Year<=last_yr+1; Year++)
     Recruit_Res(Year).initialize() ;
- 
 }
 
 void model_parameters::Calculate_Initial_Age_Structure(void)
@@ -1022,15 +1012,12 @@ void model_parameters::Calculate_Initial_Age_Structure(void)
   int Age, year, strt1,end1,strt2,end2,strt3,end3;
   dvariable SPR0,R0;
   dvariable slope, intc,Ni;
-  
-  
   // **First get the VIRGIN age-structure**
   //-----------------------------------
   Nvirg(0) = 1;
   for (Age=1; Age<=plus_grp; Age++)
     Nvirg(Age) = Nvirg(Age-1)*mfexp(-M(Age-1));
   Nvirg(plus_grp) = Nvirg(plus_grp) / (1.0 - mfexp(-M(plus_grp)));
-  
   // **Find the virgin spawner biomass-per-recruit and hence R0**
   //-----------------------------------------------------------
     //model two Ksp -periods
@@ -1041,7 +1028,6 @@ void model_parameters::Calculate_Initial_Age_Structure(void)
   end2  = KspYrs(NKspPeriods,2);
   strt3 = (KspYrs((NKspPeriods-1),2))+1;
   end3  = (KspYrs(NKspPeriods,1))-1;
-   
   for (year=strt1;year<=end1;year++)
   {
     SPR0 = 0;
@@ -1051,7 +1037,6 @@ void model_parameters::Calculate_Initial_Age_Structure(void)
     Alpha(year) = (4.0 * Steep * R0)/(5 * Steep - 1.0);
     Beta(year)  = (mfexp(par_B0))*(1.0 - Steep)/ (5 * Steep - 1.0);
   }
-   
   for (year=strt2;year<=end2;year++)
   {
     SPR0 = 0;
@@ -1061,10 +1046,9 @@ void model_parameters::Calculate_Initial_Age_Structure(void)
     Alpha(year) = (4.0 * Steep * R0)/(5 * Steep - 1.0);
     Beta(year)  = (mfexp(par_B0))*Prop*(1.0 - Steep)/ (5 * Steep - 1.0);
   }
-      
   // ** Interpolate linearly between different Ksp Periods **
   // i.e. for years in between set Ksp periods, set the alpha and beta by linear interpolation
-  //------------------------------------------------------------- 
+  //-------------------------------------------------------------
   for (year=strt3;year<=end3;year++)
   {
     slope       = 0;
@@ -1078,10 +1062,8 @@ void model_parameters::Calculate_Initial_Age_Structure(void)
     intc        = Beta(KspYrs(NKspPeriods-1,2)) - slope * KspYrs(NKspPeriods-1,2);
     Beta(year)  = intc + slope * year;
   }
-     
-  
-  //-----------------------------------------------------------  
-  Spawn(first_yr)  = 0.; 
+  //-----------------------------------------------------------
+  Spawn(first_yr)  = 0.;
   TotalB(first_yr) = 0.;
   BMid(first_yr)   = 0.;
   for (Age=0;Age<=plus_grp; Age++)
@@ -1092,8 +1074,6 @@ void model_parameters::Calculate_Initial_Age_Structure(void)
     TotalB(first_yr) += (N(first_yr,Age)*Wstrt(first_yr,Age));
     BMid(first_yr)   += N(first_yr,Age)*Wmid(first_yr,Age)*mfexp(-M(Age)/2);
   }
-  
-  
   // ** Set the spawner biomass at the start of year 1 **
   //-------------------------------------------------------------
   Spawn(first_yr)    = Ksp_fraction*mfexp(par_B0);
@@ -1104,7 +1084,6 @@ void model_parameters::Project_forward(void)
 {
   int Year, Age, II;
   dvariable Fish,Fish2,Temp;
-  
   // **DO for each year of the projection period**
   //---------------------------------------------------
   for (Year=first_yr; Year<=last_yr; Year++)
@@ -1119,8 +1098,6 @@ void model_parameters::Project_forward(void)
       SurvBeg(Year) = SurvBeg(Year) + SurvS(Age)*Temp;
       TotalB(Year)  = TotalB(Year)+Temp;
     }
-    
-   
     // ** Make sure pop do not go negative **
     // --------------------------------------
     BBeg(Year)    = posfun(BBeg(Year),0.10,negpen);
@@ -1132,6 +1109,8 @@ void model_parameters::Project_forward(void)
 		// prior += 0.5 * norm2(SelSlope - 0.5);
 		// prior += 0.5 * norm2(SelSlope - 0.5);
 		prior += 12.5*norm2(SelSlope - 0.5);
+    for (int p = 2; p <= NSelPeriods; p++)
+        prior += 0.5 * square((log_SelSlope(p)-log_SelSlope(p-1))/sigma_log_slope);
 		// prior += square(SurvA50 - 4.);
     // **First remove half of natural mortality**
     //--------------------------------------------
@@ -1140,26 +1119,21 @@ void model_parameters::Project_forward(void)
       Mtemp(Age) = N(Year,Age)*(1-mfexp(-M(Age)/2.0));   //Number of fish that died due to Natural mortality by midyear
       Ntemp(Age) = N(Year,Age)*mfexp(-M(Age)/2.0);
     }
-     
     //** Exploitable biomass and fishing mortality**
     //----------------------------------------------
     Bexp(Year) = 0;
-    
     for (Age=0; Age<=plus_grp; Age++)
     {
        Bexp(Year) = Bexp(Year) + Wmid(Year,Age)*S(Year,Age)*Ntemp(Age);
     }
     Fish = Catch(Year)/Bexp(Year);
-    
     if (Fish>0.95)
     {
        //cout<<"!!! Fishing mortality greater than 0.95 in year "<<Year<<endl;
        negpen += square(Fish - 0.95)*100.;
        Fish    = 0.95;
     }
-    
     F(Year) = Fish;
-     
     //** Remove the catch and compute survey selected biomass**
     //---------------------------------------------------------
     SurvMid(Year) = 0;
@@ -1170,18 +1144,15 @@ void model_parameters::Project_forward(void)
          CAPred2(Year,Age) = Ntemp(Age)*S(Year,Age)*Fish2;
        else
          CAPred2(Year,Age) = Ntemp(Age)*S(1988,Age)*Fish2;
-       
        SurvMid(Year) = SurvMid(Year) + SurvS(Age)*Wmid(Year,Age)*Ntemp(Age)*(1.0-S(Year,Age)*Fish/2.0);
        Ntemp(Age)    = Ntemp(Age) - CAPred(Year,Age);
        Ntemp2(Age)   = Ntemp(Age) - CAPred2(Year,Age);
      }
-     
     //** Adjust Bexp to the middle of the year**
     //------------------------------------------
     Bexp(Year)   = Bexp(Year) * (1.0 - Fish/2.0);
     Bexp(Year)   = posfun(Bexp(Year),0.10,negpen);
     TotalB(Year) = posfun(TotalB(Year),0.10,negpen);
-      
     // **Remove the rest of natural mortality**
     //------------------------------------------
     for (Age=0; Age<=plus_grp; Age++)
@@ -1189,7 +1160,6 @@ void model_parameters::Project_forward(void)
       Ntemp(Age) = Ntemp(Age)*mfexp(-M(Age)/2.0);
       Mtemp(Age) = Mtemp(Age) + Ntemp(Age)*(1-mfexp(-M(Age)/2.0));
      }
-      
     // **Update the age-structure**
     //--------------------------------
     N(Year+1,plus_grp)  = Ntemp(plus_grp)+Ntemp(plus_grp-1);
@@ -1199,10 +1169,8 @@ void model_parameters::Project_forward(void)
        N(Year+1,Age)  = Ntemp(Age-1);
        NM(Year+1,Age) = Mtemp(Age-1);
      }
-    
     // **Find the biomass by age that died due to M for J-P**
     //------------------------------------------------
-     
    for (Age=0; Age<=plus_grp; Age++)
     {
      Mbio(Year,Age) = Wstrt(Year,Age)*NM(Year,Age);
@@ -1214,12 +1182,9 @@ void model_parameters::Project_forward(void)
     for (Age=1; Age<=plus_grp; Age++)
      Spawn(Year+1) = Spawn(Year+1) + mat(Age)*Wstrt(Year,Age)*N(Year+1,Age);
      Spawn(Year+1) = posfun(Spawn(Year+1),0.10,negpen);
- 
     //** Generate the recruitment**
     //---------------------------------------
-  
      N(Year+1,0) = ((Alpha(Year)*Spawn(Year+1))/(Beta(Year) + Spawn(Year+1)))*mfexp(Recruit_Res(Year));
-     
   }
    //cout<<" here1  "<<endl;
 }
@@ -1233,11 +1198,9 @@ void model_parameters::Calc_Oneyearold_Likelihood(void)
   dvariable SSQ;
   dvariable Error;
   dvariable CVSeal;
-  
   // This estimates recruitment from the sealscat data
      Oneyearold_Likelihood = 0;
-     qtot1 = 0; nobs = 0; 
-  
+     qtot1 = 0; nobs = 0;
      for (Year=first_yr; Year<=last_yr-2; Year++)
      {
         seali_pred(Year) = N(Year,0) ;
@@ -1248,7 +1211,6 @@ void model_parameters::Calc_Oneyearold_Likelihood(void)
         }
       }
       qtot1 = mfexp(qtot1/nobs);
-    
      // Now find the likelihood
      //-------------------------
      ss.initialize();
@@ -1267,7 +1229,6 @@ void model_parameters::Calc_Oneyearold_Likelihood(void)
       qSeal = qtot1;
       SigSeal_Index = sqrt(SSQ/nobs);
       Oneyearold_Likelihood = ss;
- 
 }
 
 void model_parameters::Calc_CPUE_Like(void)
@@ -1279,7 +1240,6 @@ void model_parameters::Calc_CPUE_Like(void)
   dvariable Error;
   dvariable Sigma;
   dvariable Temp;
-  
   // Initialise CPUE likelihood
   CPUE_Like.initialize() ;
   count1=0;
@@ -1294,7 +1254,7 @@ void model_parameters::Calc_CPUE_Like(void)
     {
       if (CPUE(Year,Iser) > 0)
       {
-        nobs++; 
+        nobs++;
         if (CpueIndx(Iser) == 1) BIO(Year) = Bexp(Year);
         if (CpueIndx(Iser) == 2) BIO(Year) = SurvMid(Year);
         if (CpueIndx(Iser) == 3) BIO(Year) = SurvBeg(Year);
@@ -1302,7 +1262,6 @@ void model_parameters::Calc_CPUE_Like(void)
       }
     }
     qtot = mfexp(qtot/nobs);
-    
       // Now find the sum of squares bit
     ss.initialize();
     for (Year=first_yr; Year<=last_yr; Year++)
@@ -1312,11 +1271,10 @@ void model_parameters::Calc_CPUE_Like(void)
         Error = log(CPUE(Year,Iser)) - log(qtot*BIO(Year));
         ss   += Error*Error;
       }
-    } 
-    
+    }
     // Find the likelihood component
     Sigma = sqrt(ss/nobs);
-    if (UseCPUE(Iser) > 0) 
+    if (UseCPUE(Iser) > 0)
     {
       if (sigma_temp>0)
         Temp =  0.5 * ss /sigmasq_temp + nobs*log(sigma_temp); // Use assumed sigmas input
@@ -1324,12 +1282,12 @@ void model_parameters::Calc_CPUE_Like(void)
         Temp = nobs*log(Sigma) + nobs/2.0;                    // Estimate sigmas internally
       // Account for CPUE weighting
       CPUE_Like += CpueWght(Iser)*Temp;
-    } 
+    }
     // Store variables for output
     qCPU(Iser) = qtot;
     SigCPU(Iser) = Sigma;
     count1=nobs;
-  }  
+  }
 }
 
 void model_parameters::Calc_Survey_Like(void)
@@ -1347,7 +1305,6 @@ void model_parameters::Calc_Survey_Like(void)
   dvariable ss;
   dvariable Error;
   dvariable CVSurv2;
-  
   // Initialise Survey likelihood
   Survey_Like = 0;
   count2=0;
@@ -1374,7 +1331,7 @@ void model_parameters::Calc_Survey_Like(void)
            qtot1 = qtot1 + log(Survey(Year,Iser*2-1)/BIO(Year))/CVSurv2;
            den1  = den1 + 1.0/CVSurv2;
          }
-         else  
+         else
          {
            qtot2 = qtot2 + log(Survey(Year,Iser*2-1)/BIO(Year))/CVSurv2;
            den2  = den2 + 1.0/CVSurv2;
@@ -1391,8 +1348,7 @@ void model_parameters::Calc_Survey_Like(void)
        temp2 = den1*qtot2 - dez2*qtot1;
        qtot1 = mfexp(temp1/temp);
        qtot2 = mfexp(temp2/temp);
-     } 
-     
+     }
      // Now find the sum of squares bit
      ss = 0;
      for (Year=first_yr; Year<=last_yr; Year++)
@@ -1403,7 +1359,7 @@ void model_parameters::Calc_Survey_Like(void)
         if (SurveyIndx(Iser) == 2) BIO(Year) = SurvMid(Year);
         if (SurveyIndx(Iser) == 3) BIO(Year) = SurvBeg(Year);
         CVSurv2 = Addvar+pow(Survey(Year,Iser*2),2.0);
-        if (Year <= q_chngYr(Iser)) 
+        if (Year <= q_chngYr(Iser))
           Error = log(Survey(Year,Iser*2-1)) - log(qtot1*BIO(Year));
         else
           Error = log(Survey(Year,Iser*2-1)) - log(qtot2*BIO(Year));
@@ -1411,13 +1367,11 @@ void model_parameters::Calc_Survey_Like(void)
      }
      qSurvPre(Iser)  = qtot1;
      qSurvPost(Iser) = qtot2;
-     
      if (UseSurvey(Iser) > 0)
      {
        Survey_Like = Survey_Like + ss;
        Error = log(qtot1) - q_mean(Iser) - log(qtot2);
        Survey_Like += 0.5*Error*Error/(q_CV*q_CV);
-       
   //   cout << Survey_Like << endl;
      }
    }
@@ -1435,7 +1389,6 @@ void model_parameters::Calc_CAA_Likelihood(void)
   dvariable Residual;
   // Initial CAA Likelihood
   CAA_Likelihood = 0;
-  
   Sum1 = 0; Sum2 = 0; Sum3 = 0;Sum4.initialize();
   count3=0;
   for (Year=first_yr;Year<=last_yr;Year++)
@@ -1459,18 +1412,16 @@ void model_parameters::Calc_CAA_Likelihood(void)
       Total = 0;
       // for (Age=CAAMinus;Age<=CAAPlus;Age++)
       // Total += CAPred(Year,Age);
-     
      //**Renormalize the CAA data**
       CAPred(Year)(CAAMinus,CAAPlus) /= sum(CAPred(Year)(CAAMinus,CAAPlus)) ;
      //-----------------------------
      // for (Age=CAAMinus;Age<=CAAPlus;Age++)
       // CAPred(Year,Age) /= Total;
-      
      // **Now accumulate the total variables (Sum1 is a counter)**
      //----------------------------------------------------------
      for (Age=CAAMinus;Age<=CAAPlus;Age++)
       {
-        if (CAPred(Year,Age) >0) 
+        if (CAPred(Year,Age) >0)
          if (CAA(Year,Age) > 0)
           {
             Sum1++;
@@ -1491,7 +1442,7 @@ void model_parameters::Calc_CAA_Likelihood(void)
    if (use_multinomial>0)
      CAA_Likelihood = Sum4;
    else
-     CAA_Likelihood = Sum1*log(Sigma) - 0.5*Sum2 + Sum1/2.0; 
+     CAA_Likelihood = Sum1*log(Sigma) - 0.5*Sum2 + Sum1/2.0;
    SigCAA_com = Sigma;
 }
 
@@ -1506,11 +1457,9 @@ void model_parameters::Calc_CAAS_Likelihood(void)
   dvariable Total;
   dvariable Residual;
   dvariable ZZ;
-  
   // **Initial Survey CAA Likelihood**
   //----------------------------------
   CAAS_Likelihood = 0;
-  
   for (Iser=1;Iser<=NSurveySeries;Iser++)
    {
     Sum1 = 0; Sum2 = 0; Sum3 = 0;Sum4.initialize();
@@ -1529,7 +1478,6 @@ void model_parameters::Calc_CAAS_Likelihood(void)
          if (SurveyIndx(Iser) == 2) SAPred(Iser,Year,Age) = SurvS(Age)*N(Year,Age)*ZZ;
          if (SurveyIndx(Iser) == 3) SAPred(Iser,Year,Age) = SurvS(Age)*N(Year,Age);
         }
-        
        //** Now incorporate the survey "minus group" **
        //---------------------------------------
        AMinus = CAASMinus(Iser);
@@ -1538,7 +1486,6 @@ void model_parameters::Calc_CAAS_Likelihood(void)
          SAPred(Iser,Year,AMinus) += SAPred(Iser,Year,Age);
          // SAPred(Iser,Year,Age) = 0; // Strictly speaking, this isn't allowed
        }
-       
        //** Now incorporate the survey "plus group" **
        //---------------------------------------
        APlus = CAASPlus(Iser);
@@ -1547,13 +1494,11 @@ void model_parameters::Calc_CAAS_Likelihood(void)
          SAPred(Iser,Year,APlus) += SAPred(Iser,Year,Age);
          // SAPred(Iser,Year,Age) = 0; // Strictly speaking, this isn't allowed
        }
-        
       //**Rescale**
       //----------------
        // for (Age=AMinus;Age<=APlus;Age++)
-        // SAPred(Iser,Year,Age) /= Total;  
+        // SAPred(Iser,Year,Age) /= Total;
       SAPred(Iser,Year)(AMinus,APlus) /= sum(SAPred(Iser,Year)(AMinus,APlus)) ;
-     
        //** Now accumulate the total variables**
        //---------------------------------------
        for (Age=AMinus;Age<=APlus;Age++)
@@ -1569,27 +1514,25 @@ void model_parameters::Calc_CAAS_Likelihood(void)
             Sum4 -= SurvCAA(Iser,Year,-2)*SurvCAA(Iser,Year,Age)*log(SAPred(Iser,Year,Age) +1e-4);
           }
          }
-      } 
+      }
     if (Sum3/Sum1 <=0)
      Sigma = 0;
     else
     Sigma = sqrt(Sum3/Sum1);
-    Total = Sum1*log(Sigma) - 0.5*Sum2 + Sum1/2.0; 
+    Total = Sum1*log(Sigma) - 0.5*Sum2 + Sum1/2.0;
     if (use_multinomial>0)
       CAAS_Likelihood = Sum4;
     else
       CAAS_Likelihood = CAAS_Likelihood + Total;
       //cout<<" CAAS_Likelihood "<<CAAS_Likelihood<<endl;
     SigCAA_surv(Iser) = Sigma;
-   }   
- 
+   }
 }
 
 void model_parameters::Calc_RecRes_Likelihood(void)
 {
   int Year;
   int nyear_RecRes;
- 
   RecRes_Likelihood = 0.;
   count5 = 0;
   for (Year=first_yr; Year<=last_yr; Year++)
@@ -1607,7 +1550,6 @@ void model_parameters::Calc_RecRes_Likelihood(void)
     nyear_RecRes += 1;
     SigR_out += square(Recruit_Res(Year));
    }
-  
   if (SigR_out == 0)
    SigR_out = 99999;
   else
@@ -1625,14 +1567,13 @@ void model_parameters::Get_SRCurve(void)
     SSB(i) = SSB(20)*i/20;
     Pred_Rec(i) = (SSB(i)*Alpha(last_yr))/(Beta(last_yr) + SSB(i)) *mfexp(-(SigmaRec*SigmaRec)/2.0);
   }
- 
 }
 
 void model_parameters::Get_MSY(void)
 {
  /*Function calculates used in calculating MSY and MSYL for a designated component of the
-  population, given values for stock recruitment and selectivity...  Fmsy is the trial 
-  value of MSY example of the use of "funnel" to reduce the amount of storage for 
+  population, given values for stock recruitment and selectivity...  Fmsy is the trial
+  value of MSY example of the use of "funnel" to reduce the amount of storage for
   derivative calculations */
   dvariable Fdmsy;
   dvariable Stmp;
@@ -1682,13 +1623,11 @@ void model_parameters::Get_MSY(void)
 
 dvariable model_parameters::yield(dvariable& Ftmp, dvariable& Stmp,dvariable& Bexptmp,dvariable& Btmp)
 {
- 
   int Age, Year;
   dvariable Rtmp;
   dvariable ZZtmp;
   dvariable yield;
   dvar_vector Natmp(0,plus_grp);
-  
   //Compute the equilibrium N
   Natmp(0) = 1.;
   for (Age=1; Age<=plus_grp; Age++)
@@ -1697,7 +1636,6 @@ dvariable model_parameters::yield(dvariable& Ftmp, dvariable& Stmp,dvariable& Be
     Natmp(Age) = Natmp(Age-1)*ZZtmp;
     //cout<<" S "<<Sfut<<endl;
    }
-  
   ZZtmp = mfexp(-M(plus_grp))*(1.0-Ftmp*Sfut(plus_grp));
   Natmp(plus_grp) = Natmp(plus_grp)/(1.0 - ZZtmp);
   //cout<<"OK 2"<<endl;
@@ -1714,11 +1652,10 @@ dvariable model_parameters::yield(dvariable& Ftmp, dvariable& Stmp,dvariable& Be
     Bexptmp += Wmid(last_yr,Age)*Sfut(Age)*Natmp(Age)*ZZtmp;
     Btmp += Wmid(last_yr,Age)*Natmp(Age);
    }
-  
   //Compute the recruitement
   Rtmp = (Alpha(last_yr)*Stmp-Beta(last_yr))/Stmp;
   //cout<<"Yield "<<yield<<" Rtmp "<<Rtmp<<" Stmp "<<Stmp<<" Alpha "<<Alpha(last_yr)<<" Beta "<<Beta(last_yr)<<endl;
-  //Adjust by recruitment 
+  //Adjust by recruitment
   yield *=  Rtmp;
   Stmp *=  Rtmp;
   Bexptmp *=  Rtmp;
@@ -1744,7 +1681,6 @@ dvariable model_parameters::RY(int Year)
   for (II = 1; II<=30; II++)
    {
     FF = (Fmin + Fmax)/2.0;
- 
     // Project one year ahead and calculate the spawner biomass
     Cpred = 0.;
     for (Age = 0; Age<=plus_grp; Age++)
@@ -1769,18 +1705,16 @@ dvariable model_parameters::RY(int Year)
     if (Spawno>Spawn(Year))
      {
       Fmin = FF;
-     } 
+     }
     else
      {
       Fmax = FF;
      }
   }
-  
-  if (test == 1) 
+  if (test == 1)
    RYtmp = RYtest;
   else
    RYtmp = Cpred;
-  
   return RYtmp;
 }
 
@@ -1791,25 +1725,25 @@ void model_parameters::Get_stdev(void)
   KspSTD = mfexp(par_B0);
   KexpSTD = Bexp(first_yr);
   hSTD = Steep;
-  Bspcur = Spawn(last_yr);      
-  Bexpcur = Bexp(last_yr);      
+  Bspcur = Spawn(last_yr);
+  Bexpcur = Bexp(last_yr);
   DepspSTD = Spawn(last_yr)/Spawn(first_yr);
   DepexSTD = Bexp(last_yr)/Bexp(first_yr);
   for (Age=0; Age<=plus_grp; Age++)
   {
     MSTD(Age) = M(Age);
-    Spre1(Age) = S(1964,Age);    
-    Spre2(Age) = S(1989,Age);    
-    Spost(Age) = S(last_yr,Age);    
-    Ss(Age)    = SurvS(Age);  
+    Spre1(Age) = S(1964,Age);
+    Spre2(Age) = S(1989,Age);
+    Spost(Age) = S(last_yr,Age);
+    Ss(Age)    = SurvS(Age);
   }
-	// Terminal year total biomass over 1990 value 
+	// Terminal year total biomass over 1990 value
   Cur_90   = TotalB(last_yr)/TotalB(1990);
-	// Terminal year spawning biomass over Bzero value 
+	// Terminal year spawning biomass over Bzero value
   Cur_B0   = Spawn(last_yr)/mfexp(par_B0);
-	// Terminal year spawning biomass over Bmsy value 
+	// Terminal year spawning biomass over Bmsy value
   Cur_Bmsy = Spawn(last_yr)/Spmsy;
-  int no = 0; 
+  int no = 0;
 	aveRY_90.initialize();
   for (Year=1990;Year<=last_yr;Year++) {
     aveRY_90 += RY(Year);
@@ -1828,7 +1762,7 @@ void model_parameters::Get_stdev(void)
     DepSTD(Year) = Spawn(Year)/Spawn(first_yr);
     Bstd(Year)=Spawn(Year);
     Rstd(Year) = N(Year,0);
-    Fstd(Year) = F(Year); 
+    Fstd(Year) = F(Year);
   }
   AddvarSTD = sqrt(Addvar);
 }
@@ -1838,8 +1772,6 @@ void model_parameters::Do_Projections(void)
   int Year, Age, II, ii, noT;
   dvariable Fish,Temp,Tmp1,error, aveRYT;
   dvariable FutBias, TheCV2, FCHF, FCHW;
-  
-  
     ofstream out0("main.out");//,ios::app);
     ofstream out1("Depletion.out");//,ios::app);
     ofstream out2("Dep1990.out");//,ios::app);
@@ -1851,7 +1783,6 @@ void model_parameters::Do_Projections(void)
     ofstream out9("Sp_SPmsy(1990).out");//,ios::app);
   int u=0;
   PresValue=0;
-  
   for (int iscen=1; iscen<=10; iscen++)
 	{
   // *** DO for each year of the projection period ***
@@ -1860,40 +1791,40 @@ void model_parameters::Do_Projections(void)
   {
     switch (iscen)
     {
-      case 1: 
+      case 1:
         futCatch(Year) = 0.5*Catch(last_yr);
         break;
-      case 2: 
+      case 2:
         futCatch(Year) = .75*Catch(last_yr);
         break;
-      case 3: 
+      case 3:
         futCatch(Year) = 0.9*  Catch(last_yr);
         break;
-      case 4: 
+      case 4:
         futCatch(Year) = Catch(last_yr);
         break;
-      case 5: 
+      case 5:
         futCatch(Year) = 1.1 *  Catch(last_yr);
         break;
-      case 6: 
+      case 6:
         futCatch(Year) = 1.5 *  Catch(last_yr);
         break;
-      case 7: 
+      case 7:
         futCatch(Year) = 2. *  Catch(last_yr);
         break;
-      case 8: 
+      case 8:
 			  if(Year<=last_yr+10)
           futCatch(Year) = .95 *  Catch(last_yr);
 				else
           futCatch(Year) = 1.05 *  Catch(last_yr);
         break;
-      case 9: 
+      case 9:
 			  if(Year<=last_yr+10)
           futCatch(Year) = 1.05 *  Catch(last_yr);
 				else
           futCatch(Year) = 0.95 *  Catch(last_yr);
         break;
-      case 10: 
+      case 10:
         futCatch(Year) = Catch(last_yr);
       if (Year==last_yr){
         aveRYT = aveRY_last5 ;
@@ -1907,7 +1838,7 @@ void model_parameters::Do_Projections(void)
           if (futCatch(Year)>1.1*futCatch(Year-1))
           {
             futCatch(Year)=1.1*futCatch(Year-1);
-          }     
+          }
           if (futCatch(Year)<0.9*futCatch(Year-1))
           {
             futCatch(Year)=.9*futCatch(Year-1);
@@ -1924,14 +1855,11 @@ void model_parameters::Do_Projections(void)
         // *** Exploitable biomass and fishing mortality ***
     // -------------------------------------------------
     Bexp(Year) = 0;
-    
     for (Age=0; Age<=plus_grp; Age++)
     {
       Bexp(Year) += Wmid(last_yr,Age)*S(Year,Age)*N(Year,Age)*mfexp(-M(Age)/2.0);
-       
     }
     Fish = futCatch(Year)/Bexp(Year);
-     
     // ** Make sure fishing mortality is less than 1 **
     // ------------------------------------------------
     if (Fish>0.95)
@@ -1940,28 +1868,22 @@ void model_parameters::Do_Projections(void)
        Fish = 0.95;
     }
     F(Year) = Fish;
-     
-    
     // *** Remove the catch and compute survey selected biomass ***
     // ------------------------------------------------------------
     SurvMid(Year) = 0;
-   
     for (Age=0; Age<=plus_grp; Age++)
     {
       CAPred(Year,Age) = N(Year,Age)*mfexp(-M(Age)/2.0)*S(Year,Age)*Fish;
-      SurvBeg(Year) += SurvS(Age)*Wstrt(last_yr,Age)*Ntemp(Age)*(1.0-S(Year,Age)*Fish/2.0);    
+      SurvBeg(Year) += SurvS(Age)*Wstrt(last_yr,Age)*Ntemp(Age)*(1.0-S(Year,Age)*Fish/2.0);
       Ntemp(Age) = N(Year,Age)*mfexp(-M(Age)/2.0) - CAPred(Year,Age);
     }
-    
     // *** Adjust Bexp to the middle of the year ***
     // ---------------------------------------------
     Bexp(Year) *= (1.0 - Fish/2.0);
-    
     // *** Remove the rest of natural mortality ***
     // --------------------------------------------
     for (Age=0; Age<=plus_grp; Age++)
       Ntemp(Age) = Ntemp(Age)*mfexp(-M(Age)/2.0);
-    
     // *** Update the age-structure ***
     // --------------------------------
     N(Year+1,plus_grp) = Ntemp(plus_grp)+Ntemp(plus_grp-1);
@@ -1971,51 +1893,38 @@ void model_parameters::Do_Projections(void)
     // --------------------------------
     Spawn(Year+1) = 0;
     TotalB(Year+1) =0;
-    
     for (Age=1; Age<=plus_grp; Age++)
     {
       TotalB(Year+1) += Wstrt(last_yr,Age)*N(Year+1,Age);
-      Spawn(Year+1) += mat(Age)* Wstrt(last_yr,Age)*N(Year+1,Age);  
-      
+      Spawn(Year+1) += mat(Age)* Wstrt(last_yr,Age)*N(Year+1,Age);
     }
-    
     // *** Generate the recruitment ***
     // --------------------------------
     N(Year+1,0) = ((Spawn(Year+1)*Alpha(last_yr))/(Beta(last_yr) + Spawn(Year+1)))*mfexp(Recruit_Res(Year+1));
-             
     //*****Calculate Economic stuff*****
     //-------------------------------------------------------------------------------------------------
-    
     TAC(Year)=futCatch(Year)*1000;                   //projected TAC
-    
     CPUEfut(Year)=(Bexp(Year)*qCPU(3))/1000;   //projected CPUE
-    
-    
     //cout<<Year<<" "<<CPUEfut(Year)<< "   "<<TAC(Year)<<endl;
-    
     TACF(Year)=TAC(Year)*propF;           //TAC allocated to Freezer
     TACW(Year)=TAC(Year)*propW;           //TAC allocated to wetfish
     TempF(Year)=TACF(Year)/(CPUEfut(Year)*1.4);                     //number of hours allocated to freezers (1.29*CPUE)
     TempW(Year)=TACW(Year)/(CPUEfut(Year)*1);                      //number of hours allocated to wetfish  ((0.71 *CPUE)
     //cout<<Year<<" "<<TempW(Year)<<" "<<TempF(Year)<<" "<<TACW(Year)<<endl;
    //****number of vessels needed ****
-    VesselF(Year) =TempF(Year)/fishTimF/TrwdayF; 
+    VesselF(Year) =TempF(Year)/fishTimF/TrwdayF;
     VesselW(Year) =TempW(Year)/fishTimW/TrwdayW;
      //cout<<Year<<" "<<VesselF(Year)<<" "<<VesselW(Year)<<" "<<fishTimF<<" "<<fishTimW<<" "<<TrwdayW<<endl;
    //****Cost, revenue and profit***********
-    
     FCHF=AocF/fishTimF/TrwdayF*1000000;   ///Fishing cost per hour for freezer
     FCHW=AocW/fishTimW/TrwdayF*1000000;   //fihing cost per hour for wetfish
-  
     CostF(Year)=((TempF(Year)*FCHF)+(TACF(Year)*AocFFF))/1000000;
     CostW(Year)= ((TempW(Year)*FCHW)+(TACW(Year)*AocFFW))/1000000;
     CostT(Year)=CostF(Year) + CostW(Year);
-    
      //cout<<AocF<<" "<<fishTimF<< " "<<TrwdayF<<" "<<FCHF<<endl;
     RevF(Year)=TACF(Year)*ApF/1000000;
     RevW(Year)=TACW(Year)*ApW/1000000;
     RevT(Year)=RevF(Year)+RevW(Year);
-    
     ProfitF(Year) =RevF(Year)-CostF(Year);
     ProfitW(Year) =RevW(Year)-CostW(Year);
     ProfitT(Year) =ProfitF(Year)+ ProfitW(Year);
@@ -2032,11 +1941,9 @@ void model_parameters::Do_Projections(void)
     ProfitT(Year)=ProfitT(Year)*pow((1 + Pri),u);
     //cout<<Year<<" "<<ProfitT(Year)<<endl;
     PV(Year)=PV(Year)+ProfitT(Year)/pow((1+dr),u);
-    
     u=u+1;
      //cout<<Year<<" "<<RevT(Year)<<" "<<CostT(Year)<<" "<<ProfitT(Year)<< " "<<PV(Year)<<endl;
      PresValue = PresValue + PV(Year);
-     
      // *** Save the catch and spawning biomass ***
     // -------------------------------------------
     out0<<
@@ -2073,9 +1980,7 @@ void model_parameters::Do_Projections(void)
   out7<<" "<<endl;
   out8<<" "<<endl;
   out9<<" "<<endl;
-  
   }
- 
 }
 
 void model_parameters::report(const dvector& gradients)
@@ -2092,7 +1997,7 @@ void model_parameters::report(const dvector& gradients)
   dvariable aveRY, n;
   countAll =count1 + count2 +count3 + count4 + count5;
   aveRY = 0;
-  no = 0; 
+  no = 0;
   for (Year=1990;Year<=last_yr;Year++)
   {
     aveRY = aveRY + RY(Year);
@@ -2104,9 +2009,8 @@ void model_parameters::report(const dvector& gradients)
   report <<"Datafile_used: "<<datafilename<<endl;
   report <<"SigmaR_input SigmaR_output MSY Bsp/K"<<endl;
   report <<SigmaRec<<" "<<SigR_out<<" "<<MSY<<" "<<Spawn(last_yr)/mfexp(par_B0)<<endl;
-  report <<" "<<endl; 
+  report <<" "<<endl;
   report <<"Alpha_first "<<Alpha(first_yr)<<" Beta_first "<<Beta(first_yr)<<" Alpha_last "<<Alpha(last_yr)<<" Beta_last "<<Beta(last_yr)<<" h "<<Steep<<endl;
-  
   // ==+==+==+== Summary statistics ==+==+==+==
   report <<"'ln(Likelihoods) "<<endl;
   report << "overall      "<<obj_fun<< endl;
@@ -2141,7 +2045,6 @@ void model_parameters::report(const dvector& gradients)
   report << "MSY                "<<MSY<<endl;
   report << "Bsp("<<last_yr<<")/Ksp        "<<Spawn(last_yr)/mfexp(par_B0)<<endl;
   report << "Bexp("<<last_yr<<")/Kexp      "<<Bexp(last_yr)/Bexp(first_yr)<<endl;
-  
   report << "         "<<endl;
   report << "TotalB(last_yr)/TotalB(1990)      "<<TotalB(last_yr)/TotalB(1990)<<endl;
   // cout<<"Total B "<<TotalB(last_yr)<<endl;
@@ -2172,10 +2075,10 @@ void model_parameters::report(const dvector& gradients)
   report << "qCPUE_GLM       " << qCPU(3) << endl;
   report << "qCPUE_7Vessel   " << qCPU(6) << endl;
   report << "qSeal_index      "<<qSeal<< endl;
-  report << " " << endl;  
+  report << " " << endl;
   report << "sigmaSpanWint   " << SigCPU(4) << endl;
   report << "sigmaSpanSum    " << SigCPU(5) << endl;
-  report << " " << endl; 
+  report << " " << endl;
   report << "SpanSurveyqWin  " << qCPU(4) << endl;
   report << "SpanSurveyqSum  " << qCPU(5) << endl;
   report << "Addvariance    "<<Addvar<<endl;
@@ -2183,7 +2086,6 @@ void model_parameters::report(const dvector& gradients)
   report << "NanSurveyqSum   " << qSurvPre(1) <<" "<< qSurvPost(1) << " "<<mean(qSurvPre(1)*SurvS(3,6))<<" "<<mean(qSurvPost(1)*SurvS(3,6))<<endl;
   report << "NanSurveyqWin   " << qSurvPre(2) <<" "<< qSurvPost(2) << " "<<mean(qSurvPre(2)*SurvS(3,6))<<" "<<mean(qSurvPost(2)*SurvS(3,6))<<endl;
   // cout << "NanSurveyqSum   " << qSurvPre(1) <<" "<< qSurvPost(1) << endl;
-  
   // cout << "NanSurveyqWin   " << qSurvPre(2) <<" "<< qSurvPost(2) <<endl;
   report << " " << endl;
   report << "sigCAA_com      " << SigCAA_com << endl;
@@ -2193,15 +2095,12 @@ void model_parameters::report(const dvector& gradients)
   report << "Added_Sigma_Seal    "<<sig_seal_added<<" prop "<< Prop <<endl;
   report << " "<<endl;
   report << " " << endl;
-  
   //
   // ---------- Natural Mortality ----------
   report<<"Natural mortality by age "<<endl;
   for (Age=0; Age<=plus_grp; Age++)
    report << "M("<<Age<<")       "<<M(Age)<<endl;
-  
   report <<"Minf  "<<Minf<<"  Minfage "<< Minfage <<endl;
- 
   //
   //
   // ==+==+==+== Fit to abundance data ==+==+==+==
@@ -2241,12 +2140,12 @@ void model_parameters::report(const dvector& gradients)
    }
   report << " " << endl;
   //
-  // 
+  //
   // ==+==+==+== Some more values ==+==+==+==
   report << "Virgin Age Structure" << endl << Nvirg << endl;
   report << " " << endl;
   report << "Numbers at Age" <<endl;
-  for (Year=first_yr;Year<=last_yr;Year++) 
+  for (Year=first_yr;Year<=last_yr;Year++)
   {
     report<<Year<<" ";
     for (Age=0; Age<=plus_grp; Age++)
@@ -2265,9 +2164,9 @@ void model_parameters::report(const dvector& gradients)
   }
   report<<" "<<endl;
   //
-  // 
+  //
   report<<"Commercial selectivity"<<endl;
-  for (Year=first_yr;Year<=last_yr;Year++) 
+  for (Year=first_yr;Year<=last_yr;Year++)
   {
     report<<Year<<" ";
     for (Age=0; Age<=plus_grp; Age++)
@@ -2276,7 +2175,7 @@ void model_parameters::report(const dvector& gradients)
   }
   report<<" "<<endl;
   for (Year=first_yr;Year<=last_yr;Year++)
-  { 
+  {
      if (sum(CAA(Year)(0,8))>0)
      {
         report<<Year<<"  "<<CAA(Year)(0,8) <<" ";
@@ -2304,10 +2203,10 @@ void model_parameters::report(const dvector& gradients)
           report<< " 0  ";
         report<<endl;
           // report<<Year<<" "<<SurvCAA(Iser,Year)(0,8)<<" "<<SAPred(Iser,Year)(0,8)             <<endl;
-      }     
+      }
     }
     //report<<" "<<endl;
-  }  
+  }
   ofstream RYout("ReplacYield.dat");
    RYout<<"Replacement Yield by year"<<endl;
    RYout<<"MSY="<<"  "<<MSY<<endl;
@@ -2315,9 +2214,8 @@ void model_parameters::report(const dvector& gradients)
    for (Year=first_yr;Year<=last_yr;Year++)
      RYout<<Year<<" "<<RY(Year)<<" "<<Spawn(Year)<<endl;
    RYout.close();
- 
   report<<"Replacement Yield by year"<<endl;
-  report<<"Year ReplacYield Bsp Catch"<<endl; 
+  report<<"Year ReplacYield Bsp Catch"<<endl;
   for (Year=first_yr;Year<=last_yr;Year++)
      report<<Year<<" "<<RY(Year)<<" "<<Spawn(Year)<<" "<<Catch(Year)<<endl;
   report<<"'----------Stock-recruitment_curve----"<<endl;
@@ -2325,39 +2223,34 @@ void model_parameters::report(const dvector& gradients)
   report << "0 "<<Pred_Rec<<endl;
   report<<"'----------Catch-at-Age----------"<<endl;
   report<<"'----------CommercialCAA----------"<<endl;
-  
   for (Year=first_yr;Year<=last_yr;Year++)
-  { 
+  {
     for (Age=CAAMinus; Age<=CAAPlus; Age++)
       if (CAA(Year,Age)>0)
         if (CAPred(Year,Age)>0)
        {
         report<<Year<<"  "<<Age<<" "<<CAA(Year,Age)<<" "<<CAPred(Year,Age)<<" "<<(log(CAA(Year,Age))-log(CAPred(Year,Age)))/(SigCAA_com/sqrt(CAPred(Year,Age)))<<" "<<endl;
         //cout<<Year<<"  "<<Age<<" "<<CAA(Year,Age)<<" "<<CAPred(Year,Age)<<" "<<(log(CAA(Year,Age))-log(CAPred(Year,Age)))/(SigCAA_com/sqrt(CAPred(Year,Age)))<<" "<<endl;
-        
       }
   }
-  
   //report<<" "<<endl;
   for (Iser=1;Iser<=NSurveySeries;Iser++)
   {
     report<<"'----------Survey"<<Iser<<"'----------"<<endl;
-    
     for (Year=first_yr;Year<=last_yr;Year++)
     {
       int s = CAASMinus(Iser);
       int t = CAASPlus(Iser);
-      for (Age=s; Age<=t; Age++) 
+      for (Age=s; Age<=t; Age++)
       if (SurvCAA(Iser,Year,Age)>0)
         if (SAPred(Iser,Year,Age)>0)
         {
           report<<Year<<" "<<Age<<" "<<SurvCAA(Iser,Year,Age)<<" "<<SAPred(Iser,Year,Age)<<" "<<(log(SurvCAA(Iser,Year,Age))-log(SAPred(Iser,Year,Age)))/(SigCAA_surv(Iser)/sqrt(SAPred(Iser,Year,Age)))<<" "<<endl;
           //cout<<Year<<" "<<Age<<" "<<SurvCAA(Iser,Year,Age)<<endl;
-        }     
+        }
      }
     //report<<" "<<endl;
-  }  
-  
+  }
   report<<" "<<endl;
   report<<" "<<endl;
   report<<" biomass of fish by age "<<endl;
@@ -2378,7 +2271,6 @@ void model_parameters::report(const dvector& gradients)
    }
   report<<"   " <<endl;
   report<<"----- The End -----"<<endl;
-  
 }
 
 void model_parameters::final_calcs()
@@ -2513,47 +2405,46 @@ void model_parameters::final_calcs()
       int s = CAASMinus(Iser);
       int t = CAASPlus(Iser);
       Rreport<< Year <<" ";
-      for (int Age=s; Age<=t; Age++) 
+      for (int Age=s; Age<=t; Age++)
       {
         Rreport<< SAPred(Iser,Year,Age)<<" ";
-      }     
+      }
 			Rreport<<endl;
-    }     
+    }
 	  Rreport <<"survey"<<Iser<<"_Pobs"<<endl;
     for (int Year=first_yr;Year<=last_yr;Year++) {
       int s = CAASMinus(Iser);
       int t = CAASPlus(Iser);
       Rreport<< Year <<" ";
-      for (int Age=s; Age<=t; Age++) 
+      for (int Age=s; Age<=t; Age++)
       {
         Rreport<< SurvCAA(Iser,Year,Age)<<" ";
-      }     
+      }
 			Rreport<<endl;
-    }     
+    }
 	  Rreport <<"fishery_Pobs"<<endl;
     for (int Year=first_yr;Year<=last_yr;Year++) {
       int s = CAAMinus;
       int t = CAAPlus;
       Rreport<< Year <<" ";
-      for (int Age=s; Age<=t; Age++) 
+      for (int Age=s; Age<=t; Age++)
       {
         Rreport<< CAA(Year,Age)<<" ";
-      }     
+      }
 			Rreport<<endl;
-    }     
+    }
 	  Rreport <<"fishery_Phat"<<endl;
     for (int Year=first_yr;Year<=last_yr;Year++) {
       int s = CAAMinus;
       int t = CAAPlus;
       Rreport<< Year <<" ";
-      for (int Age=s; Age<=t; Age++) 
+      for (int Age=s; Age<=t; Age++)
       {
         Rreport<< CAPred(Year,Age)<<" ";
-      }     
+      }
 			Rreport<<endl;
-    }     
-  }     
-	
+    }
+  }
 }
 
 model_data::~model_data()

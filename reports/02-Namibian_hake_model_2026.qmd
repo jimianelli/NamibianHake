@@ -25,12 +25,61 @@ source(here::here("R", "assessment-validation.R"))
 source(here::here("R", "get_relbiom.R"))
 
 library(dplyr)
+library(ggridges)
 library(ggplot2)
 library(knitr)
 library(readr)
 library(tidyr)
 
 theme_set(ggthemes::theme_few())
+
+noaa_colors <- c(
+  navy = "#003087",
+  light_blue = "#CFE8F3"
+)
+
+selectivity_ridge_data <- function(model) {
+  years <- model$Year
+  selectivity <- model$S[seq_along(years), , drop = FALSE]
+  colnames(selectivity) <- seq.int(0L, ncol(selectivity) - 1L)
+
+  as.data.frame(selectivity) |>
+    mutate(Year = years) |>
+    pivot_longer(-Year, names_to = "Age", values_to = "selectivity") |>
+    group_by(Year) |>
+    mutate(
+      relative_selectivity = selectivity / max(selectivity, na.rm = TRUE)
+    ) |>
+    ungroup() |>
+    mutate(
+      Age = as.integer(Age),
+      Year = factor(Year, levels = sort(unique(Year), decreasing = TRUE))
+    )
+}
+
+plot_selectivity_ridges <- function(model) {
+  selectivity_ridge_data(model) |>
+    ggplot(aes(
+      x = Age,
+      y = Year,
+      height = relative_selectivity,
+      fill = relative_selectivity
+    )) +
+    geom_ridgeline_gradient(
+      scale = 3,
+      rel_min_height = 0.01,
+      linewidth = 0.2
+    ) +
+    scale_fill_gradient(
+      low = unname(noaa_colors["light_blue"]),
+      high = unname(noaa_colors["navy"]),
+      limits = c(0, 1),
+      name = "Relative\nselectivity"
+    ) +
+    scale_x_continuous(breaks = 0:8) +
+    labs(x = "Age (years)", y = "Year") +
+    theme(legend.position = "right")
+}
 
 model_spec <- tibble::tribble(
   ~directory, ~model, ~configuration,
@@ -130,12 +179,10 @@ and a positive-definite Hessian. Estimated terminal spawning biomass was
 biomass relative to BMSY was
 `r round(terminal_value("m26", "B_Bmsy", assessment_year), 3)`.
 
-Five of six sensitivity configurations met the same convergence criteria as
-the base model after the dome-selectivity and steepness-0.5 cases were
-restarted from their first-pass `nh.bar` files. The restart reduced both
-maximum gradients below 0.001, and the steepness-0.5 model converged. The
-dome-shaped selectivity case retained a non-positive-definite Hessian and is
-not used for inference.
+All six sensitivity configurations met the same convergence criteria as the
+base model. After the selectivity slopes were estimated on the log scale with
+a first-difference smoothing penalty, the dome-shaped selectivity case
+converged with a maximum gradient below 0.001 and a positive-definite Hessian.
 
 No TAC, ABC, or OFL recommendation is made in this document. Those quantities
 require the agreed Namibian management procedure and management inputs.
@@ -297,6 +344,43 @@ bridge_series |>
   geom_ribbon(aes(ymin = ymin, ymax = ymax), alpha = 0.15, colour = NA) +
   geom_line() +
   labs(x = "Year", y = "Spawning biomass / unfished spawning biomass")
+```
+
+## Time-varying fishery selectivity
+
+The following figures use the year-normalized gradient ridge-plot presentation
+from the pollock model to compare time-varying fishery selectivity from the
+converged 2026 base model with the dome-shaped sensitivity. The same colour
+scale is used in both figures.
+
+\clearpage
+
+```{r}
+#| label: fig-selectivity-base
+#| fig-cap: "Time-varying fishery selectivity for the converged 2026 base model."
+#| fig-width: 6
+#| fig-height: 7.5
+#| fig-pos: H
+
+base_selectivity <- read_rep(
+  here::here("mods", "m26", "nh_R.rep")
+)
+plot_selectivity_ridges(base_selectivity)
+```
+
+\clearpage
+
+```{r}
+#| label: fig-selectivity-dome
+#| fig-cap: "Time-varying fishery selectivity for the converged 2026 dome-shaped sensitivity."
+#| fig-width: 6
+#| fig-height: 7.5
+#| fig-pos: H
+
+dome_selectivity <- read_rep(
+  here::here("mods", "m26_dome_selectivity", "nh_R.rep")
+)
+plot_selectivity_ridges(dome_selectivity)
 ```
 
 {{< pagebreak >}}
@@ -726,9 +810,9 @@ be interpreted as adopted TAC advice.
 
 The 2026 base model passed the declared numerical diagnostics. Structural
 uncertainty remains material: estimated natural mortality and fixed survey
-catchability change the inferred scale of the stock, while the dome-shaped
-selectivity case retains a non-positive-definite Hessian. The non-converged
-dome-selectivity result should not be assigned inferential weight.
+catchability change the inferred scale of the stock. The dome-shaped
+selectivity case now passes the numerical criteria, but it remains a structural
+sensitivity rather than the selected base configuration.
 
 # Status determination
 
@@ -744,8 +828,9 @@ signals for *M. paradoxus* and *M. capensis*.
 
 # Data gaps and research priorities
 
-1. Resolve the non-identifiability of dome-shaped selectivity before using
-   that alternative for management inference.
+1. Evaluate the biological plausibility and stability of the regularized
+   dome-shaped selectivity alternative before using it for management
+   inference.
 2. Document the provenance and preprocessing of each annual input block.
 3. Add retrospective analyses and likelihood profiles to the operational
    workflow.
