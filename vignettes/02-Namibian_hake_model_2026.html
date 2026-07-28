@@ -2715,6 +2715,137 @@ Table 3: Convergence diagnostics for the bridge and sensitivity models.
 </figure>
 </div>
 </div>
+<div class="cell" data-tbl-pos="H">
+<div id="tbl-likelihood-components" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-pos="H">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-likelihood-components-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table 4: Penalized negative-log-likelihood components by model. Lower values indicate a smaller contribution to the objective, but components should be compared within rather than across data types.
+</figcaption>
+<div aria-describedby="tbl-likelihood-components-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Component</th>
+<th style="text-align: right;">2025</th>
+<th style="text-align: right;">2026</th>
+<th style="text-align: right;">q = 1.0</th>
+<th style="text-align: right;">q = 0.5</th>
+<th style="text-align: right;">Est. M</th>
+<th style="text-align: right;">Dome</th>
+<th style="text-align: right;">h = 0.5</th>
+<th style="text-align: right;">h = 0.9</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CPUE</td>
+<td style="text-align: right;">-47.59</td>
+<td style="text-align: right;">-48.59</td>
+<td style="text-align: right;">-50.14</td>
+<td style="text-align: right;">-47.64</td>
+<td style="text-align: right;">-49.14</td>
+<td style="text-align: right;">-46.03</td>
+<td style="text-align: right;">-48.54</td>
+<td style="text-align: right;">-48.81</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Survey B</td>
+<td style="text-align: right;">-33.32</td>
+<td style="text-align: right;">-35.31</td>
+<td style="text-align: right;">-23.73</td>
+<td style="text-align: right;">-20.50</td>
+<td style="text-align: right;">-34.65</td>
+<td style="text-align: right;">-28.02</td>
+<td style="text-align: right;">-35.36</td>
+<td style="text-align: right;">-34.96</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Fishery CAA</td>
+<td style="text-align: right;">-128.12</td>
+<td style="text-align: right;">-126.58</td>
+<td style="text-align: right;">-117.09</td>
+<td style="text-align: right;">-67.64</td>
+<td style="text-align: right;">-128.28</td>
+<td style="text-align: right;">-129.41</td>
+<td style="text-align: right;">-127.07</td>
+<td style="text-align: right;">-124.21</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Survey CAA</td>
+<td style="text-align: right;">90.83</td>
+<td style="text-align: right;">89.88</td>
+<td style="text-align: right;">95.77</td>
+<td style="text-align: right;">115.45</td>
+<td style="text-align: right;">87.54</td>
+<td style="text-align: right;">125.50</td>
+<td style="text-align: right;">89.82</td>
+<td style="text-align: right;">90.30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Recruit</td>
+<td style="text-align: right;">15.81</td>
+<td style="text-align: right;">16.62</td>
+<td style="text-align: right;">15.99</td>
+<td style="text-align: right;">9.97</td>
+<td style="text-align: right;">18.06</td>
+<td style="text-align: right;">8.01</td>
+<td style="text-align: right;">8.56</td>
+<td style="text-align: right;">25.63</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sel. penalty</td>
+<td style="text-align: right;">35.64</td>
+<td style="text-align: right;">36.14</td>
+<td style="text-align: right;">33.59</td>
+<td style="text-align: right;">26.87</td>
+<td style="text-align: right;">37.39</td>
+<td style="text-align: right;">32.25</td>
+<td style="text-align: right;">35.96</td>
+<td style="text-align: right;">35.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Priors</td>
+<td style="text-align: right;">50.73</td>
+<td style="text-align: right;">50.98</td>
+<td style="text-align: right;">48.21</td>
+<td style="text-align: right;">44.51</td>
+<td style="text-align: right;">51.57</td>
+<td style="text-align: right;">25.75</td>
+<td style="text-align: right;">50.99</td>
+<td style="text-align: right;">50.78</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Total</td>
+<td style="text-align: right;">-16.03</td>
+<td style="text-align: right;">-16.85</td>
+<td style="text-align: right;">2.60</td>
+<td style="text-align: right;">61.02</td>
+<td style="text-align: right;">-17.50</td>
+<td style="text-align: right;">-11.96</td>
+<td style="text-align: right;">-25.64</td>
+<td style="text-align: right;">-5.35</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The one-year-old biomass index is not shown as an objective component because its likelihood weight is zero in these runs. The negative component values arise from the likelihood formulations and their estimated variance terms; they do not indicate negative lack of fit. Totals are penalized objectives, so their absolute values are most directly comparable for configurations fitted to the same observations with the same penalty structure.</p>
+<p>The notably lower total for the (h=0.5) model is almost entirely attributable to the recruitment-residual component. Its recruitment contribution is 8.56, compared with 16.62 for the 2026 base model: a reduction of 8.07 objective units. The full objective decreases by 8.79 units, while the CPUE, survey, age-composition, selectivity-penalty, and prior components change comparatively little. With steepness fixed at 0.5, the stock–recruit curve requires smaller estimated recruitment deviations under the model’s quadratic residual penalty. Thus the lower total primarily reflects better agreement with the assumed stock–recruit relationship, not a broad improvement in fit to every observed data type or, by itself, evidence that (h=0.5) should replace the base assumption.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-sensitivity" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H">
@@ -2805,12 +2936,12 @@ f(B_y,\lambda) =
 \end{cases}
 \]</span></p>
 <p>The rebuilding factor <span class="math inline">\(\delta\)</span> is 0.8 when spawning biomass is below <span class="math inline">\(B_{MSY}\)</span> and 1.0 otherwise. The <span class="math inline">\(\lambda\)</span> term responds when spawning biomass falls below <span class="math inline">\(0.5B_{MSY}\)</span>, while <span class="math inline">\(\gamma\)</span> controls the response to the <em>M. paradoxus</em> biomass ratio.</p>
-<p><a href="#tbl-control-rule" class="quarto-xref">Table 4</a> applies the same four <span class="math inline">\(\lambda\)</span>-<span class="math inline">\(\gamma\)</span> options shown in the 2025 report to the unchanged 2025 model and the 2026 update.</p>
+<p><a href="#tbl-control-rule" class="quarto-xref">Table 5</a> applies the same four <span class="math inline">\(\lambda\)</span>-<span class="math inline">\(\gamma\)</span> options shown in the 2025 report to the unchanged 2025 model and the 2026 update.</p>
 <div class="cell">
 <div id="tbl-control-rule" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-control-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table 4: Namibian hake control-rule calculations under the options evaluated in the 2025 report.
+Table 5: Namibian hake control-rule calculations under the options evaluated in the 2025 report.
 </figcaption>
 <div aria-describedby="tbl-control-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -2921,7 +3052,7 @@ Figure 11: Forty-year projections under catch scenarios based on the 2026 catch
 </section>
 <section id="harvest-recommendations" class="level1">
 <h1>Harvest recommendations</h1>
-<p>The ADMB model produced replacement-yield and long-term reference-point outputs for each converged configuration. A management recommendation is not presented because the final choice among control-rule options and other management inputs was not supplied as part of this update. The calculations in <a href="#tbl-control-rule" class="quarto-xref">Table 4</a> reproduce the options evaluated previously and should not be interpreted as adopted TAC advice.</p>
+<p>The ADMB model produced replacement-yield and long-term reference-point outputs for each converged configuration. A management recommendation is not presented because the final choice among control-rule options and other management inputs was not supplied as part of this update. The calculations in <a href="#tbl-control-rule" class="quarto-xref">Table 5</a> reproduce the options evaluated previously and should not be interpreted as adopted TAC advice.</p>
 </section>
 <section id="risk-table-and-recommendation" class="level1">
 <h1>Risk table and recommendation</h1>

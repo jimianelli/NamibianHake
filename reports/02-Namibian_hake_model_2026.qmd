@@ -145,6 +145,34 @@ diagnostics <- lapply(model_spec$directory, function(directory) {
     status = if_else(converged, "Converged", "Failed diagnostic criteria")
   )
 
+read_likelihood_component <- function(directory, label) {
+  lines <- readLines(
+    here::here("mods", directory, "nh.rep"),
+    warn = FALSE
+  )
+  match <- grep(paste0("^", label, "\\s+"), lines, value = TRUE)
+  if (!length(match)) {
+    return(NA_real_)
+  }
+  as.numeric(sub(paste0("^", label, "\\s+"), "", match[[1L]]))
+}
+
+likelihood_components <- lapply(model_spec$directory, function(directory) {
+  tibble(
+    directory = directory,
+    CPUE = read_likelihood_component(directory, "CPUE"),
+    `Survey biomass` = read_likelihood_component(directory, "Survey"),
+    `Fishery ages` = read_likelihood_component(directory, "CAA"),
+    `Survey ages` = read_likelihood_component(directory, "CAAsurv"),
+    Recruitment = read_likelihood_component(directory, "SRresidual"),
+    `Selectivity penalty` = read_likelihood_component(directory, "selpen"),
+    Priors = read_likelihood_component(directory, "prior"),
+    Total = read_likelihood_component(directory, "overall")
+  )
+}) |>
+  bind_rows() |>
+  left_join(model_spec |> select(directory, model), by = "directory")
+
 terminal_value <- function(directory, variable, year) {
   model_output[[directory]] |>
     filter(Variable == variable, Year == year) |>
@@ -446,6 +474,59 @@ diagnostics |>
   ) |>
   kable(digits = 5)
 ```
+
+```{r}
+#| label: tbl-likelihood-components
+#| tbl-cap: "Penalized negative-log-likelihood components by model. Lower values indicate a smaller contribution to the objective, but components should be compared within rather than across data types."
+#| tbl-pos: H
+
+likelihood_components |>
+  mutate(model = recode(
+    model,
+    `2025 baseline` = "2025",
+    `2026 update` = "2026",
+    `Estimated M` = "Est. M",
+    `Dome selectivity` = "Dome"
+  )) |>
+  select(
+    model,
+    CPUE,
+    `Survey B` = `Survey biomass`,
+    `Fishery CAA` = `Fishery ages`,
+    `Survey CAA` = `Survey ages`,
+    Recruit = Recruitment,
+    `Sel. penalty` = `Selectivity penalty`,
+    Priors,
+    Total
+  ) |>
+  pivot_longer(-model, names_to = "Component", values_to = "Value") |>
+  pivot_wider(names_from = model, values_from = Value) |>
+  kable(digits = 2)
+```
+
+The one-year-old biomass index is not shown as an objective component because
+its likelihood weight is zero in these runs. The negative component values
+arise from the likelihood formulations and their estimated variance terms;
+they do not indicate negative lack of fit. Totals are penalized objectives,
+so their absolute values are most directly comparable for configurations
+fitted to the same observations with the same penalty structure.
+
+The notably lower total for the \(h=0.5\) model is almost entirely attributable
+to the recruitment-residual component. Its recruitment contribution is
+`r round(likelihood_components$Recruitment[likelihood_components$directory == "m26_steepness_0_5"], 2)`,
+compared with
+`r round(likelihood_components$Recruitment[likelihood_components$directory == "m26"], 2)`
+for the 2026 base model: a reduction of
+`r round(likelihood_components$Recruitment[likelihood_components$directory == "m26"] - likelihood_components$Recruitment[likelihood_components$directory == "m26_steepness_0_5"], 2)`
+objective units. The full objective decreases by
+`r round(likelihood_components$Total[likelihood_components$directory == "m26"] - likelihood_components$Total[likelihood_components$directory == "m26_steepness_0_5"], 2)`
+units, while the CPUE, survey, age-composition, selectivity-penalty, and prior
+components change comparatively little. With steepness fixed at 0.5, the
+stock--recruit curve requires smaller estimated recruitment deviations under
+the model's quadratic residual penalty. Thus the lower total primarily
+reflects better agreement with the assumed stock--recruit relationship, not a
+broad improvement in fit to every observed data type or, by itself, evidence
+that \(h=0.5\) should replace the base assumption.
 
 ```{r}
 #| label: fig-sensitivity
