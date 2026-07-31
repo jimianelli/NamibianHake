@@ -7,6 +7,7 @@ format:
     embed-resources: true
     toc: true
     code-fold: true
+    lightbox: auto
 execute:
   echo: false
   warning: false
@@ -603,9 +604,9 @@ that \(h=0.5\) should replace the base assumption.
 
 ```{r}
 #| label: fig-stock-recruit
-#| fig-cap: "Fitted stock--recruit curves with annual spawning-biomass and age-0 recruitment estimates overlaid as two-digit year labels for the 2026 base model and the two fixed-steepness sensitivities."
-#| fig-width: 9
-#| fig-height: 4.5
+#| fig-cap: "Fitted stock--recruit curves and annual estimates for the 2026 base model and two fixed-steepness sensitivities, overlaid in one panel and coloured by model. Estimates are identified by two-digit year labels."
+#| fig-width: 7.5
+#| fig-height: 5
 #| fig-pos: H
 
 stock_recruit_spec <- tibble::tribble(
@@ -640,7 +641,8 @@ stock_recruit_estimates <- lapply(
         Year,
         Spawning_biomass = SSB,
         Recruitment = R,
-        Model = stock_recruit_spec$Model[[i]]
+        Model = stock_recruit_spec$Model[[i]],
+        label_vjust = c(-0.7, 0.5, 1.7)[[i]]
       )
   }
 ) |>
@@ -652,29 +654,35 @@ ggplot() +
     aes(
       Spawning_biomass,
       Recruitment,
-      colour = Year,
-      label = sprintf("%02d", Year %% 100L)
+      colour = Model,
+      label = sprintf("%02d", Year %% 100L),
+      vjust = label_vjust
     ),
-    alpha = 0.75,
-    size = 2.3
+    alpha = 0.7,
+    size = 2.2
   ) +
   geom_line(
     data = stock_recruit_curves,
-    aes(Spawning_biomass, Recruitment),
-    colour = unname(noaa_colors["navy"]),
-    linewidth = 1
+    aes(Spawning_biomass, Recruitment, colour = Model),
+    linewidth = 1.1
   ) +
-  facet_wrap(~Model, nrow = 1) +
-  scale_colour_viridis_c(option = "C", direction = -1, name = "Year") +
+  scale_colour_manual(
+    values = c(
+      "2026 base (h = 0.7)" = "#008EAA",
+      "h = 0.5" = "#F2A900",
+      "h = 0.9" = "#003087"
+    ),
+    name = "Model"
+  ) +
   labs(
     x = "Spawning biomass",
     y = "Estimated age-0 recruitment"
   )
 ```
 
-The annual estimates, identified by the last two digits of their year, are
-overlaid on their corresponding fitted curves in @fig-stock-recruit. The three
-models estimate broadly similar historical
+The annual estimates, identified by the last two digits of their year and
+coloured by model, are overlaid with all three fitted curves in
+@fig-stock-recruit. The three models estimate broadly similar historical
 spawning biomass and recruitment, but impose different recruitment responses
 at low spawning biomass. The \(h=0.5\) curve has the weakest recruitment at low
 biomass, whereas \(h=0.9\) maintains comparatively high recruitment over the
