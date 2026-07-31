@@ -353,6 +353,17 @@ ggplot(bridge_series, aes(Year, value, colour = Model, fill = Model)) +
   labs(x = "Year", y = "Spawning biomass")
 ```
 
+As shown in @fig-bridge-ssb, adding the 2026 observations caused only modest
+revisions to the historical spawning-biomass trajectory. For the common
+terminal year 2025, the updated model estimated spawning biomass at
+`r round(terminal_value("m26", "SSB", 2025))`, compared with
+`r round(terminal_value("m25", "SSB", 2025))` in the previous assessment—an
+increase of approximately
+`r round(100 * (terminal_value("m26", "SSB", 2025) / terminal_value("m25", "SSB", 2025) - 1), 1)`%.
+Despite this upward revision to the 2025 estimate, the updated trajectory
+continued downward to
+`r round(terminal_value("m26", "SSB", assessment_year))` in 2026.
+
 ```{r}
 #| label: fig-bridge-depletion
 #| fig-cap: "Estimated depletion from the 2025 baseline and 2026 update."
@@ -373,6 +384,66 @@ bridge_series |>
   geom_line() +
   labs(x = "Year", y = "Spawning biomass / unfished spawning biomass")
 ```
+
+The same result is apparent on the relative scale in
+@fig-bridge-depletion. Estimated 2025 depletion increased from
+`r round(terminal_value("m25", "Depletion", 2025), 3)` in the previous model
+to `r round(terminal_value("m26", "Depletion", 2025), 3)` after the data
+update, before declining to
+`r round(terminal_value("m26", "Depletion", assessment_year), 3)` in 2026.
+The overlapping uncertainty intervals and closely aligned historical series
+indicate that the update changes the recent endpoint more than the overall
+interpretation of the stock trajectory.
+
+```{r}
+#| label: fig-bridge-recruitment
+#| fig-cap: "Estimated age-0 recruitment from the 2025 baseline and 2026 update, 1990–2026. The 2026 bar is available only for the updated model."
+#| fig-width: 8
+#| fig-height: 4.5
+
+bridge_labels <- c("m25" = "2025 baseline", "m26" = "2026 update")
+bridge_recruitment <- Map(
+    f = function(directory, model_label) {
+      model <- read_rep(here::here("mods", directory, "nh_R.rep"))
+      tibble(
+        Year = model$Year,
+        Recruitment = model$N[seq_along(model$Year), 1L],
+        Model = model_label
+      )
+    },
+    directory = names(bridge_labels),
+    model_label = unname(bridge_labels)
+  ) |>
+  bind_rows() |>
+  filter(Year >= 1990)
+
+ggplot(bridge_recruitment, aes(Year, Recruitment, fill = Model)) +
+  geom_col(
+    position = position_dodge(width = 0.8),
+    width = 0.75
+  ) +
+  scale_x_continuous(
+    breaks = seq(1990, 2025, by = 5)
+  ) +
+  labs(
+    x = "Recruitment year",
+    y = "Estimated age-0 recruitment",
+    fill = "Model"
+  )
+```
+
+Recruitment estimates are very similar over most of the shared time series
+(@fig-bridge-recruitment), consistent with the limited historical revisions
+in the biomass bridge. The update produces more visible revisions in the most
+recent years: estimated 2025 recruitment decreases from
+`r round(bridge_recruitment$Recruitment[bridge_recruitment$Model == "2025 baseline" & bridge_recruitment$Year == 2025], 2)`
+to
+`r round(bridge_recruitment$Recruitment[bridge_recruitment$Model == "2026 update" & bridge_recruitment$Year == 2025], 2)`,
+while the updated model estimates 2026 recruitment at
+`r round(bridge_recruitment$Recruitment[bridge_recruitment$Model == "2026 update" & bridge_recruitment$Year == assessment_year], 2)`.
+The apparent 2026 increase should be interpreted cautiously because it is the
+new terminal recruitment estimate and is consequently informed by less data
+than earlier cohorts.
 
 ## Time-varying fishery selectivity
 
