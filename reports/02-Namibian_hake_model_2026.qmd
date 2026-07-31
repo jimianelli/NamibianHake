@@ -338,6 +338,26 @@ than `r gradient_tolerance`, and a positive-definite ADMB Hessian.
 
 ## Bridge comparison
 
+@fig-bridge-ssb and @fig-bridge-depletion show that adding the 2026
+observations caused only modest revisions to the historical spawning-biomass
+trajectory. For the common terminal year 2025, the updated model estimated
+spawning biomass at `r round(terminal_value("m26", "SSB", 2025))`, compared
+with `r round(terminal_value("m25", "SSB", 2025))` in the previous
+assessment—an increase of approximately
+`r round(100 * (terminal_value("m26", "SSB", 2025) / terminal_value("m25", "SSB", 2025) - 1), 1)`%.
+Despite this upward revision to the 2025 estimate, the updated trajectory
+continued downward to
+`r round(terminal_value("m26", "SSB", assessment_year))` in 2026.
+
+On the relative scale, estimated 2025 depletion increased from
+`r round(terminal_value("m25", "Depletion", 2025), 3)` in the previous model
+to `r round(terminal_value("m26", "Depletion", 2025), 3)` after the data
+update, before declining to
+`r round(terminal_value("m26", "Depletion", assessment_year), 3)` in 2026.
+The overlapping uncertainty intervals and closely aligned historical series
+indicate that the update changes the recent endpoint more than the overall
+interpretation of the stock trajectory.
+
 ```{r}
 #| label: fig-bridge-ssb
 #| fig-cap: "Spawning biomass from the unchanged 2025 model and the 2026 data update."
@@ -353,17 +373,6 @@ ggplot(bridge_series, aes(Year, value, colour = Model, fill = Model)) +
   geom_line() +
   labs(x = "Year", y = "Spawning biomass")
 ```
-
-As shown in @fig-bridge-ssb, adding the 2026 observations caused only modest
-revisions to the historical spawning-biomass trajectory. For the common
-terminal year 2025, the updated model estimated spawning biomass at
-`r round(terminal_value("m26", "SSB", 2025))`, compared with
-`r round(terminal_value("m25", "SSB", 2025))` in the previous assessment—an
-increase of approximately
-`r round(100 * (terminal_value("m26", "SSB", 2025) / terminal_value("m25", "SSB", 2025) - 1), 1)`%.
-Despite this upward revision to the 2025 estimate, the updated trajectory
-continued downward to
-`r round(terminal_value("m26", "SSB", assessment_year))` in 2026.
 
 ```{r}
 #| label: fig-bridge-depletion
@@ -385,16 +394,6 @@ bridge_series |>
   geom_line() +
   labs(x = "Year", y = "Spawning biomass / unfished spawning biomass")
 ```
-
-The same result is apparent on the relative scale in
-@fig-bridge-depletion. Estimated 2025 depletion increased from
-`r round(terminal_value("m25", "Depletion", 2025), 3)` in the previous model
-to `r round(terminal_value("m26", "Depletion", 2025), 3)` after the data
-update, before declining to
-`r round(terminal_value("m26", "Depletion", assessment_year), 3)` in 2026.
-The overlapping uncertainty intervals and closely aligned historical series
-indicate that the update changes the recent endpoint more than the overall
-interpretation of the stock trajectory.
 
 ```{r}
 #| label: fig-bridge-recruitment
@@ -445,6 +444,101 @@ while the updated model estimates 2026 recruitment at
 The apparent 2026 increase should be interpreted cautiously because it is the
 new terminal recruitment estimate and is consequently informed by less data
 than earlier cohorts.
+
+The stock--recruit comparison extends the recruitment bridge by contrasting
+the 2026 base assumption with the two fixed-steepness sensitivities. The
+annual estimates, identified by the last two digits of their year and coloured
+by model, are overlaid with all three fitted curves in @fig-stock-recruit.
+
+```{r}
+#| label: fig-stock-recruit
+#| fig-cap: "Fitted stock--recruit curves and annual age-0 recruitment estimates for the 2026 base model and two fixed-steepness sensitivities, overlaid in one panel and coloured by model. Estimates are identified by two-digit year labels; recruitment is shown on a log10 scale."
+#| fig-width: 7.5
+#| fig-height: 5
+#| fig-pos: H
+
+stock_recruit_spec <- tibble::tribble(
+  ~directory, ~Model,
+  "m26", "2026 base (h = 0.7)",
+  "m26_steepness_0_5", "h = 0.5",
+  "m26_steepness_0_9", "h = 0.9"
+) |>
+  mutate(Model = factor(Model, levels = Model))
+
+stock_recruit_curves <- lapply(seq_len(nrow(stock_recruit_spec)), function(i) {
+  model <- read_rep(here::here(
+    "mods", stock_recruit_spec$directory[[i]], "nh_R.rep"
+  ))
+  tibble(
+    Spawning_biomass = model$SSB,
+    Recruitment = model$Pred_Rec,
+    Model = stock_recruit_spec$Model[[i]]
+  )
+}) |>
+  bind_rows()
+
+stock_recruit_estimates <- lapply(
+  seq_len(nrow(stock_recruit_spec)),
+  function(i) {
+    model_output[[stock_recruit_spec$directory[[i]]]] |>
+      filter(Variable %in% c("SSB", "R")) |>
+      select(Year, Variable, value) |>
+      pivot_wider(names_from = Variable, values_from = value) |>
+      filter(is.finite(SSB), is.finite(R)) |>
+      transmute(
+        Year,
+        Spawning_biomass = SSB,
+        Recruitment = R,
+        Model = stock_recruit_spec$Model[[i]],
+        label_vjust = c(-0.7, 0.5, 1.7)[[i]]
+      )
+  }
+) |>
+  bind_rows()
+
+ggplot() +
+  geom_text(
+    data = stock_recruit_estimates,
+    aes(
+      Spawning_biomass,
+      Recruitment,
+      colour = Model,
+      label = sprintf("%02d", Year %% 100L),
+      vjust = label_vjust
+    ),
+    alpha = 0.7,
+    size = 2.2
+  ) +
+  geom_line(
+    data = stock_recruit_curves,
+    aes(Spawning_biomass, Recruitment, colour = Model),
+    linewidth = 1.1
+  ) +
+  scale_colour_manual(
+    values = c(
+      "2026 base (h = 0.7)" = "#008EAA",
+      "h = 0.5" = "#F2A900",
+      "h = 0.9" = "#003087"
+    ),
+    name = "Model"
+  ) +
+  scale_y_log10() +
+  labs(
+    x = "Spawning biomass",
+    y = "Estimated age-0 recruitment (log10 scale)"
+  )
+```
+
+The three models estimate broadly similar historical spawning biomass and
+recruitment, but impose different recruitment responses at low spawning
+biomass. The \(h=0.5\) curve has the weakest recruitment at low biomass,
+whereas \(h=0.9\) maintains comparatively high recruitment over the same
+range. As shown later in @tbl-likelihood-components, the smaller
+recruitment-residual contribution for \(h=0.5\) means that its curve passes
+closer, in the model's penalized residual metric, to the annual recruitment
+estimates. The wide scatter around all three curves nevertheless shows that
+the data provide limited information for choosing steepness solely from this
+comparison.
 
 ## Time-varying fishery selectivity
 
@@ -599,99 +693,6 @@ the model's quadratic residual penalty. Thus the lower total primarily
 reflects better agreement with the assumed stock--recruit relationship, not a
 broad improvement in fit to every observed data type or, by itself, evidence
 that \(h=0.5\) should replace the base assumption.
-
-### Stock--recruit relationships
-
-```{r}
-#| label: fig-stock-recruit
-#| fig-cap: "Fitted stock--recruit curves and annual estimates for the 2026 base model and two fixed-steepness sensitivities, overlaid in one panel and coloured by model. Estimates are identified by two-digit year labels."
-#| fig-width: 7.5
-#| fig-height: 5
-#| fig-pos: H
-
-stock_recruit_spec <- tibble::tribble(
-  ~directory, ~Model,
-  "m26", "2026 base (h = 0.7)",
-  "m26_steepness_0_5", "h = 0.5",
-  "m26_steepness_0_9", "h = 0.9"
-) |>
-  mutate(Model = factor(Model, levels = Model))
-
-stock_recruit_curves <- lapply(seq_len(nrow(stock_recruit_spec)), function(i) {
-  model <- read_rep(here::here(
-    "mods", stock_recruit_spec$directory[[i]], "nh_R.rep"
-  ))
-  tibble(
-    Spawning_biomass = model$SSB,
-    Recruitment = model$Pred_Rec,
-    Model = stock_recruit_spec$Model[[i]]
-  )
-}) |>
-  bind_rows()
-
-stock_recruit_estimates <- lapply(
-  seq_len(nrow(stock_recruit_spec)),
-  function(i) {
-    model_output[[stock_recruit_spec$directory[[i]]]] |>
-      filter(Variable %in% c("SSB", "R")) |>
-      select(Year, Variable, value) |>
-      pivot_wider(names_from = Variable, values_from = value) |>
-      filter(is.finite(SSB), is.finite(R)) |>
-      transmute(
-        Year,
-        Spawning_biomass = SSB,
-        Recruitment = R,
-        Model = stock_recruit_spec$Model[[i]],
-        label_vjust = c(-0.7, 0.5, 1.7)[[i]]
-      )
-  }
-) |>
-  bind_rows()
-
-ggplot() +
-  geom_text(
-    data = stock_recruit_estimates,
-    aes(
-      Spawning_biomass,
-      Recruitment,
-      colour = Model,
-      label = sprintf("%02d", Year %% 100L),
-      vjust = label_vjust
-    ),
-    alpha = 0.7,
-    size = 2.2
-  ) +
-  geom_line(
-    data = stock_recruit_curves,
-    aes(Spawning_biomass, Recruitment, colour = Model),
-    linewidth = 1.1
-  ) +
-  scale_colour_manual(
-    values = c(
-      "2026 base (h = 0.7)" = "#008EAA",
-      "h = 0.5" = "#F2A900",
-      "h = 0.9" = "#003087"
-    ),
-    name = "Model"
-  ) +
-  labs(
-    x = "Spawning biomass",
-    y = "Estimated age-0 recruitment"
-  )
-```
-
-The annual estimates, identified by the last two digits of their year and
-coloured by model, are overlaid with all three fitted curves in
-@fig-stock-recruit. The three models estimate broadly similar historical
-spawning biomass and recruitment, but impose different recruitment responses
-at low spawning biomass. The \(h=0.5\) curve has the weakest recruitment at low
-biomass, whereas \(h=0.9\) maintains comparatively high recruitment over the
-same range. The smaller recruitment-residual contribution for \(h=0.5\) in
-@tbl-likelihood-components means that its curve passes closer, in the model's
-penalized residual metric, to the annual recruitment estimates. The wide
-scatter of annual estimates around all three curves nevertheless shows that
-the data provide limited information for choosing steepness solely from this
-comparison.
 
 ```{r}
 #| label: fig-sensitivity
