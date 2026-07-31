@@ -403,17 +403,17 @@ interpretation of the stock trajectory.
 
 bridge_labels <- c("m25" = "2025 baseline", "m26" = "2026 update")
 bridge_recruitment <- Map(
-    f = function(directory, model_label) {
-      model <- read_rep(here::here("mods", directory, "nh_R.rep"))
-      tibble(
-        Year = model$Year,
-        Recruitment = model$N[seq_along(model$Year), 1L],
-        Model = model_label
-      )
-    },
-    directory = names(bridge_labels),
-    model_label = unname(bridge_labels)
-  ) |>
+  f = function(directory, model_label) {
+    model <- read_rep(here::here("mods", directory, "nh_R.rep"))
+    tibble(
+      Year = model$Year,
+      Recruitment = model$N[seq_along(model$Year), 1L],
+      Model = model_label
+    )
+  },
+  directory = names(bridge_labels),
+  model_label = unname(bridge_labels)
+) |>
   bind_rows() |>
   filter(Year >= 1990)
 
