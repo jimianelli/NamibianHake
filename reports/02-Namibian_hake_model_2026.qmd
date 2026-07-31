@@ -599,6 +599,92 @@ reflects better agreement with the assumed stock--recruit relationship, not a
 broad improvement in fit to every observed data type or, by itself, evidence
 that \(h=0.5\) should replace the base assumption.
 
+### Stock--recruit relationships
+
+```{r}
+#| label: fig-stock-recruit
+#| fig-cap: "Fitted stock--recruit curves with annual spawning-biomass and age-0 recruitment estimates overlaid as two-digit year labels for the 2026 base model and the two fixed-steepness sensitivities."
+#| fig-width: 9
+#| fig-height: 4.5
+#| fig-pos: H
+
+stock_recruit_spec <- tibble::tribble(
+  ~directory, ~Model,
+  "m26", "2026 base (h = 0.7)",
+  "m26_steepness_0_5", "h = 0.5",
+  "m26_steepness_0_9", "h = 0.9"
+) |>
+  mutate(Model = factor(Model, levels = Model))
+
+stock_recruit_curves <- lapply(seq_len(nrow(stock_recruit_spec)), function(i) {
+  model <- read_rep(here::here(
+    "mods", stock_recruit_spec$directory[[i]], "nh_R.rep"
+  ))
+  tibble(
+    Spawning_biomass = model$SSB,
+    Recruitment = model$Pred_Rec,
+    Model = stock_recruit_spec$Model[[i]]
+  )
+}) |>
+  bind_rows()
+
+stock_recruit_estimates <- lapply(
+  seq_len(nrow(stock_recruit_spec)),
+  function(i) {
+    model_output[[stock_recruit_spec$directory[[i]]]] |>
+      filter(Variable %in% c("SSB", "R")) |>
+      select(Year, Variable, value) |>
+      pivot_wider(names_from = Variable, values_from = value) |>
+      filter(is.finite(SSB), is.finite(R)) |>
+      transmute(
+        Year,
+        Spawning_biomass = SSB,
+        Recruitment = R,
+        Model = stock_recruit_spec$Model[[i]]
+      )
+  }
+) |>
+  bind_rows()
+
+ggplot() +
+  geom_text(
+    data = stock_recruit_estimates,
+    aes(
+      Spawning_biomass,
+      Recruitment,
+      colour = Year,
+      label = sprintf("%02d", Year %% 100L)
+    ),
+    alpha = 0.75,
+    size = 2.3
+  ) +
+  geom_line(
+    data = stock_recruit_curves,
+    aes(Spawning_biomass, Recruitment),
+    colour = unname(noaa_colors["navy"]),
+    linewidth = 1
+  ) +
+  facet_wrap(~Model, nrow = 1) +
+  scale_colour_viridis_c(option = "C", direction = -1, name = "Year") +
+  labs(
+    x = "Spawning biomass",
+    y = "Estimated age-0 recruitment"
+  )
+```
+
+The annual estimates, identified by the last two digits of their year, are
+overlaid on their corresponding fitted curves in @fig-stock-recruit. The three
+models estimate broadly similar historical
+spawning biomass and recruitment, but impose different recruitment responses
+at low spawning biomass. The \(h=0.5\) curve has the weakest recruitment at low
+biomass, whereas \(h=0.9\) maintains comparatively high recruitment over the
+same range. The smaller recruitment-residual contribution for \(h=0.5\) in
+@tbl-likelihood-components means that its curve passes closer, in the model's
+penalized residual metric, to the annual recruitment estimates. The wide
+scatter of annual estimates around all three curves nevertheless shows that
+the data provide limited information for choosing steepness solely from this
+comparison.
+
 ```{r}
 #| label: fig-sensitivity
 #| fig-cap: "Terminal spawning biomass for the converged 2026 models."
